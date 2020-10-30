@@ -1,4 +1,4 @@
-name: athena-COMPONENT_NAME
+name: athena-console
 
 version: 0.1.0
 
@@ -6,15 +6,15 @@ crystal: 0.35.0
 
 license: MIT
 
-repository: https://github.com/athena-framework/COMPONENT_NAME
+repository: https://github.com/athena-framework/console
 
-documentation: https://athena-framework.github.io/COMPONENT_NAME/Athena/NAMESPACE_NAME.html
+documentation: https://athena-framework.github.io/console/Athena/Console.html
 
-description: |
-  DESCRIPTION.
+Allows the creation of CLI based commands.: |
+  Allows the creation of CLI based commands.
 
 authors:
-  - CREATOR_NAME <CREATOR_EMAIL>
+  - George Dietrich <george@dietrich.app>
 
 development_dependencies:
   ameba:
