@@ -1,0 +1,22 @@
+name: athena-COMPONENT_NAME
+
+version: 0.1.0
+
+crystal: 0.35.0
+
+license: MIT
+
+repository: https://github.com/athena-framework/COMPONENT_NAME
+
+documentation: https://athena-framework.github.io/COMPONENT_NAME/Athena/NAMESPACE_NAME.html
+
+description: |
+  DESCRIPTION.
+
+authors:
+  - CREATOR_NAME <CREATOR_EMAIL>
+
+development_dependencies:
+  ameba:
+    github: crystal-ameba/ameba
+    version: ~> 0.13.0
