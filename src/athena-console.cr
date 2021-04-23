@@ -50,4 +50,9 @@ output = Athena::Console::Output::ConsoleOutput.new
 
 output.puts "pre <error>Bad thing!</error> post"
 output.puts "pre <info>Something useful</info> post"
-output.puts output.formatter.format_and_wrap "foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar", 35
+output.puts "foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar"
+
+# output = ACON::Output::NullOutput.new
+# output.puts "pre <error>Bad thing!</error> post"
+# output.puts "pre <info>Something useful</info> post"
+# output.puts "foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar"
