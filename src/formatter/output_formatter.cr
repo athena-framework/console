@@ -56,18 +56,13 @@ class Athena::Console::Formatter::OutputFormatter
               match[3]? || ""
             end
 
-      pp pos, text, tag
-
       if !open && !tag
-        pp "pop"
         @style_stack.pop
       elsif (style = self.create_style_from_string(tag)).nil?
         output += self.apply_current_style text, output, width
       elsif open
-        pp "push"
         @style_stack << style
       else
-        pp "pop style"
         @style_stack.pop style
       end
     end
@@ -81,7 +76,6 @@ class Athena::Console::Formatter::OutputFormatter
     return "" if text.empty?
 
     if width.zero?
-      pp self.decorated?, @style_stack.current
       return self.decorated? ? @style_stack.current.apply(text) : text
     end
 
@@ -97,15 +91,15 @@ class Athena::Console::Formatter::OutputFormatter
       prefix = ""
     end
 
-    # TODO: Something about replacing stuff.
+    # TODO: Something about matching `~(\\n)$~`.
+    text = prefix + text.gsub(/([^\n]{#{width}})\ */, "\\0\n")
+    text = text.rstrip
 
     if !@current_line_length.zero? && !current.empty? && "\n" != current[-1]
       text = "\n#{text}"
     end
 
     lines = text.split "\n"
-
-    pp lines
 
     lines.each do |line|
       @current_line_length += line.size

@@ -46,10 +46,8 @@ end
 # puts style.apply "foo"
 # pp style.apply "foo"
 
-output = Athena::Console::IOOutput.new STDOUT
-
-# pp output
-
-# output.puts "foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar" # =>
+output = Athena::Console::Output::ConsoleOutput.new
 
 output.puts "pre <error>Bad thing!</error> post"
+output.puts "pre <info>Something useful</info> post"
+output.puts output.formatter.format_and_wrap "foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar", 35

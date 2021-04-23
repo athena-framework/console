@@ -1,7 +1,5 @@
-abstract class Athena::Console::Output; end
-
-class Athena::Console::IOOutput < Athena::Console::Output
-  @io : IO
+class Athena::Console::Output::IOOutput < Athena::Console::Output
+  getter io : IO
 
   def initialize(
     @io : IO,
