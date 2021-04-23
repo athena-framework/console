@@ -21,18 +21,6 @@ enum Athena::Console::Formatter::Mode
   # Makes the text invisible.
   Hidden
 
-  # def modes : Array(Symbol)
-  #   modes = Array(Symbol).new
-
-  #   self.each do |mode|
-  #     if sym = mode.to_sym
-  #       modes << sym
-  #     end
-  #   end
-
-  #   modes
-  # end
-
   protected def to_sym : Symbol
     case self
     when .bold?      then :bold

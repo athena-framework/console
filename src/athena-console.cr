@@ -4,6 +4,7 @@ require "./terminal"
 
 require "./commands/*"
 require "./formatter/*"
+require "./output/*"
 
 # Convenience alias to make referencing `Athena::Console` types easier.
 alias ACON = Athena::Console
@@ -37,10 +38,18 @@ end
 
 # pp e
 
-style = ACON::Formatter::OutputFormatterStyle.new
-style.options = ACON::Formatter::Mode::Reverse | ACON::Formatter::Mode::Hidden
+# style = ACON::Formatter::OutputFormatterStyle.new
+# style.options = ACON::Formatter::Mode::Reverse | ACON::Formatter::Mode::Hidden
 
-pp style
+# pp style
 
-puts style.apply "foo"
-pp style.apply "foo"
+# puts style.apply "foo"
+# pp style.apply "foo"
+
+output = Athena::Console::IOOutput.new STDOUT
+
+# pp output
+
+# output.puts "foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar" # =>
+
+output.puts "pre <error>Bad thing!</error> post"
