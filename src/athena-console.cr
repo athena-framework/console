@@ -3,6 +3,7 @@ require "./command"
 require "./terminal"
 
 require "./commands/*"
+require "./exceptions/*"
 require "./input/*"
 require "./formatter/*"
 require "./output/*"
@@ -21,7 +22,7 @@ end
 # d << ACON::Input::Option.new "foo", "f"
 # d << ACON::Input::Option.new "bar", "b", :required
 
-input = ACON::Input::ARGVInput.new # definition: d
+# input = ACON::Input::ARGVInput.new # definition: d
 # new InputArgument('foo4', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, '', [1, 2]),
 # argument = ACON::Input::Argument.new "foo", :is_array, ["one"]
 
@@ -32,9 +33,6 @@ input = ACON::Input::ARGVInput.new # definition: d
 # pp ACON::Input::Option.new "option", "o", ACON::Input::Option::Mode::IS_ARRAY | ACON::Input::Option::Mode::OPTIONAL, "desc", Array(String).new
 
 app = ACON::Application.new "Athena"
-
-output = ACON::Output::ConsoleOutput.new
-
 app.run # input, output
 
 # console = ACON::Terminal.new

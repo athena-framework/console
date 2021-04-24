@@ -6,7 +6,7 @@ require "./io_output"
 class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IOOutput
   include Athena::Console::Output::ConsoleOutputInterface
 
-  property stderr : ACON::Output::OutputInterface
+  @stderr : ACON::Output::OutputInterface
 
   def initialize(
     verbosity : ACON::Output::Verbosity = :normal,
@@ -24,6 +24,14 @@ class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IOOutput
   end
 
   # TODO: Support sections
+
+  def error_output : ACON::Output::OutputInterface
+    @stderr
+  end
+
+  def error_output=(error_output : ACON::Output::OutputInterface)
+    @stderr = error_output
+  end
 
   def decorated=(decorated : Bool)
     super

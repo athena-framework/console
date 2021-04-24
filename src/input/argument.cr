@@ -16,8 +16,8 @@ class Athena::Console::Input::Argument
   def initialize(
     @name : String,
     @mode : ACON::Input::Argument::Mode = :optional,
-    default : String | Array(String) | Nil = nil,
-    @description : String = ""
+    @description : String = "",
+    default : String | Array(String) | Nil = nil
   )
     self.default = default
   end

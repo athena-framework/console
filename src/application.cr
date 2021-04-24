@@ -6,9 +6,11 @@ class Athena::Console::Application
 
   setter default_command : String = "list"
   property? auto_exit : Bool = true
+  property? catch_exceptions : Bool = true
   getter? single_command : Bool = false
 
   @definition : ACON::Input::Definition? = nil
+  @running_command : ACON::Command? = nil
 
   def self.new(name : String, version : String = "0.1.0") : self
     new name, SemanticVersion.parse version
@@ -25,13 +27,15 @@ class Athena::Console::Application
     ENV["LINES"] = @terminal.height.to_s
     ENV["COLUMNS"] = @terminal.width.to_s
 
-    # TODO: What to do about error handling?
-
     self.configure_io input, output
 
     begin
       exit_status = self.do_run input, output
     rescue ex : Exception
+      raise ex unless @catch_exceptions
+
+      self.render_exception ex, output
+
       exit_status = ACON::Command::Status::FAILURE
     end
 
@@ -49,9 +53,24 @@ class Athena::Console::Application
       return ACON::Command::Status::SUCCESS
     end
 
-    input.bind self.definition rescue nil
+    input.bind self.definition
 
     ACON::Command::Status::SUCCESS
+  end
+
+  def render_exception(ex : Exception, output : ACON::Output::ConsoleOutputInterface) : Nil
+    self.render_exception ex, output.error_output
+  end
+
+  def render_exception(ex : Exception, output : ACON::Output::OutputInterface) : Nil
+    output.puts "", :quiet
+
+    self.do_render_exception ex, output
+
+    if running_command = @running_command
+      output.puts "<info>COMMAND NAME</info>", :quiet
+      output.puts "", :quiet
+    end
   end
 
   def definition : ACON::Input::Definition
@@ -127,5 +146,67 @@ class Athena::Console::Application
       ACON::Input::Option.new("ansi", value_mode: :negatable, description: "Display this application version"),
       ACON::Input::Option.new("no-interaction", "n", description: "Do not ask any interactive question"),
     )
+  end
+
+  protected def do_render_exception(ex : Exception, output : ACON::Output::OutputInterface) : Nil
+    loop do
+      message = (ex.message || "").strip
+
+      if message.empty? || ACON::Output::Verbosity::VERBOSE <= output.verbosity
+        title = "  [#{ex.class}]  "
+        len = title.size
+      else
+        len = 0
+        title = ""
+      end
+
+      width = @terminal.width ? @terminal.width - 1 : Int32::MAX
+      lines = [] of Tuple(String, Int32)
+
+      message.split(/(\r?\n)/) do |line|
+        self.split_string_by_width(line, width - 4) do |l|
+          line_length = l.size + 4
+          lines << {l, line_length}
+
+          len = Math.max line_length, len
+        end
+      end
+
+      messages = [] of String
+
+      if !ex.is_a?(ACON::Exceptions::ConsoleException) || ACON::Output::Verbosity::VERBOSE <= output.verbosity
+        if trace = ex.backtrace?.try &.first
+          messages << "<comment>At #{ACON::Formatter::OutputFormatter.escape trace}</comment>" # TODO: Finish this line/file message.
+        end
+      end
+
+      messages << (empty_line = "<error>#{" "*len}</error>")
+
+      if messages.empty? || ACON::Output::Verbosity::VERBOSE <= output.verbosity
+        messages << "<error>#{title}#{" "*(Math.max(0, len - title.size))}</error>"
+      end
+
+      lines.each do |line|
+        messages << "<error>  #{ACON::Formatter::OutputFormatter.escape line[0]}  #{" "*(len - line[1])}</error>"
+      end
+
+      messages << empty_line
+      messages << ""
+
+      messages.each do |m|
+        output.puts m, :quiet
+      end
+
+      if ACON::Output::Verbosity::VERBOSE <= output.verbosity
+      end
+
+      break unless (ex = ex.cause)
+    end
+  end
+
+  private def split_string_by_width(line : String, width : Int32, & : String -> Nil) : Nil
+    line.split(/(.{#{width}}?)/, remove_empty: true) do |match|
+      yield match.as(String)
+    end
   end
 end

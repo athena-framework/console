@@ -3,6 +3,19 @@ require "./wrappable_output_formatter_interface"
 class Athena::Console::Formatter::OutputFormatter
   include Athena::Console::Formatter::WrappableOutputFormatterInterface
 
+  def self.escape(string : String) : String
+    text = string.gsub /([^\\\\]?)</, "\\1\\<"
+
+    self.escape_trailing_backslash text
+  end
+
+  def self.escape_trailing_backslash(text : String) : String
+    if text.ends_with? '\\'
+    end
+
+    text
+  end
+
   getter style_stack : ACON::Formatter::OutputFormatterStyleStack = ACON::Formatter::OutputFormatterStyleStack.new
 
   # :inherit:

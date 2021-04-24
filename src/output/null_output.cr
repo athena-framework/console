@@ -12,7 +12,7 @@ class Athena::Console::Output::NullOutput
   end
 
   def verbosity : ACON::Output::Verbosity
-    :quiet
+    ACON::Output::Verbosity::QUIET
   end
 
   def verbosity=(verbosity : ACON::Output::Verbosity)
