@@ -5,24 +5,26 @@ abstract class Athena::Console::Input
 
   property? interactive : Bool = true
 
-  @arguments = Array(ACON::Input::Argument).new
+  @arguments = Hash(String, String | Array(String)).new
   @definition : ACON::Input::Definition
-  @options = Array(ACON::Input::Option).new
+  @options = Hash(String, String | Array(String | Bool | Nil) | Bool | Nil).new
 
   def initialize(definition : ACON::Input::Definition? = nil)
     if definition.nil?
       @definition = ACON::Input::Definition.new
     else
       @definition = definition
-      self.bind definition.not_nil!
+      self.bind definition
       self.validate
     end
   end
 
   def bind(definition : ACON::Input::Definition) : Nil
-    @arguments = Array(ACON::Input::Argument).new
-    @options = Array(ACON::Input::Option).new
+    @arguments.clear
+    @options.clear
     @definition = definition
+
+    pp "bind"
 
     self.parse
   end

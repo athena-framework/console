@@ -1,6 +1,7 @@
 abstract class Athena::Console::Input; end
 
 class Athena::Console::Input::Argument
+  @[Flags]
   enum Mode
     REQUIRED
     OPTIONAL
@@ -33,5 +34,13 @@ class Athena::Console::Input::Argument
     end
 
     @default = default
+  end
+
+  def required? : Bool
+    @mode.required?
+  end
+
+  def is_array? : Bool
+    @mode.is_array?
   end
 end

@@ -1,6 +1,6 @@
 class Athena::Console::Input::Option
   @[Flags]
-  enum Mode
+  enum Value
     NONE
     REQUIRED
     OPTIONAL
@@ -13,15 +13,15 @@ class Athena::Console::Input::Option
   end
 
   getter name : String
-  getter shortcut : String | Array(String) | Nil
-  getter mode : ACON::Input::Option::Mode
+  getter shortcut : String?
+  getter value_mode : ACON::Input::Option::Value
   getter default : String | Array(String) | Bool | Nil
   getter description : String
 
   def initialize(
     name : String,
     shortcut : String | Array(String) | Nil = nil,
-    @mode : ACON::Input::Option::Mode = :none,
+    @value_mode : ACON::Input::Option::Value = :none,
     @description : String = "",
     default : String | Array(String) | Bool | Nil = nil
   )
@@ -39,11 +39,11 @@ class Athena::Console::Input::Option
 
     @shortcut = shortcut
 
-    if @mode.is_array? && !@mode.accepts_value?
+    if @value_mode.is_array? && !self.accepts_value?
       raise ArgumentError.new " Cannot have IS_ARRAY option mode when the option does not accept a value."
     end
 
-    if @mode.negatable? && @mode.accepts_value?
+    if @value_mode.negatable? && self.accepts_value?
       raise ArgumentError.new " Cannot have NEGATABLE option mode if the option also accepts a value."
     end
 
@@ -51,10 +51,10 @@ class Athena::Console::Input::Option
   end
 
   def default=(default : String | Array(String) | Bool | Nil) : Nil
-    raise ArgumentError.new "Cannot set a default value when the argument is required." if @mode.required? && !default.nil?
-    raise ArgumentError.new "Cannot set a default value when using NEGATABLE mode." if @mode.negatable? && !default.nil?
+    raise ArgumentError.new "Cannot set a default value when the argument is required." if @value_mode.required? && !default.nil?
+    raise ArgumentError.new "Cannot set a default value when using NEGATABLE mode." if @value_mode.negatable? && !default.nil?
 
-    if @mode.is_array?
+    if @value_mode.is_array?
       if default.nil?
         default = [] of String
       else
@@ -62,6 +62,22 @@ class Athena::Console::Input::Option
       end
     end
 
-    @default = @mode.accepts_value? ? default : false
+    @default = @value_mode.accepts_value? ? default : false
+  end
+
+  def accepts_value? : Bool
+    @value_mode.accepts_value?
+  end
+
+  def is_array? : Bool
+    @value_mode.is_array?
+  end
+
+  def value_required? : Bool
+    @value_mode.required?
+  end
+
+  def value_optional? : Bool
+    @value_mode.optional?
   end
 end

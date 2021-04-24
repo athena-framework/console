@@ -14,8 +14,14 @@ module Athena::Console
   VERSION = "0.1.0"
 end
 
-pp ACON::Input::ARGVInput.new
+d = ACON::Input::Definition.new
+d << ACON::Input::Argument.new "command", :required, description: "The command to execute."
+d << ACON::Input::Argument.new "id", :required
+d << ACON::Input::Option.new "dry-run", "d"
+d << ACON::Input::Option.new "foo", "f"
+d << ACON::Input::Option.new "bar", "b", :required
 
+input = ACON::Input::ARGVInput.new definition: d
 # new InputArgument('foo4', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, '', [1, 2]),
 # argument = ACON::Input::Argument.new "foo", :is_array, ["one"]
 
