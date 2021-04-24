@@ -1,8 +1,8 @@
 abstract class Athena::Console::Command
   enum Status
-    Success
-    Failure
-    Invalid
+    SUCCESS = 0
+    FAILURE = 1
+    INVALID = 2
   end
 
   @@default_name : String? = nil

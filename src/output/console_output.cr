@@ -35,7 +35,7 @@ class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IOOutput
     @stderr.formatter = formatter
   end
 
-  def verbosity=(verbosity : Bool)
+  def verbosity=(verbosity : ACON::Output::Verbosity)
     super
     @stderr.verbosity = verbosity
   end

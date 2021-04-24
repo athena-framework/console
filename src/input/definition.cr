@@ -10,7 +10,11 @@ class Athena::Console::Input::Definition
 
   getter required_count : Int32 = 0
 
-  def intiailize(definition : Array(ACON::Input::Argument | ACON::Input::Option)? = nil)
+  def self.new(*definitions : ACON::Input::Argument | ACON::Input::Option) : self
+    new definitions.to_a
+  end
+
+  def initialize(definition : Array(ACON::Input::Argument | ACON::Input::Option)? = nil)
     return unless definition
 
     self.definition = definition
@@ -61,7 +65,7 @@ class Athena::Console::Input::Definition
     options = Array(ACON::Input::Option).new
 
     definition.each do |d|
-      case definition
+      case d
       in ACON::Input::Argument then arguments << d
       in ACON::Input::Option   then options << d
       end

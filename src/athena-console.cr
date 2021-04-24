@@ -14,14 +14,14 @@ module Athena::Console
   VERSION = "0.1.0"
 end
 
-d = ACON::Input::Definition.new
-d << ACON::Input::Argument.new "command", :required, description: "The command to execute."
-d << ACON::Input::Argument.new "id", :required
-d << ACON::Input::Option.new "dry-run", "d"
-d << ACON::Input::Option.new "foo", "f"
-d << ACON::Input::Option.new "bar", "b", :required
+# d = ACON::Input::Definition.new
+# d << ACON::Input::Argument.new "command", :required, description: "The command to execute."
+# d << ACON::Input::Argument.new "id", :required
+# d << ACON::Input::Option.new "dry-run", "d"
+# d << ACON::Input::Option.new "foo", "f"
+# d << ACON::Input::Option.new "bar", "b", :required
 
-input = ACON::Input::ARGVInput.new definition: d
+input = ACON::Input::ARGVInput.new # definition: d
 # new InputArgument('foo4', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, '', [1, 2]),
 # argument = ACON::Input::Argument.new "foo", :is_array, ["one"]
 
@@ -31,8 +31,11 @@ input = ACON::Input::ARGVInput.new definition: d
 
 # pp ACON::Input::Option.new "option", "o", ACON::Input::Option::Mode::IS_ARRAY | ACON::Input::Option::Mode::OPTIONAL, "desc", Array(String).new
 
-# app = ACON::Application.new
-# pp app
+app = ACON::Application.new "Athena"
+
+output = ACON::Output::ConsoleOutput.new
+
+app.run # input, output
 
 # console = ACON::Terminal.new
 # pp console.width

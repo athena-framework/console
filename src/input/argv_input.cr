@@ -6,6 +6,33 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
     super definition
   end
 
+  def has_parameter?(*values : String, only_params : Bool = false) : Bool
+    @tokens.each do |token|
+      return false if only_params && "--" == token
+
+      values.each do |value|
+        leading = value.starts_with?("--") ? "#{value}=" : value
+        return true if token == value || (!leading.empty? && token.starts_with? leading)
+      end
+    end
+
+    false
+  end
+
+  def parameter(value : String, default : _ = false, only_params : Bool = false)
+    tokens = @tokens.dup
+
+    while token = tokens.shift?
+      return default if only_params && "--" == token
+      return tokens.shift? if token == value
+
+      leading = value.starts_with?("--") ? "#{value}=" : value
+      return token[leading.size..] if !leading.empty? && token.starts_with? leading
+    end
+
+    default
+  end
+
   protected def parse : Nil
     parse_options = true
     @parsed = @tokens
