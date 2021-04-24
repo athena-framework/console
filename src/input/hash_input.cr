@@ -35,16 +35,22 @@ class Athena::Console::Input::HashInput < Athena::Console::Input
 
   protected def parse : Nil
     @parameters.each do |name, value|
-      return if "--" == key
+      return if "--" == name
 
-      if key.starts_with? "--"
-        self.add_long_option key.lchop "--", value
-      elsif key.starts_with? '-'
-        self.add_short_option key.lchop '-', value
+      if name.starts_with? "--"
+        self.add_long_option name.lchop("--"), value
+      elsif name.starts_with? '-'
+        self.add_short_option name.lchop('-'), value
       else
-        self.add_argument key, value
+        self.add_argument name, value
       end
     end
+  end
+
+  private def add_argument(name : String, value : String?) : Nil
+    raise "The #{name} argument does not exist." if !@definition.has_argument? name
+
+    @arguments[name] = value
   end
 
   private def add_long_option(name : String, value : String?) : Nil

@@ -15,5 +15,5 @@ abstract class Athena::Console::Helper
     string
   end
 
-  property! helper_set : ACON::Helper::HelperSet
+  property helper_set : ACON::Helper::HelperSet?
 end

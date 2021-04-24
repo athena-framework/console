@@ -26,9 +26,11 @@ abstract class Athena::Console::Command
 
   getter application : ACON::Application? = nil
   property aliases : Array(String) = [] of String
+  setter process_title : String? = nil
 
   @definition : ACON::Input::Definition
   @full_definition : ACON::Input::Definition? = nil
+  @ignore_validation_errors : Bool = false
 
   def initialize(name : String? = nil)
     @definition = ACON::Input::Definition.new
@@ -52,6 +54,10 @@ abstract class Athena::Console::Command
     end
 
     @full_definition = nil
+  end
+
+  def definition : ACON::Input::Definition
+    @full_definition || self.native_definition
   end
 
   def definition(@definition : ACON::Input::Definition) : self
@@ -86,6 +92,10 @@ abstract class Athena::Console::Command
     self
   end
 
+  def ignore_validation_errors : Nil
+    @ignore_validation_errors = true
+  end
+
   def enabled? : Bool
     true
   end
@@ -93,16 +103,46 @@ abstract class Athena::Console::Command
   def run(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
     self.merge_application_definition
 
-    ACON::Command::Status::SUCCESS
+    begin
+      input.bind self.definition
+    rescue ex : ACON::Exceptions::ConsoleException
+      raise ex unless @ignore_validation_errors
+    end
+
+    self.setup input, output
+
+    # TODO: Allow setting process title
+
+    if input.interactive?
+      self.interact input, output
+    end
+
+    # TODO: Set `command` argument if ran directly
+
+    input.validate
+
+    self.execute input, output
   end
 
   protected def merge_application_definition(merge_args : Bool = true) : Nil
-    return if (application = @application)
+    return unless (application = @application)
 
     full_definition = ACON::Input::Definition.new
-    # full_definition.options = @definition.options
+    full_definition.options.merge! @definition.options
+    full_definition.options.merge! application.definition.options
+
+    if merge_args
+      full_definition.arguments.merge! application.definition.arguments
+      full_definition.arguments.merge! @definition.arguments
+    else
+      full_definition.arguments.merge! @definition.arguments
+    end
 
     @full_definition = full_definition
+  end
+
+  protected def native_definition
+    @definition
   end
 
   protected abstract def execute(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status

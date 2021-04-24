@@ -66,7 +66,7 @@ class Athena::Console::Commands::List < ACON::Command
   protected def execute(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
     output.puts @help
 
-    :success
+    ACON::Command::Status::SUCCESS
   end
 end
 
