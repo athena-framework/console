@@ -1,6 +1,6 @@
 require "./output_formatter_style_interface"
 
-module Athena::Console::Formatter::OutputFormatterInterface
+module Athena::Console::Formatter::Interface
   abstract def decorated=(@decorated : Bool)
   abstract def decorated? : Bool
   abstract def set_style(name : String, style : ACON::Formatter::OutputFormatterStyleInterface) : Nil

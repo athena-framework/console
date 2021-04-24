@@ -1,7 +1,7 @@
-require "./input_interface"
+require "./interface"
 
 abstract class Athena::Console::Input
-  include Athena::Console::Input::InputInterface
+  include Athena::Console::Input::Interface
 
   property? interactive : Bool = true
 
@@ -23,8 +23,6 @@ abstract class Athena::Console::Input
     @arguments.clear
     @options.clear
     @definition = definition
-
-    pp "bind"
 
     self.parse
   end

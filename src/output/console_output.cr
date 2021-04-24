@@ -6,12 +6,12 @@ require "./io_output"
 class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IOOutput
   include Athena::Console::Output::ConsoleOutputInterface
 
-  @stderr : ACON::Output::OutputInterface
+  @stderr : ACON::Output::Interface
 
   def initialize(
     verbosity : ACON::Output::Verbosity = :normal,
     decorated : Bool? = nil,
-    formatter : ACON::Formatter::OutputFormatterInterface? = nil
+    formatter : ACON::Formatter::Interface? = nil
   )
     super STDOUT, verbosity, decorated, formatter
 
@@ -25,11 +25,11 @@ class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IOOutput
 
   # TODO: Support sections
 
-  def error_output : ACON::Output::OutputInterface
+  def error_output : ACON::Output::Interface
     @stderr
   end
 
-  def error_output=(error_output : ACON::Output::OutputInterface)
+  def error_output=(error_output : ACON::Output::Interface)
     @stderr = error_output
   end
 

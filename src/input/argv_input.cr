@@ -6,6 +6,27 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
     super definition
   end
 
+  def first_argument : String?
+    is_option = false
+
+    @tokens.each_with_index do |token, idx|
+      if !token.empty? && '-' == token.char_at 0
+        next if !token.includes?('=') || @tokens[idx + 1]?.nil?
+
+        name = '-' == token.char_at(1) ? token[2..] : token[-1..]
+      end
+
+      if is_option
+        is_option = false
+        next
+      end
+
+      return token
+    end
+
+    nil
+  end
+
   def has_parameter?(*values : String, only_params : Bool = false) : Bool
     @tokens.each do |token|
       return false if only_params && "--" == token
@@ -35,11 +56,9 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
 
   protected def parse : Nil
     parse_options = true
-    @parsed = @tokens
+    @parsed = @tokens.dup
 
     while token = @parsed.shift?
-      puts "Parsing token: #{token}"
-
       if parse_options && token.empty?
         self.parse_argument token
       elsif parse_options && "--" == token
@@ -52,8 +71,6 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
         self.parse_argument token
       end
     end
-
-    pp @arguments, @options
   end
 
   private def parse_argument(token : String) : Nil

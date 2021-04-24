@@ -1,7 +1,7 @@
 require "./definition"
 
-module Athena::Console::Input::InputInterface
-  # abstract def first_argument : String?
+module Athena::Console::Input::Interface
+  abstract def first_argument : String?
   abstract def has_parameter?(*values : String, only_params : Bool = false) : Bool
   abstract def parameter(value : String, default : _ = false, only_params : Bool = false)
   abstract def bind(definition : ACON::Input::Definition) : Nil

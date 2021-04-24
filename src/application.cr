@@ -10,7 +10,10 @@ class Athena::Console::Application
   getter? single_command : Bool = false
 
   @definition : ACON::Input::Definition? = nil
+  @commands = Hash(String, ACON::Command).new
+  @initialized : Bool = false
   @running_command : ACON::Command? = nil
+  @wants_help : Bool = false
 
   def self.new(name : String, version : String = "0.1.0") : self
     new name, SemanticVersion.parse version
@@ -23,7 +26,70 @@ class Athena::Console::Application
     # This'll require the ability to optional set an event dispatcher on this type.
   end
 
-  def run(input : ACON::Input::InputInterface = ACON::Input::ARGVInput.new, output : ACON::Output::OutputInterface = ACON::Output::ConsoleOutput.new) : ACON::Command::Status
+  def add(command : ACON::Command) : ACON::Command?
+    self.init
+
+    command.application = self
+
+    unless command.enabled?
+      command.application = nil
+
+      return nil
+    end
+
+    # TODO: Do something about LazyCommands?
+
+    raise ArgumentError.new "The #{command.class} command cannot have an empty name." unless (command_name = command.name)
+
+    @commands[command_name] = command
+
+    command.aliases.each do |a|
+      @commands[a] = command
+    end
+
+    command
+  end
+
+  def find(name : String) : ACON::Command
+    self.init
+
+    aliases = [] of String
+
+    @commands.each_value do |command|
+      command.aliases.each do |a|
+        @commands[a] = command unless self.has? a
+      end
+    end
+
+    return self.get name if self.has? name
+
+    raise ACON::Exceptions::CommandNotFound.new "The command #{name} does not exist."
+  end
+
+  def get(name : String) : ACON::Command
+    self.init
+
+    raise ACON::Exceptions::CommandNotFound.new "The command #{name} does not exist." unless self.has? name
+
+    # TODO: Handle checking for loader based commands
+
+    command = @commands[name]
+
+    if @wants_help
+      @wants_help = false
+
+      # help_command = self.get "help"
+      # TODO: Setup Help command
+    end
+
+    command
+  end
+
+  def has?(name : String) : Bool
+    @commands.has_key? name
+  end
+
+  def run(input : ACON::Input::Interface = ACON::Input::ARGVInput.new, output : ACON::Output::Interface = ACON::Output::ConsoleOutput.new) : ACON::Command::Status
     ENV["LINES"] = @terminal.height.to_s
     ENV["COLUMNS"] = @terminal.width.to_s
 
@@ -46,7 +112,7 @@ class Athena::Console::Application
     exit_status
   end
 
-  def do_run(input : ACON::Input::InputInterface, output : ACON::Output::OutputInterface) : ACON::Command::Status
+  def do_run(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
     if input.has_parameter? "--version", "-V", only_params: true
       output.puts self.get_long_version
 
@@ -55,14 +121,47 @@ class Athena::Console::Application
 
     input.bind self.definition
 
-    ACON::Command::Status::SUCCESS
+    command_name = self.command_name input
+
+    if input.has_parameter? "--help", "-h", only_params: true
+      if command_name.nil?
+        command_name = "help"
+        input = ACON::Input::HashInput.new({"command_name" => @default_command})
+      else
+        @wants_help = true
+      end
+    end
+
+    if command_name.nil?
+      command_name = @default_command
+      definition = self.definition
+      definition.arguments.merge!({
+        "command" => ACON::Input::Argument.new("command", :optional, definition.argument("command").description, command_name),
+      })
+    end
+
+    begin
+      @running_command = nil
+
+      command = self.find command_name
+    rescue ex : Exception
+      # TODO: Handle missing commands.
+
+      raise ex
+    end
+
+    @running_command = command
+    exit_status = self.do_run_command command, input, output
+    @running_command = nil
+
+    exit_status
   end
 
   def render_exception(ex : Exception, output : ACON::Output::ConsoleOutputInterface) : Nil
     self.render_exception ex, output.error_output
   end
 
-  def render_exception(ex : Exception, output : ACON::Output::OutputInterface) : Nil
+  def render_exception(ex : Exception, output : ACON::Output::Interface) : Nil
     output.puts "", :quiet
 
     self.do_render_exception ex, output
@@ -93,7 +192,11 @@ class Athena::Console::Application
     "#{@name} <info>#{@version}</info>"
   end
 
-  protected def configure_io(input : ACON::Input::InputInterface, output : ACON::Output::OutputInterface) : Nil
+  protected def command_name(input : ACON::Input::Interface) : String?
+    @single_command ? @default_command : input.first_argument
+  end
+
+  protected def configure_io(input : ACON::Input::Interface, output : ACON::Output::Interface) : Nil
     if input.has_parameter? "--ansi", only_params: true
       output.decorated = true
     elsif input.has_parameter? "--no-ansi", only_params: true
@@ -136,6 +239,15 @@ class Athena::Console::Application
     ENV["SHELL_VERBOSITY"] = shell_verbosity.to_s
   end
 
+  protected def do_run_command(command : ACON::Command, input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
+    # TODO: Setup helpers
+    # TODO: Handle registering signable command listeners
+
+    return command.run input, output
+
+    # TODO: Handle eventing
+  end
+
   protected def default_input_definition : ACON::Input::Definition
     ACON::Input::Definition.new(
       ACON::Input::Argument.new("command", :required, "The command to execute"),
@@ -148,7 +260,13 @@ class Athena::Console::Application
     )
   end
 
-  protected def do_render_exception(ex : Exception, output : ACON::Output::OutputInterface) : Nil
+  protected def default_commands : Array(ACON::Command)
+    [
+      Athena::Console::Commands::List.new,
+    ] of ACON::Command
+  end
+
+  protected def do_render_exception(ex : Exception, output : ACON::Output::Interface) : Nil
     loop do
       message = (ex.message || "").strip
 
@@ -197,10 +315,21 @@ class Athena::Console::Application
         output.puts m, :quiet
       end
 
-      if ACON::Output::Verbosity::VERBOSE <= output.verbosity
+      if (ACON::Output::Verbosity::VERBOSE <= output.verbosity) && (t = ex.backtrace?)
+        # TODO: Output the backtrace in verbose output mode.
       end
 
       break unless (ex = ex.cause)
+    end
+  end
+
+  private def init : Nil
+    return if @initialized
+
+    @initialized = true
+
+    self.default_commands.each do |command|
+      self.add command
     end
   end
 

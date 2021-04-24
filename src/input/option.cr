@@ -29,7 +29,7 @@ class Athena::Console::Input::Option
 
     raise ArgumentError.new " An option name cannot be blank." if name.blank?
 
-    if shortcut.nil?
+    unless shortcut.nil?
       if shortcut.is_a? Array
         shortcut = shortcut.join '|'
       end

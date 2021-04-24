@@ -1,9 +1,9 @@
-require "./output_interface"
+require "./interface"
 
 class Athena::Console::Output::NullOutput
-  include Athena::Console::Output::OutputInterface
+  include Athena::Console::Output::Interface
 
-  @formatter : ACON::Formatter::OutputFormatterInterface? = nil
+  @formatter : ACON::Formatter::Interface? = nil
 
   def puts(message : String, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
   end
@@ -25,10 +25,10 @@ class Athena::Console::Output::NullOutput
     false
   end
 
-  def formatter : ACON::Formatter::OutputFormatterInterface
+  def formatter : ACON::Formatter::Interface
     @formatter ||= ACON::Formatter::NullOutputFormatter.new
   end
 
-  def formatter=(formatter : ACON::Formatter::OutputFormatterInterface)
+  def formatter=(formatter : ACON::Formatter::Interface)
   end
 end

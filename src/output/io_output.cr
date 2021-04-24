@@ -5,7 +5,7 @@ class Athena::Console::Output::IOOutput < Athena::Console::Output
     @io : IO,
     verbosity : ACON::Output::Verbosity? = :normal,
     decorated : Bool? = nil,
-    formatter : ACON::Formatter::OutputFormatterInterface? = nil
+    formatter : ACON::Formatter::Interface? = nil
   )
     decorated = self.has_color_support? if decorated.nil?
 

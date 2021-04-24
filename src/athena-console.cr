@@ -3,7 +3,9 @@ require "./command"
 require "./terminal"
 
 require "./commands/*"
+require "./descriptor/*"
 require "./exceptions/*"
+require "./helper/*"
 require "./input/*"
 require "./formatter/*"
 require "./output/*"
@@ -32,7 +34,46 @@ end
 
 # pp ACON::Input::Option.new "option", "o", ACON::Input::Option::Mode::IS_ARRAY | ACON::Input::Option::Mode::OPTIONAL, "desc", Array(String).new
 
+class Athena::Console::Commands::List < ACON::Command
+  protected def configure : Nil
+    self
+      .name("list")
+      .definition(
+        ACON::Input::Argument.new("namespace", :optional, "Only list commands in this namespace")
+      )
+      .description("List commands")
+      .help(
+        <<-HELP
+          The <info>%command.name%</info> command lists all commands:
+
+            <info>%command.full_name%</info>
+
+          You can also display the commands for a specific namespace:
+
+            <info>%command.full_name% test</info>
+
+          You can also output the information in other formats by using the <comment>--format</comment> option:
+
+            <info>%command.full_name% --format=xml</info>
+
+          It's also possible to get raw list of commands (useful for embedding command runner):
+
+            <info>%command.full_name% --raw</info>
+        HELP
+      )
+  end
+
+  protected def execute(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
+    output.puts @help
+
+    :success
+  end
+end
+
+# pp ACON::Commands::List.new
+
 app = ACON::Application.new "Athena"
+app.add ACON::Commands::List.new
 app.run # input, output
 
 # console = ACON::Terminal.new

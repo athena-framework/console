@@ -1,7 +1,7 @@
-require "./output_formatter_interface"
+require "./interface"
 
 class Athena::Console::Formatter::NullOutputFormatter
-  include Athena::Console::Formatter::OutputFormatterInterface
+  include Athena::Console::Formatter::Interface
 
   @style : ACON::Formatter::OutputFormatterStyle? = nil
 

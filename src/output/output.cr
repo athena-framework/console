@@ -1,15 +1,15 @@
-require "./output_interface"
+require "./interface"
 
 abstract class Athena::Console::Output
-  include Athena::Console::Output::OutputInterface
+  include Athena::Console::Output::Interface
 
   property verbosity : ACON::Output::Verbosity
-  property formatter : ACON::Formatter::OutputFormatterInterface
+  property formatter : ACON::Formatter::Interface
 
   def initialize(
     verbosity : ACON::Output::Verbosity? = :normal,
     decorated : Bool = false,
-    formatter : ACON::Formatter::OutputFormatterInterface? = nil
+    formatter : ACON::Formatter::Interface? = nil
   )
     @verbosity = verbosity || ACON::Output::Verbosity::NORMAL
     @formatter = formatter || ACON::Formatter::OutputFormatter.new decorated
