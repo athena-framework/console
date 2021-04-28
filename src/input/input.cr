@@ -25,6 +25,10 @@ abstract class Athena::Console::Input
     @arguments[name]? || @definition.argument(name).default
   end
 
+  def argument(name : String, type : T.class) : T forall T
+    self.argument(name).as T
+  end
+
   def option(name : String)
     raise "The #{name} option does not exist." unless @definition.has_option? name
 

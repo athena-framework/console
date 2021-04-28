@@ -1,6 +1,7 @@
 class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
-  def describe(output : ACON::Output::Interface, object : ACON::Application, context : ACON::Descriptor::ListContext) : Nil
-    description = ACON::Descriptor::Application.new object, context.namespace
+  protected def describe(application : ACON::Application, context : ACON::Descriptor::Context) : Nil
+    described_namespace = context.namespace
+    description = ACON::Descriptor::Application.new application, context.namespace
 
     commands = description.commands.values
 
@@ -8,11 +9,145 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
       width = self.width commands
 
       commands.each do |command|
-        self.write_text output, sprintf("%-#{width}s %s", command.name, command.description)
-        self.write_text output, "\n"
+        self.write_text sprintf("%-#{width}s %s", command.name, command.description)
+        self.write_text "\n"
       end
-    else
+
+      return
     end
+
+    self.write_text "#{application.help}\n\n", context
+
+    self.write_text "<comment>Usage:</comment>\n", context
+    self.write_text "  command [options] [arguments]\n\n", context
+
+    self.describe ACON::Input::Definition.new(application.definition.options), context
+
+    self.write_text "\n"
+    self.write_text "\n"
+
+    commands = description.commands
+    namespaces = description.namespaces
+
+    if described_namespace && !namespaces.empty?
+      # Ensure all alias commands are included when describing a specific namespace.
+      # TODO: Do this.
+    end
+
+    # TODO: Properly cacluate this
+    width = 6
+
+    if described_namespace
+      self.write_text "<comment>Available commands for the #{described_namespace} namespace:</comment>", context
+    else
+      self.write_text "<comment>Available commands:</comment>"
+    end
+
+    namespaces.each_value do |namespace|
+      namespace[:commands].select! { |c| commands.has_key? c }
+
+      next if namespace[:commands].empty?
+
+      if !described_namespace && namespace[:id] != ACON::Descriptor::Application::GLOBAL_NAMESPACE
+        self.write_text "\n"
+        self.write_text " <comment>#{namespace[:id]}</comment>"
+      end
+
+      namespace[:commands].each do |name|
+        self.write_text "\n"
+        spacing_width = width - name.size
+        command = commands[name]
+        command_aliases = name === command.name ? "" : ""
+
+        self.write_text "  <info>#{name}</info>#{" " * spacing_width}#{command_aliases}#{command.description}"
+      end
+    end
+
+    self.write_text "\n"
+  end
+
+  protected def describe(argument : ACON::Input::Argument, context : ACON::Descriptor::Context) : Nil
+    # TODO: Implement this.
+  end
+
+  protected def describe(definition : ACON::Input::Definition, context : ACON::Descriptor::Context) : Nil
+    total_width = self.calculate_total_width_for_options definition.options
+
+    definition.arguments.each_value do |arg|
+      total_width = Math.max total_width, arg.name.size
+    end
+
+    unless definition.arguments.empty?
+      self.write_text "<comment>Arguments:</comment>"
+      self.write_text "\n"
+
+      definition.arguments.each_value do |arg|
+        self.describe arg, context.copy_with total_width: total_width
+        self.write_text "\n"
+      end
+    end
+
+    if !definition.arguments.empty? && !definition.options.empty?
+      self.write_text "\n"
+    end
+
+    unless definition.options.empty?
+      later_options = [] of ACON::Input::Option
+
+      self.write_text "<comment>Options:</comment>"
+
+      definition.options.each_value do |option|
+        if (option.shortcut || "").size > 1
+          later_options << option
+          next
+        end
+
+        self.write_text "\n"
+        self.describe option, context.copy_with total_width: total_width
+      end
+
+      later_options.each do |option|
+        self.write_text "\n"
+        self.describe option, context.copy_with total_width: total_width
+      end
+    end
+  end
+
+  protected def describe(option : ACON::Input::Option, context : ACON::Descriptor::Context) : Nil
+    if option.accepts_value? && !option.default.nil? && !option.default.is_a?(Array)
+      default = "<comment> [default: #{option.default}]</comment>"
+    else
+      default = ""
+    end
+
+    value = ""
+    if option.accepts_value?
+      value = "=#{option.name.upcase}"
+
+      if option.value_optional?
+        value = "[#{value}]"
+      end
+    end
+
+    total_width = context.total_width || self.calculate_total_width_for_options [option]
+    synopsis = sprintf(
+      "%s%s",
+      (s = option.shortcut) ? sprintf("-%s, ", s) : "    ",
+      (option.negatable? ? "--%<name>s|--no-%<name>s" : "--%<name>s%<value>s") % {name: option.name, value: value}
+    )
+
+    spacing_width = total_width - synopsis.size
+
+    self.write_text(
+      sprintf(
+        "  <info>%s</info>  %s%s%s%s",
+        synopsis,
+        " " * spacing_width,
+        option.description.gsub(/\s*[\r\n]\s*/, "\n#{" " * (total_width + 4)}"),
+        default,
+        option.is_array? ? "<comment> (multiple values allowed)</comment>" : ""
+      )
+    )
   end
 
   private def width(commands : Array(ACON::Command)) : Int32
@@ -29,9 +164,27 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     widths.empty? ? 0 : widths.max + 2
   end
 
-  private def write_text(output : ACON::Output::Interface, content : String, context : ACON::Descriptor::ListContext? = nil) : Nil
+  private def calculate_total_width_for_options(options : Hash(String, ACON::Input::Option)) : Int32
+    self.calculate_total_width_for_options options.values
+  end
+
+  private def calculate_total_width_for_options(options : Array(ACON::Input::Option)) : Int32
+    options.max_of do |o|
+      name_length = 1 + Math.max((o.shortcut || "").size, 1) + 4 + o.name.size
+
+      if o.negatable?
+        name_length += 6 + o.name.size
+      elsif o.accepts_value?
+        name_length += 1 + o.name.size + (o.value_optional? ? 2 : 0)
+      end
+
+      name_length
+    end
+  end
+
+  private def write_text(content : String, context : ACON::Descriptor::Context? = nil) : Nil
     unless ctx = context
-      return self.write output, content, true
+      return self.write content, true
     end
 
     raw_output = true
@@ -41,11 +194,8 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     end
 
     self.write(
-      output,
       content,
       raw_output
     )
   end
 end
-
-"name           desc"

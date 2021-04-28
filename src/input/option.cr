@@ -51,8 +51,8 @@ class Athena::Console::Input::Option
   end
 
   def default=(default : String | Array(String) | Bool | Nil) : Nil
-    raise ArgumentError.new "Cannot set a default value when the argument is required." if @value_mode.required? && !default.nil?
-    raise ArgumentError.new "Cannot set a default value when using NEGATABLE mode." if @value_mode.negatable? && !default.nil?
+    raise ArgumentError.new "Cannot set a default value when using Value::NONE mode." if @value_mode.none? && !default.nil?
+    raise ArgumentError.new "Cannot set a default value when using Value::NEGATABLE mode." if @value_mode.negatable? && !default.nil?
 
     if @value_mode.is_array?
       if default.nil?
@@ -71,6 +71,10 @@ class Athena::Console::Input::Option
 
   def is_array? : Bool
     @value_mode.is_array?
+  end
+
+  def negatable? : Bool
+    @value_mode.negatable?
   end
 
   def value_required? : Bool

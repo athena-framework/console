@@ -10,6 +10,10 @@ class Athena::Console::Input::Definition
 
   getter required_count : Int32 = 0
 
+  def self.new(definition : Hash(String, ACON::Input::Option) | Hash(String, ACON::Input::Argument)) : self
+    new definition.values
+  end
+
   def self.new(*definitions : ACON::Input::Argument | ACON::Input::Option) : self
     new definitions.to_a
   end
