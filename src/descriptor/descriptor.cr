@@ -12,6 +12,7 @@ abstract class Athena::Console::Descriptor
   end
 
   protected abstract def describe(application : ACON::Application, context : ACON::Descriptor::Context) : Nil
+  protected abstract def describe(command : ACON::Command, context : ACON::Descriptor::Context) : Nil
   protected abstract def describe(definition : ACON::Input::Definition, context : ACON::Descriptor::Context) : Nil
   protected abstract def describe(argument : ACON::Input::Argument, context : ACON::Descriptor::Context) : Nil
   protected abstract def describe(option : ACON::Input::Option, context : ACON::Descriptor::Context) : Nil

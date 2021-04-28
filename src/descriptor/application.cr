@@ -35,7 +35,7 @@ record Athena::Console::Descriptor::Application, application : ACON::Application
       names = Array(String).new
 
       command_hash.each do |name, command|
-        next if command.name.nil? || (!show_hidden && command.hidden?)
+        next if command.name.nil? || (!@show_hidden && command.hidden?)
 
         if name == command.name
           commands[name] = command
@@ -70,6 +70,12 @@ record Athena::Console::Descriptor::Application, application : ACON::Application
 
     unless global_commands.empty?
       sorted_commands[GLOBAL_NAMESPACE] = self.sort_hash global_commands
+    end
+
+    unless namespaced_commands.empty?
+      namespaced_commands.keys.sort!.each do |key|
+        sorted_commands[key] = self.sort_hash namespaced_commands[key]
+      end
     end
 
     sorted_commands

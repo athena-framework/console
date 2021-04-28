@@ -5,6 +5,11 @@ abstract class Athena::Console::Command
     INVALID = 2
   end
 
+  enum Synopsis
+    SHORT
+    LONG
+  end
+
   @@default_name : String? = nil
   @@default_description : String? = nil
 
@@ -33,6 +38,7 @@ abstract class Athena::Console::Command
   @definition : ACON::Input::Definition
   @full_definition : ACON::Input::Definition? = nil
   @ignore_validation_errors : Bool = false
+  @synopsis = Hash(ACON::Command::Synopsis, String).new
 
   def initialize(name : String? = nil)
     @definition = ACON::Input::Definition.new
@@ -94,6 +100,16 @@ abstract class Athena::Console::Command
 
   def help(@help : String) : self
     self
+  end
+
+  def synopsis(short : Bool = false) : String
+    key = short ? :short : :long
+
+    unless @synopsis.has_key? key
+      @synopsis[key] = "#{@name} #{@definition.synopsis short}".strip
+    end
+
+    @synopsis[key]
   end
 
   def ignore_validation_errors : Nil

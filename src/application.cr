@@ -107,8 +107,10 @@ class Athena::Console::Application
     if @wants_help
       @wants_help = false
 
-      # help_command = self.get "help"
-      # TODO: Setup Help command
+      help_command = self.get "help"
+      help_command.as(ACON::Commands::Help).command = command
+
+      return help_command
     end
 
     command
@@ -312,7 +314,8 @@ class Athena::Console::Application
   protected def default_commands : Array(ACON::Command)
     [
       Athena::Console::Commands::List.new,
-    ] of ACON::Command
+      Athena::Console::Commands::Help.new,
+    ]
   end
 
   protected def default_helper_set : ACON::Helper::HelperSet

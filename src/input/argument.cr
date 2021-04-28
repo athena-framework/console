@@ -22,7 +22,7 @@ class Athena::Console::Input::Argument
     self.default = default
   end
 
-  def default=(default : String | Array(String) | Nil = nil)
+  def default=(default : String | Array(String) | Bool | Nil = nil)
     raise ArgumentError.new "Cannot set a default value when the argument is required." if @mode.required? && !default.nil?
 
     if @mode.is_array?

@@ -8,7 +8,7 @@ class Athena::Console::Input::Definition
   @shortcuts = Hash(String, String).new
   @negations = Hash(String, String).new
 
-  getter required_count : Int32 = 0
+  getter required_argument_count : Int32 = 0
 
   def self.new(definition : Hash(String, ACON::Input::Option) | Hash(String, ACON::Input::Argument)) : self
     new definition.values
@@ -18,17 +18,19 @@ class Athena::Console::Input::Definition
     new definitions.to_a
   end
 
-  def initialize(definition : Array(ACON::Input::Argument | ACON::Input::Option)? = nil)
-    return unless definition
-
+  def initialize(definition : Array(ACON::Input::Argument | ACON::Input::Option) = Array(ACON::Input::Argument | ACON::Input::Option).new)
     self.definition = definition
   end
 
   def <<(argument : ACON::Input::Argument) : Nil
-    raise "An argument with the name #{argument.name} already exists." if @arguments.has_key?(argument.name)
-    raise "Cannot add a required argument after an Array argument." unless @last_array_argument.nil?
+    raise ACON::Exceptions::Logic.new "An argument with the name '#{argument.name}' already exists." if @arguments.has_key?(argument.name)
+
+    if (last_array_argument = @last_array_argument)
+      raise ACON::Exceptions::Logic.new "Cannot add a required argument '#{argument.name}' after Array argument '#{last_array_argument.name}'."
+    end
+
     if argument.required? && (last_optional_argument = @last_optional_argument)
-      raise "Cannot add required argument #{argument.name} after the optional argument #{last_optional_argument.name}."
+      raise ACON::Exceptions::Logic.new "Cannot add required argument '#{argument.name}' after the optional argument '#{last_optional_argument.name}'."
     end
 
     if argument.is_array?
@@ -36,7 +38,7 @@ class Athena::Console::Input::Definition
     end
 
     if argument.required?
-      @required_count += 1
+      @required_argument_count += 1
     else
       @last_optional_argument = argument
     end
@@ -81,7 +83,7 @@ class Athena::Console::Input::Definition
 
   def arguments=(arguments : Array(ACON::Input::Argument)) : Nil
     @arguments.clear
-    @required_count = 0
+    @required_argument_count = 0
     @last_array_argument = nil
     @last_optional_argument = nil
 
@@ -89,6 +91,8 @@ class Athena::Console::Input::Definition
   end
 
   def argument(name : String | Int32) : ACON::Input::Argument
+    raise ACON::Exceptions::InvalidArgument.new "The argument '#{name}' does not exist." unless self.has_argument? name
+
     case name
     in String then @arguments[name]
     in Int32  then @arguments.values[name]
@@ -106,7 +110,7 @@ class Athena::Console::Input::Definition
     !@last_array_argument.nil? ? Int32::MAX : @arguments.size
   end
 
-  def argument_defaults : Array(String | Array(String) | Bool)
+  def argument_defaults
     @arguments.to_h do |(name, arg)|
       {name, arg.default}
     end

@@ -34,8 +34,11 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
       # TODO: Do this.
     end
 
-    # TODO: Properly cacluate this
-    width = 6
+    width = self.width(
+      namespaces.values.flat_map do |n|
+        n[:commands] | commands.keys
+      end.uniq!
+    )
 
     if described_namespace
       self.write_text "<comment>Available commands for the #{described_namespace} namespace:</comment>", context
@@ -68,6 +71,21 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
 
   protected def describe(argument : ACON::Input::Argument, context : ACON::Descriptor::Context) : Nil
     # TODO: Implement this.
+  end
+
+  protected def describe(command : ACON::Command, context : ACON::Descriptor::Context) : Nil
+    command.merge_application_definition false
+
+    if description = command.description.presence
+      self.write_text "<comment>Description:</comment>", context
+      self.write_text "\n"
+      self.write_text "  #{description}"
+      self.write_text "\n\n"
+    end
+
+    self.write_text "<comment>Usage:</comment>", context
+
+    # self.output.puts command.synopsis
   end
 
   protected def describe(definition : ACON::Input::Definition, context : ACON::Descriptor::Context) : Nil
@@ -150,14 +168,19 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     )
   end
 
-  private def width(commands : Array(ACON::Command)) : Int32
+  private def width(commands : Array(ACON::Command) | Array(String)) : Int32
     widths = Array(Int32).new
 
     commands.each do |command|
-      widths << command.name.not_nil!.size
+      case command
+      in ACON::Command
+        widths << command.name.not_nil!.size
 
-      command.aliases.each do |a|
-        widths << a.size
+        command.aliases.each do |a|
+          widths << a.size
+        end
+      in String
+        widths << command.size
       end
     end
 
