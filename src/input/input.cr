@@ -19,6 +19,22 @@ abstract class Athena::Console::Input
     end
   end
 
+  def argument(name : String)
+    raise "The #{name} argument does not exist." unless @definition.has_argument? name
+
+    @arguments[name]? || @definition.argument(name).default
+  end
+
+  def option(name : String)
+    raise "The #{name} option does not exist." unless @definition.has_option? name
+
+    @options[name]? || @definition.option(name).default
+  end
+
+  def option(name : String, type : T.class) : T forall T
+    self.option(name).as T
+  end
+
   def bind(definition : ACON::Input::Definition) : Nil
     @arguments.clear
     @options.clear

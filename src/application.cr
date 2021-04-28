@@ -8,6 +8,7 @@ class Athena::Console::Application
   property? auto_exit : Bool = true
   property? catch_exceptions : Bool = true
   getter? single_command : Bool = false
+  property helper_set : ACON::Helper::HelperSet { self.default_helper_set }
 
   @definition : ACON::Input::Definition? = nil
   @commands = Hash(String, ACON::Command).new
@@ -50,6 +51,18 @@ class Athena::Console::Application
     command
   end
 
+  def commands(namespace : String? = nil) : Hash(String, ACON::Command)
+    self.init
+
+    if namespace.nil?
+      return @commands
+
+      # TODO: Handle command loader
+    end
+
+    Hash(String, ACON::Command).new
+  end
+
   def find(name : String) : ACON::Command
     self.init
 
@@ -64,6 +77,22 @@ class Athena::Console::Application
     return self.get name if self.has? name
 
     raise ACON::Exceptions::CommandNotFound.new "The command #{name} does not exist."
+  end
+
+  def find_namespace(namespace : String) : String
+    namespaces = self.namespaces
+
+    # TODO: Handle empty namespaces
+    # TODO: Handle multiple namespaces
+
+    namespaces.first
+  end
+
+  def extract_namespace(name : String, limit : Int32? = nil) : String
+    # Pop off the shortcut name of the command.
+    parts = name.split(':').tap &.pop
+
+    (limit.nil? ? parts : parts[0..limit]).join ';'
   end
 
   def get(name : String) : ACON::Command
@@ -87,6 +116,22 @@ class Athena::Console::Application
 
   def has?(name : String) : Bool
     @commands.has_key? name
+  end
+
+  def namespaces : Array(String)
+    namespaces = [] of String
+
+    self.commands.each_value do |command|
+      next if command.hidden?
+
+      namespaces.concat self.extract_all_namespaces command.name.not_nil!
+
+      command.aliases.each do |a|
+        namespaces.concat self.extract_all_namespaces a
+      end
+    end
+
+    namespaces.reject!(&.blank?).uniq!
   end
 
   def run(input : ACON::Input::Interface = ACON::Input::ARGVInput.new, output : ACON::Output::Interface = ACON::Output::ConsoleOutput.new) : ACON::Command::Status
@@ -266,6 +311,10 @@ class Athena::Console::Application
     ] of ACON::Command
   end
 
+  protected def default_helper_set : ACON::Helper::HelperSet
+    ACON::Helper::HelperSet.new
+  end
+
   protected def do_render_exception(ex : Exception, output : ACON::Output::Interface) : Nil
     loop do
       message = (ex.message || "").strip
@@ -321,6 +370,23 @@ class Athena::Console::Application
 
       break unless (ex = ex.cause)
     end
+  end
+
+  private def extract_all_namespaces(name : String) : Array(String)
+    # Pop off the shortcut name of the command.
+    parts = name.split(':').tap &.pop
+
+    namespaces = [] of String
+
+    parts.each do |p|
+      namespaces << if namespaces.empty?
+        p
+      else
+        "#{namespaces.last}:#{p}"
+      end
+    end
+
+    namespaces
   end
 
   private def init : Nil

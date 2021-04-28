@@ -23,21 +23,23 @@ abstract class Athena::Console::Output
     @formatter.decorated = decorated
   end
 
-  def puts(message : String, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+  def puts(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
     self.write message, true, verbosity, output_type
   end
 
-  def print(message : String, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+  def print(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
     self.write message, false, verbosity, output_type
   end
 
   protected def write(
-    message : String,
+    message,
     new_line : Bool,
     verbosity : ACON::Output::Verbosity,
     output_type : ACON::Output::Type
   )
     return if verbosity > self.verbosity
+
+    message = message.to_s
 
     message = case output_type
               in .normal? then @formatter.format message

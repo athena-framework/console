@@ -39,33 +39,52 @@ class Athena::Console::Commands::List < ACON::Command
     self
       .name("list")
       .definition(
-        ACON::Input::Argument.new("namespace", :optional, "Only list commands in this namespace")
+        ACON::Input::Argument.new("namespace", :optional, "Only list commands in this namespace"),
+        ACON::Input::Option.new("raw", nil, :none, "To output raw command list")
       )
       .description("List commands")
       .help(
         <<-HELP
-          The <info>%command.name%</info> command lists all commands:
+        The <info>%command.name%</info> command lists all commands:
 
-            <info>%command.full_name%</info>
+          <info>%command.full_name%</info>
 
-          You can also display the commands for a specific namespace:
+        You can also display the commands for a specific namespace:
 
-            <info>%command.full_name% test</info>
+          <info>%command.full_name% test</info>
 
-          You can also output the information in other formats by using the <comment>--format</comment> option:
+        You can also output the information in other formats by using the <comment>--format</comment> option:
 
-            <info>%command.full_name% --format=xml</info>
+          <info>%command.full_name% --format=xml</info>
 
-          It's also possible to get raw list of commands (useful for embedding command runner):
+        It's also possible to get raw list of commands (useful for embedding command runner):
 
-            <info>%command.full_name% --raw</info>
+          <info>%command.full_name% --raw</info>
         HELP
       )
   end
 
   protected def execute(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
-    output.puts @help
+    ACON::Helper::Descriptor.new.describe(
+      output,
+      self.application,
+      ACON::Descriptor::ListContext.new(
+        raw_text: input.option("raw", Bool)
+      )
+    )
 
+    ACON::Command::Status::SUCCESS
+  end
+end
+
+class AFoo < ACON::Command
+  protected def configure : Nil
+    self
+      .name("debug:router")
+      .description("Creates a new user.")
+  end
+
+  protected def execute(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
     ACON::Command::Status::SUCCESS
   end
 end
@@ -73,7 +92,9 @@ end
 # pp ACON::Commands::List.new
 
 app = ACON::Application.new "Athena"
-app.add ACON::Commands::List.new
+
+# pp app.namespaces
+app.add AFoo.new
 app.run # input, output
 
 # console = ACON::Terminal.new

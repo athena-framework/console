@@ -108,6 +108,7 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
   private def add_long_option(name : String, value : String?) : Nil
     if !@definition.has_option?(name)
       # TODO: Handle negation stuff
+      return
     end
 
     option = @definition.option name

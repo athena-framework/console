@@ -24,9 +24,11 @@ abstract class Athena::Console::Command
   getter description : String = ""
   getter help : String = ""
 
-  getter application : ACON::Application? = nil
+  getter! application : ACON::Application
   property aliases : Array(String) = [] of String
   setter process_title : String? = nil
+  property helper_set : ACON::Helper::HelperSet? = nil
+  getter? hidden : Bool = false
 
   @definition : ACON::Input::Definition
   @full_definition : ACON::Input::Definition? = nil
@@ -48,9 +50,9 @@ abstract class Athena::Console::Command
 
   def application=(@application : ACON::Application? = nil) : Nil
     if application = @application
-      # TODO: Set helper set to the application's
+      @helper_set = application.helper_set
     else
-      # TODO: Otherwise nil out the helper set
+      @helper_set = nil
     end
 
     @full_definition = nil
@@ -72,6 +74,8 @@ abstract class Athena::Console::Command
 
   def definition(definition : Array(ACON::Input::Argument | ACON::Input::Option)) : self
     @definition.definition = definition
+
+    @full_definition = nil
 
     self
   end

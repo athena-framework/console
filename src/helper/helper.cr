@@ -1,5 +1,3 @@
-abstract class Athena::Console::Helper; end
-
 require "./interface"
 
 abstract class Athena::Console::Helper
@@ -15,5 +13,5 @@ abstract class Athena::Console::Helper
     string
   end
 
-  property helper_set : ACON::Helper::HelperSet?
+  property helper_set : ACON::Helper::HelperSet? = nil
 end

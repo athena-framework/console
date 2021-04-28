@@ -10,14 +10,14 @@ class Athena::Console::Input::Argument
 
   getter name : String
   getter mode : ACON::Input::Argument::Mode
-  getter default : String | Array(String) | Nil
+  getter default : String | Array(String) | Bool | Nil
   getter description : String
 
   def initialize(
     @name : String,
     @mode : ACON::Input::Argument::Mode = :optional,
     @description : String = "",
-    default : String | Array(String) | Nil = nil
+    default : String | Array(String) | Bool | Nil = nil
   )
     self.default = default
   end
