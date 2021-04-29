@@ -147,15 +147,17 @@ abstract class Athena::Console::Command
   protected def merge_application_definition(merge_args : Bool = true) : Nil
     return unless (application = @application)
 
+    # TODO: Figure out if there is a better way to structure/store
+    # the data to remove the .values call.
     full_definition = ACON::Input::Definition.new
-    full_definition.options.merge! @definition.options
-    full_definition.options.merge! application.definition.options
+    full_definition.options = @definition.options.values
+    full_definition << application.definition.options.values
 
     if merge_args
-      full_definition.arguments.merge! application.definition.arguments
-      full_definition.arguments.merge! @definition.arguments
+      full_definition.arguments = application.definition.arguments.values
+      full_definition << @definition.arguments.values
     else
-      full_definition.arguments.merge! @definition.arguments
+      full_definition.arguments = @definition.arguments.values
     end
 
     @full_definition = full_definition

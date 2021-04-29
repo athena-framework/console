@@ -166,7 +166,7 @@ class Athena::Console::Application
       return ACON::Command::Status::SUCCESS
     end
 
-    input.bind self.definition
+    input.bind self.definition rescue nil
 
     command_name = self.command_name input
 
