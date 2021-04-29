@@ -70,7 +70,25 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
   end
 
   protected def describe(argument : ACON::Input::Argument, context : ACON::Descriptor::Context) : Nil
-    # TODO: Implement this.
+    default = if !argument.default.nil? && !argument.default.is_a?(Array)
+                "<comment> [default: #{argument.default}]</comment>"
+              else
+                ""
+              end
+
+    total_width = context.total_width || argument.name.size
+    spacing_width = total_width - argument.name.size
+
+    self.write_text(
+      sprintf(
+        "  <info>%s</info>  %s%s%s",
+        argument.name,
+        " " * spacing_width,
+        argument.description.gsub(/\s*[\r\n]\s*/, "\n#{" " * (total_width + 4)}"),
+        default
+      ),
+      context
+    )
   end
 
   protected def describe(command : ACON::Command, context : ACON::Descriptor::Context) : Nil
@@ -85,7 +103,28 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
 
     self.write_text "<comment>Usage:</comment>", context
 
-    # self.output.puts command.synopsis
+    ([command.synopsis(true)] + command.aliases + command.usages).each do |usage|
+      self.write_text "\n"
+      self.write_text "  #{ACON::Formatter::OutputFormatter.escape usage}", context
+    end
+
+    self.write_text "\n"
+
+    definition = command.definition
+
+    if !definition.options.empty? || !definition.arguments.empty?
+      self.write_text "\n"
+      self.describe definition, context
+      self.write_text "\n"
+    end
+
+    if (help = command.processed_help).presence && help != description
+      self.write_text "\n"
+      self.write_text "<comment>Help:</comment>", context
+      self.write_text "\n"
+      self.write_text "  #{help.gsub("\n", "\n  ")}", context
+      self.write_text "\n"
+    end
   end
 
   protected def describe(definition : ACON::Input::Definition, context : ACON::Descriptor::Context) : Nil

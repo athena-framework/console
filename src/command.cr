@@ -34,6 +34,7 @@ abstract class Athena::Console::Command
   setter process_title : String? = nil
   property helper_set : ACON::Helper::HelperSet? = nil
   getter? hidden : Bool = false
+  getter usages : Array(String) = [] of String
 
   @definition : ACON::Input::Definition
   @full_definition : ACON::Input::Definition? = nil
@@ -102,14 +103,38 @@ abstract class Athena::Console::Command
     self
   end
 
+  def processed_help : String
+    is_single_command = (application = @application) && application.single_command?
+    prog_name = Path.new(PROGRAM_NAME).basename
+    full_name = is_single_command ? prog_name : "#{prog_name} #{@name}"
+
+    processed_help = self.help || self.description
+
+    { {"%command.name%", @name}, {"%command.full_name%", full_name} }.each do |(placeholder, replacement)|
+      processed_help = processed_help.gsub placeholder, replacement
+    end
+
+    processed_help
+  end
+
   def synopsis(short : Bool = false) : String
-    key = short ? :short : :long
+    key = short ? Synopsis::SHORT : Synopsis::LONG
 
     unless @synopsis.has_key? key
       @synopsis[key] = "#{@name} #{@definition.synopsis short}".strip
     end
 
     @synopsis[key]
+  end
+
+  def usage(usage : String) : self
+    unless usage.starts_with? @name
+      usage = "#{@name} #{usage}"
+    end
+
+    @usages << usage
+
+    self
   end
 
   def ignore_validation_errors : Nil
