@@ -138,8 +138,8 @@ class Athena::Console::Input::Definition
 
   def options=(options : Array(ACON::Input::Option)) : Nil
     @options.clear
-    @shortcuts = Hash(String, String).new
-    @negations = Hash(String, String).new
+    @shortcuts.clear
+    @negations.clear
 
     self.<< options
   end
@@ -172,6 +172,12 @@ class Athena::Console::Input::Definition
 
   def has_negation?(name : String | Char) : Bool
     @negations.has_key? name.to_s
+  end
+
+  def negation_to_name(name : String) : String
+    raise ACON::Exceptions::InvalidArgument.new "The '--#{name}' option does not exist." unless self.has_negation? name
+
+    @negations[name]
   end
 
   def option_for_shortcut(shortcut : String | Char) : ACON::Input::Option

@@ -101,13 +101,19 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
 
       self.add_long_option name[0, pos], value
     else
-      self.add_long_option name, nil unless name.includes? '='
+      self.add_long_option name, nil
     end
   end
 
   private def add_long_option(name : String, value : String?) : Nil
-    if !@definition.has_option?(name)
-      # TODO: Handle negation stuff
+    unless @definition.has_option?(name)
+      raise "The '--#{name}' option does not exist." unless @definition.has_negation? name
+
+      option_name = @definition.negation_to_name name
+      raise "The '--#{name}' option does not accept a value." unless value.nil?
+
+      @options[option_name] = false
+
       return
     end
 
@@ -115,6 +121,16 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
 
     if !value.nil? && !option.accepts_value?
       raise "The --#{option.name} option does not accept a value."
+    end
+
+    if value.in?("", nil) && option.accepts_value? && !@parsed.empty?
+      next_value = @parsed.shift?
+
+      if ((v = next_value.presence) && '-' != v.char_at(0)) || next_value.in?("", nil)
+        value = next_value
+      else
+        @parsed.unshift next_value || ""
+      end
     end
 
     if value.nil?

@@ -1,6 +1,5 @@
 require "../spec_helper"
 
-@[ASPEC::TestCase::Focus]
 struct InputDefinitionTest < ASPEC::TestCase
   getter arg_foo : ACON::Input::Argument { ACON::Input::Argument.new "foo" }
   getter arg_foo1 : ACON::Input::Argument { ACON::Input::Argument.new "foo" }
@@ -307,6 +306,19 @@ struct InputDefinitionTest < ASPEC::TestCase
       "foo6" => [] of String,
       "foo7" => ["1", "2"],
     })
+  end
+
+  def test_negation_to_name : Nil
+    definition = ACON::Input::Definition.new ACON::Input::Option.new "foo", value_mode: :negatable
+    definition.negation_to_name("no-foo").should eq "foo"
+  end
+
+  def test_negation_to_name_invalid : Nil
+    definition = ACON::Input::Definition.new ACON::Input::Option.new "foo", value_mode: :negatable
+
+    expect_raises ACON::Exceptions::InvalidArgument, "The '--no-bar' option does not exist." do
+      definition.negation_to_name "no-bar"
+    end
   end
 
   @[DataProvider("synopsis_provider")]

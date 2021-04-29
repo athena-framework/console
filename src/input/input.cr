@@ -29,6 +29,10 @@ abstract class Athena::Console::Input
     self.argument(name).as T
   end
 
+  def arguments : Hash
+    @definition.argument_defaults.merge @arguments
+  end
+
   def option(name : String)
     raise "The #{name} option does not exist." unless @definition.has_option? name
 
@@ -37,6 +41,10 @@ abstract class Athena::Console::Input
 
   def option(name : String, type : T.class) : T forall T
     self.option(name).as T
+  end
+
+  def options : Hash
+    @definition.option_defaults.merge @options
   end
 
   def bind(definition : ACON::Input::Definition) : Nil

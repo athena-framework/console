@@ -6,10 +6,10 @@ module Athena::Console::Input::Interface
   abstract def parameter(value : String, default : _ = false, only_params : Bool = false)
   abstract def bind(definition : ACON::Input::Definition) : Nil
   abstract def validate : Nil
-  # abstract def arguments : Array(String)
+  abstract def arguments : Hash
   abstract def argument(name : String)
   # abstract def set_argument(name : String, value : String | Array(String) | Nil) : Nil
-  # abstract def options
+  abstract def options : Hash
   abstract def option(name : String)
   # abstract def set_option(name : String, value : String | Array(String) | Bool | Nil) : Nil
   # abstract def has_option?(name : String) : Bool
