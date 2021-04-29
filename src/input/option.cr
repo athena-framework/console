@@ -18,6 +18,8 @@ class Athena::Console::Input::Option
   getter default : String | Array(String) | Bool | Nil
   getter description : String
 
+  def_equals @name, @shortcut, @default, @value_mode
+
   def initialize(
     name : String,
     shortcut : String | Array(String) | Nil = nil,
