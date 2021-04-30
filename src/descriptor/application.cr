@@ -16,6 +16,14 @@ record Athena::Console::Descriptor::Application, application : ACON::Application
     @commands.not_nil!
   end
 
+  def command(name : String) : ACON::Command
+    if !@commands.not_nil!.has_key?(name) && !@aliases.not_nil!.has_key?(name)
+      raise ACON::Exceptions::CommandNotFound.new "Command '#{name}' does not exist."
+    end
+
+    @commands.not_nil![name]? || @aliases.not_nil![name]
+  end
+
   def namespaces : Hash(String, NamedTuple(id: String, commands: Array(String)))
     if @namespaces.nil?
       self.inspect_application
@@ -29,7 +37,7 @@ record Athena::Console::Descriptor::Application, application : ACON::Application
     namespaces = Hash(String, NamedTuple(id: String, commands: Array(String))).new
     aliases = Hash(String, ACON::Command).new
 
-    commands = @application.commands (namespace = @namespace) ? @application.find_namespace(namespace) : nil
+    commands = @application.commands ((namespace = @namespace) ? @application.find_namespace(namespace) : nil)
 
     self.sort_commands(commands).each do |namespace, command_hash|
       names = Array(String).new

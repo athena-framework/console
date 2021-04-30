@@ -60,7 +60,16 @@ class Athena::Console::Application
       # TODO: Handle command loader
     end
 
-    Hash(String, ACON::Command).new
+    commands = Hash(String, ACON::Command).new
+    @commands.each do |name, command|
+      if namespace == self.extract_namespace(name, namespace.count(':') + 1)
+        commands[name] = command
+      end
+    end
+
+    # TODO: Handle command loader
+
+    commands
   end
 
   def find(name : String) : ACON::Command
@@ -83,9 +92,15 @@ class Athena::Console::Application
     namespaces = self.namespaces
 
     # TODO: Handle empty namespaces
-    # TODO: Handle multiple namespaces
 
-    namespaces.first
+    exact = namespaces.includes? namespace
+
+    if namespaces.size > 1 && !exact
+      # TODO: Suggest alternate commands.
+      raise ACON::Exceptions::NamespaceNotFound.new "The namespace '#{namespace}' is ambigious."
+    end
+
+    exact ? namespace : namespaces.first
   end
 
   def extract_namespace(name : String, limit : Int32? = nil) : String

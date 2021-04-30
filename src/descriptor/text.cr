@@ -1,3 +1,6 @@
+# :nodoc:
+#
+# TODO: Should/can this be implemented via `to_s(io)` on each type?
 class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
   protected def describe(application : ACON::Application, context : ACON::Descriptor::Context) : Nil
     described_namespace = context.namespace
@@ -30,8 +33,9 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     namespaces = description.namespaces
 
     if described_namespace && !namespaces.empty?
-      # Ensure all alias commands are included when describing a specific namespace.
-      # TODO: Do this.
+      namespaces.values.first[:commands].each do |n|
+        commands[n] = description.command n
+      end
     end
 
     width = self.width(
