@@ -1,12 +1,12 @@
 abstract class Athena::Console::Output; end
 
 require "./console_output_interface"
-require "./io_output"
+require "./io"
 
-class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IOOutput
+class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IO
   include Athena::Console::Output::ConsoleOutputInterface
 
-  @stderr : ACON::Output::Interface
+  setter stderr : ACON::Output::Interface
 
   def initialize(
     verbosity : ACON::Output::Verbosity = :normal,
@@ -15,7 +15,7 @@ class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IOOutput
   )
     super STDOUT, verbosity, decorated, formatter
 
-    @stderr = ACON::Output::IOOutput.new STDERR, verbosity, decorated, @formatter
+    @stderr = ACON::Output::IO.new STDERR, verbosity, decorated, @formatter
     actual_decorated = self.decorated?
 
     if decorated.nil?

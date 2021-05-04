@@ -79,12 +79,12 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
     # If expecting another argument, add it.
     if @definition.has_argument? count
       argument = @definition.argument count
-      @arguments[argument.name] = argument.is_array? ? [token] : token
+      @arguments[argument.name] = (argument.is_array? ? [token] : token).as InputType
 
       # If the last argument IS_ARRAY, append token to last argument.
     elsif @definition.has_argument?(count - 1) && @definition.argument(count - 1).is_array?
       argument = @definition.argument(count - 1)
-      @arguments[argument.name].as(Array(String)) << token
+      @arguments[argument.name].as(Array(InputTypes)) << token
 
       # TODO: Handle unexpected argument.
     else
@@ -139,9 +139,9 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
     end
 
     if option.is_array?
-      (@options[name] ||= Array(String | Bool | Nil).new).as(Array(String | Bool | Nil)) << value
+      (@options[name] ||= Array(InputTypes).new).as(Array(InputTypes)) << value
     else
-      @options[name] = value
+      @options[name] = value.as InputType
     end
   end
 

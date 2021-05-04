@@ -2,7 +2,9 @@ require "semantic_version"
 
 class Athena::Console::Application
   @terminal : ACON::Terminal
-  @version : SemanticVersion
+
+  getter version : SemanticVersion
+  getter name : String
 
   setter default_command : String = "list"
   property? auto_exit : Bool = true
@@ -107,7 +109,7 @@ class Athena::Console::Application
     # Pop off the shortcut name of the command.
     parts = name.split(':').tap &.pop
 
-    (limit.nil? ? parts : parts[0..limit]).join ';'
+    (limit.nil? ? parts : parts[0...limit]).join ':'
   end
 
   def get(name : String) : ACON::Command
@@ -132,6 +134,9 @@ class Athena::Console::Application
   end
 
   def has?(name : String) : Bool
+    self.init
+
+    # TODO: Support command loaders
     @commands.has_key? name
   end
 
@@ -176,7 +181,7 @@ class Athena::Console::Application
 
   def do_run(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
     if input.has_parameter? "--version", "-V", only_params: true
-      output.puts self.get_long_version
+      output.puts self.long_version
 
       return ACON::Command::Status::SUCCESS
     end
@@ -188,7 +193,7 @@ class Athena::Console::Application
     if input.has_parameter? "--help", "-h", only_params: true
       if command_name.nil?
         command_name = "help"
-        input = ACON::Input::HashInput.new({"command_name" => @default_command})
+        input = ACON::Input::Hash.new(command_name: @default_command)
       else
         @wants_help = true
       end
@@ -250,12 +255,12 @@ class Athena::Console::Application
   def definition=(@definition : ACON::Input::Definition)
   end
 
-  def get_long_version : String
+  def long_version : String
     "#{@name} <info>#{@version}</info>"
   end
 
   def help : String
-    self.get_long_version
+    self.long_version
   end
 
   protected def command_name(input : ACON::Input::Interface) : String?

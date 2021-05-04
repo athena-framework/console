@@ -1,6 +1,6 @@
 require "./interface"
 
-class Athena::Console::Output::NullOutput
+class Athena::Console::Output::Null
   include Athena::Console::Output::Interface
 
   @formatter : ACON::Formatter::Interface? = nil
@@ -26,7 +26,7 @@ class Athena::Console::Output::NullOutput
   end
 
   def formatter : ACON::Formatter::Interface
-    @formatter ||= ACON::Formatter::NullOutputFormatter.new
+    @formatter ||= ACON::Formatter::NullFormatter.new
   end
 
   def formatter=(formatter : ACON::Formatter::Interface)

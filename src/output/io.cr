@@ -1,8 +1,10 @@
-class Athena::Console::Output::IOOutput < Athena::Console::Output
-  getter io : IO
+class Athena::Console::Output::IO < Athena::Console::Output
+  property io : ::IO
+
+  delegate :to_s, to: @io
 
   def initialize(
-    @io : IO,
+    @io : ::IO,
     verbosity : ACON::Output::Verbosity? = :normal,
     decorated : Bool? = nil,
     formatter : ACON::Formatter::Interface? = nil

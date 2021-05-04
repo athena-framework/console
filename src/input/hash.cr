@@ -1,7 +1,11 @@
-class Athena::Console::Input::HashInput < Athena::Console::Input
-  @parameters : Hash(String, String)
+class Athena::Console::Input::Hash < Athena::Console::Input
+  @parameters : HashType
 
-  def initialize(@parameters : Hash(String, String), definition : ACON::Input::Definition? = nil)
+  def self.new(**args : InputType) : self
+    new args.to_h.transform_keys(&.to_s).transform_values(&.as(InputType))
+  end
+
+  def initialize(@parameters : HashType, definition : ACON::Input::Definition? = nil)
     super definition
   end
 
@@ -9,7 +13,7 @@ class Athena::Console::Input::HashInput < Athena::Console::Input
     @parameters.each do |name, value|
       next if name.starts_with? '-'
 
-      return value
+      return value.as(String)
     end
 
     nil
@@ -17,6 +21,7 @@ class Athena::Console::Input::HashInput < Athena::Console::Input
 
   def has_parameter?(*values : String, only_params : Bool = false) : Bool
     @parameters.each do |name, value|
+      value = name unless value.is_a? Number
       return false if only_params && "--" == value
       return true if values.includes? value
     end
@@ -47,22 +52,23 @@ class Athena::Console::Input::HashInput < Athena::Console::Input
     end
   end
 
-  private def add_argument(name : String, value : String?) : Nil
+  private def add_argument(name : String, value : InputType) : Nil
     raise "The #{name} argument does not exist." if !@definition.has_argument? name
 
     @arguments[name] = value
   end
 
-  private def add_long_option(name : String, value : String?) : Nil
-    if !@definition.has_option?(name)
-      # TODO: Handle negation stuff
+  private def add_long_option(name : String, value : InputType) : Nil
+    unless @definition.has_option?(name)
+      raise "The '--#{name}' option does not exist." unless @definition.has_negation? name
+
+      option_name = @definition.negation_to_name name
+      @options[option_name] = false
+
+      return
     end
 
     option = @definition.option name
-
-    if !value.nil? && !option.accepts_value?
-      raise "The --#{option.name} option does not accept a value."
-    end
 
     if value.nil?
       raise "The --#{option.name} option requires a value." if option.value_required?
@@ -72,7 +78,7 @@ class Athena::Console::Input::HashInput < Athena::Console::Input
     @options[name] = value
   end
 
-  private def add_short_option(name : String, value : String?) : Nil
+  private def add_short_option(name : String, value : InputType) : Nil
     name = name.to_s
 
     raise "The -#{name} option does not exist." if !@definition.has_shortcut? name

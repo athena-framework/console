@@ -1,16 +1,16 @@
 class Athena::Console::Input::Definition
-  getter options : Hash(String, ACON::Input::Option) = Hash(String, ACON::Input::Option).new
-  getter arguments : Hash(String, ACON::Input::Argument) = Hash(String, ACON::Input::Argument).new
+  getter options : ::Hash(String, ACON::Input::Option) = ::Hash(String, ACON::Input::Option).new
+  getter arguments : ::Hash(String, ACON::Input::Argument) = ::Hash(String, ACON::Input::Argument).new
 
   @last_array_argument : ACON::Input::Argument? = nil
   @last_optional_argument : ACON::Input::Argument? = nil
 
-  @shortcuts = Hash(String, String).new
-  @negations = Hash(String, String).new
+  @shortcuts = ::Hash(String, String).new
+  @negations = ::Hash(String, String).new
 
   getter required_argument_count : Int32 = 0
 
-  def self.new(definition : Hash(String, ACON::Input::Option) | Hash(String, ACON::Input::Argument)) : self
+  def self.new(definition : ::Hash(String, ACON::Input::Option) | ::Hash(String, ACON::Input::Argument)) : self
     new definition.values
   end
 

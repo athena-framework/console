@@ -1,4 +1,4 @@
-class Athena::Console::Formatter::NullOutputFormatterStyle
+class Athena::Console::Formatter::NullFormatterStyle
   include Athena::Console::Formatter::OutputFormatterStyleInterface
 
   def foreground=(forground : Colorize::Color)

@@ -1,6 +1,6 @@
 require "./interface"
 
-class Athena::Console::Formatter::NullOutputFormatter
+class Athena::Console::Formatter::NullFormatter
   include Athena::Console::Formatter::Interface
 
   @style : ACON::Formatter::OutputFormatterStyle? = nil
@@ -20,7 +20,7 @@ class Athena::Console::Formatter::NullOutputFormatter
   end
 
   def style(name : String) : ACON::Formatter::OutputFormatterStyleInterface
-    @style ||= ACON::Formatter::NullOutputFormatterStyle.new
+    @style ||= ACON::Formatter::NullFormatterStyle.new
   end
 
   def format(message : String?) : String

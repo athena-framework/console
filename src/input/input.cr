@@ -3,11 +3,15 @@ require "./interface"
 abstract class Athena::Console::Input
   include Athena::Console::Input::Interface
 
+  alias InputTypes = String | Bool | Nil
+  alias InputType = InputTypes | Array(InputTypes)
+  alias HashType = ::Hash(String, InputType)
+
   property? interactive : Bool = true
 
-  @arguments = Hash(String, String | Array(String)).new
+  @arguments = HashType.new
   @definition : ACON::Input::Definition
-  @options = Hash(String, String | Array(String | Bool | Nil) | Bool | Nil).new
+  @options = HashType.new
 
   def initialize(definition : ACON::Input::Definition? = nil)
     if definition.nil?
@@ -29,7 +33,7 @@ abstract class Athena::Console::Input
     self.argument(name).as T
   end
 
-  def arguments : Hash
+  def arguments : ::Hash
     @definition.argument_defaults.merge @arguments
   end
 
@@ -43,7 +47,7 @@ abstract class Athena::Console::Input
     self.option(name).as T
   end
 
-  def options : Hash
+  def options : ::Hash
     @definition.option_defaults.merge @options
   end
 

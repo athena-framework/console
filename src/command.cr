@@ -36,14 +36,12 @@ abstract class Athena::Console::Command
   getter? hidden : Bool = false
   getter usages : Array(String) = [] of String
 
-  @definition : ACON::Input::Definition
+  @definition : ACON::Input::Definition = ACON::Input::Definition.new
   @full_definition : ACON::Input::Definition? = nil
   @ignore_validation_errors : Bool = false
   @synopsis = Hash(ACON::Command::Synopsis, String).new
 
   def initialize(name : String? = nil)
-    @definition = ACON::Input::Definition.new
-
     if n = (name || self.class.default_name)
       self.name n
     end
@@ -53,6 +51,18 @@ abstract class Athena::Console::Command
     end
 
     self.configure
+  end
+
+  def aliases(*aliases : String) : self
+    self.aliases aliases.to_a
+  end
+
+  def aliases(aliases : Enumerable(String)) : self
+    aliases.each &->validate_name(String)
+
+    @aliases = aliases
+
+    self
   end
 
   def application=(@application : ACON::Application? = nil) : Nil
