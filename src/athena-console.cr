@@ -7,6 +7,7 @@ require "./descriptor/*"
 require "./exceptions/*"
 require "./helper/*"
 require "./input/*"
+require "./loader/*"
 require "./formatter/*"
 require "./output/*"
 

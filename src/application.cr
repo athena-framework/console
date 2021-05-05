@@ -11,6 +11,7 @@ class Athena::Console::Application
   property? catch_exceptions : Bool = true
   getter? single_command : Bool = false
   property helper_set : ACON::Helper::HelperSet { self.default_helper_set }
+  setter command_loader : ACON::Loader::Interface? = nil
 
   @definition : ACON::Input::Definition? = nil
   @commands = Hash(String, ACON::Command).new
@@ -57,9 +58,18 @@ class Athena::Console::Application
     self.init
 
     if namespace.nil?
-      return @commands
+      unless command_loader = @command_loader
+        return @commands
+      end
 
-      # TODO: Handle command loader
+      commands = @commands.dup
+      command_loader.names.each do |name|
+        if !commands.has_key?(name) && self.has?(name)
+          commands[name] = self.get name
+        end
+      end
+
+      return commands
     end
 
     commands = Hash(String, ACON::Command).new
@@ -69,7 +79,13 @@ class Athena::Console::Application
       end
     end
 
-    # TODO: Handle command loader
+    if command_loader = @command_loader
+      command_loader.names.each do |name|
+        if !commands.has_key?(name) && namespace == self.extract_namespace(name, namespace.count(':') + 1) && self.has?(name)
+          commands[name] = self.get name
+        end
+      end
+    end
 
     commands
   end
@@ -117,7 +133,9 @@ class Athena::Console::Application
 
     raise ACON::Exceptions::CommandNotFound.new "The command '#{name}' does not exist." unless self.has? name
 
-    # TODO: Handle checking for loader based commands
+    if !@commands.has_key? name
+      raise ACON::Exceptions::CommandNotFound.new "The '#{name}' command cannot be found because it is registered under multiple names."
+    end
 
     command = @commands[name]
 
@@ -136,8 +154,15 @@ class Athena::Console::Application
   def has?(name : String) : Bool
     self.init
 
-    # TODO: Support command loaders
-    @commands.has_key? name
+    return true if @commands.has_key? name
+
+    if (command_loader = @command_loader) && command_loader.has? name
+      self.add command_loader.get name
+
+      true
+    else
+      false
+    end
   end
 
   def namespaces : Array(String)

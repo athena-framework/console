@@ -38,7 +38,24 @@ struct ApplicationTest < ASPEC::TestCase
     commands.size.should eq 1
   end
 
-  def ptest_commands_with_loader : Nil
+  def test_commands_with_loader : Nil
+    app = ACON::Application.new "foo"
+    commands = app.commands
+
+    commands["help"].should be_a ACON::Commands::Help
+    commands["list"].should be_a ACON::Commands::List
+
+    app.add FooCommand.new
+    commands = app.commands "foo"
+    commands.size.should eq 1
+
+    app.command_loader = ACON::Loader::Factory.new({
+      "foo:bar1" => ->{ Foo1Command.new.as ACON::Command },
+    })
+    commands = app.commands "foo"
+    commands.size.should eq 2
+    commands["foo:bar"].should be_a FooCommand
+    commands["foo:bar1"].should be_a Foo1Command
   end
 
   def test_add : Nil
@@ -48,7 +65,7 @@ struct ApplicationTest < ASPEC::TestCase
 
     commands["foo:bar"].should be foo
 
-    # TODO: Add a splat/enumerable overload?
+    # TODO: Add a splat/enumerable overload of #add ?
   end
 
   def test_has_get : Nil
@@ -69,7 +86,27 @@ struct ApplicationTest < ASPEC::TestCase
     app.get("foo:bar").should be_a ACON::Commands::Help
   end
 
-  def ptest_has_get_with_loader : Nil
+  def test_has_get_with_loader : Nil
+    app = ACON::Application.new "foo"
+    app.has?("list").should be_true
+    app.has?("afoobar").should be_false
+
+    app.add foo = FooCommand.new
+    app.has?("afoobar").should be_true
+    app.get("foo:bar").should be foo
+    app.get("afoobar").should be foo
+
+    app.command_loader = ACON::Loader::Factory.new({
+      "foo:bar1" => ->{ Foo1Command.new.as ACON::Command },
+    })
+
+    app.has?("afoobar").should be_true
+    app.get("foo:bar").should be foo
+    app.get("afoobar").should be foo
+    app.has?("foo:bar1").should be_true
+    (foo1 = app.get("foo:bar1")).should be_a Foo1Command
+    app.has?("afoobar1").should be_true
+    app.get("afoobar1").should be foo1
   end
 
   def test_silent_help : Nil
