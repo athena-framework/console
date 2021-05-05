@@ -320,7 +320,19 @@ struct ApplicationTest < ASPEC::TestCase
 
     tester = ACON::Spec::ApplicationTester.new app
     tester.run(ACON::Input::HashType{"command" => "foos:bar1"}, decorated: false)
-    puts tester.display
+    tester.display.should eq(
+      <<-OUTPUT
+
+                                                                
+        There are no commands defined in the 'foos' namespace.  
+                                                                
+        Did you mean this?                                      
+            foo                                                 
+                                                                
+
+
+      OUTPUT
+    )
   end
 
   def ptest_run_alternate_command_name : Nil
@@ -329,10 +341,57 @@ struct ApplicationTest < ASPEC::TestCase
   def ptest_dont_run_alternate_command_name : Nil
   end
 
-  def ptest_find_alternative_exception_message_multiple : Nil
+  def test_find_alternative_exception_message_multiple : Nil
+    ENV["COLUMNS"] = "120"
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add Foo1Command.new
+    app.add Foo2Command.new
+
+    # Command + plural
+    ex = expect_raises ACON::Exceptions::CommandNotFound do
+      app.find "foo:baR"
+    end
+
+    message = ex.message.should_not be_nil
+    message.should contain "Did you mean one of these?"
+    message.should contain "foo1:bar"
+    message.should contain "foo:bar"
+
+    # Namespace + plural
+    ex = expect_raises ACON::Exceptions::CommandNotFound do
+      app.find "foo2:bar"
+    end
+
+    message = ex.message.should_not be_nil
+    message.should contain "Did you mean one of these?"
+    message.should contain "foo1"
+
+    app.add Foo3Command.new
+    app.add Foo4Command.new
+
+    # Subnamespace + plural
+    ex = expect_raises ACON::Exceptions::CommandNotFound do
+      app.find "foo3:"
+    end
+
+    message = ex.message.should_not be_nil
+    message.should contain "foo3:bar"
+    message.should contain "foo3:bar:toh"
   end
 
-  def ptest_find_alternative_commands : Nil
+  def test_find_alternative_commands : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add Foo1Command.new
+    app.add Foo2Command.new
+
+    ex = expect_raises ACON::Exceptions::CommandNotFound do
+      app.find "Unknown command"
+    end
+
+    ex.alternatives.should be_empty
+    ex.message.should eq "Command 'Unknown command' is not defined."
   end
 
   def ptest_find_alternative_commands_with_alias : Nil

@@ -120,7 +120,7 @@ class Athena::Console::Application
     if commands.empty? || commands.select(/^#{expression}$/i).size < 1
       if pos = name.index ':'
         # Check if a namespace exists and contains commands
-        self.find_namespace name[0..pos]
+        self.find_namespace name[0...pos]
       end
 
       message = "Command '#{name}' is not defined."
@@ -138,7 +138,7 @@ class Athena::Console::Application
         message += alternatives.join("\n    ")
       end
 
-      raise ACON::Exceptions::CommandNotFound.new message
+      raise ACON::Exceptions::CommandNotFound.new message, alternatives
     end
 
     # Filter out aliases for commands which are already on the list.
@@ -186,21 +186,30 @@ class Athena::Console::Application
   end
 
   def find_namespace(namespace : String) : String
-    namespaces = self.namespaces
+    all_namespace_names = self.namespaces
+
+    expression = "#{namespace.split(':').join("[^:]*:", &->Regex.escape(String))}[^:]*"
+    namespaces = all_namespace_names.select(/^#{expression}/)
 
     if namespaces.empty?
       message = "There are no commands defined in the '#{namespace}' namespace."
 
-      # TODO: Suggest alternatives
+      if (alternatives = self.find_alternatives namespace, all_namespace_names) && (!alternatives.empty?)
+        case alternatives.size
+        when 1 then message += "\n\nDid you mean this?\n    "
+        else        message += "\n\nDid you mean one of these?\n    "
+        end
 
-      raise ACON::Exceptions::NamespaceNotFound.new message
+        message += alternatives.join("\n    ")
+      end
+
+      raise ACON::Exceptions::NamespaceNotFound.new message, alternatives
     end
 
     exact = namespaces.includes? namespace
 
     if namespaces.size > 1 && !exact
-      # TODO: Suggest alternate commands.
-      raise ACON::Exceptions::NamespaceNotFound.new "The namespace '#{namespace}' is ambiguous."
+      raise ACON::Exceptions::NamespaceNotFound.new "The namespace '#{namespace}' is ambiguous.\nDid you mean one of these?\n#{self.abbreviation_suggestions namespaces}", namespaces
     end
 
     exact ? namespace : namespaces.first
@@ -468,7 +477,7 @@ class Athena::Console::Application
       width = @terminal.width ? @terminal.width - 1 : Int32::MAX
       lines = [] of Tuple(String, Int32)
 
-      message.split(/(\r?\n)/) do |line|
+      message.split(/(?:\r?\n)/) do |line|
         self.split_string_by_width(line, width - 4) do |l|
           line_length = l.size + 4
           lines << {l, line_length}
@@ -584,7 +593,7 @@ class Athena::Console::Application
   end
 
   private def split_string_by_width(line : String, width : Int32, & : String -> Nil) : Nil
-    line.split(/(.{#{width}}?)/, remove_empty: true) do |match|
+    line.split(/(.{#{width}}?)/) do |match|
       yield match.as(String)
     end
   end
