@@ -297,11 +297,11 @@ struct ApplicationTest < ASPEC::TestCase
   end
 
   @[DataProvider("invalid_command_names_single_provider")]
-  def ptest_find_alternative_exception_message_single(name) : Nil
+  def test_find_alternative_exception_message_single(name) : Nil
     app = ACON::Application.new "foo"
     app.add Foo3Command.new
 
-    expect_raises ACON::Exceptions::CommandNotFound, "Did you mean this" do
+    expect_raises ACON::Exceptions::CommandNotFound, "Did you mean this?" do
       app.find name
     end
   end
@@ -313,7 +313,7 @@ struct ApplicationTest < ASPEC::TestCase
     }
   end
 
-  def ptest_doesnt_run_alternative_namespace_name : Nil
+  def test_doesnt_run_alternative_namespace_name : Nil
     app = ACON::Application.new "foo"
     app.add Foo1Command.new
     app.auto_exit = false

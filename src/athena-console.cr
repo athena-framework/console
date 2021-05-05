@@ -51,9 +51,9 @@ end
 
 # app = ACON::Application.new "Athena", "0.15.0"
 
-# app.add FooCommand.new
+# app.add Foo3Command.new
 # app.add FooHiddenCommand.new
 
-# app.find "foo:"
+# app.find "foo3:barr"
 
 # app.run # input, output

@@ -1,4 +1,5 @@
 require "semantic_version"
+require "levenshtein"
 
 class Athena::Console::Application
   @terminal : ACON::Terminal
@@ -124,7 +125,18 @@ class Athena::Console::Application
 
       message = "Command '#{name}' is not defined."
 
-      # TODO: Suggest alternatives
+      if (alternatives = self.find_alternatives name, all_command_names) && (!alternatives.empty?)
+        alternatives.select! do |name|
+          !self.get(name).hidden?
+        end
+
+        case alternatives.size
+        when 1 then message += "\n\nDid you mean this?\n    "
+        else        message += "\n\nDid you mean one of these?\n    "
+        end
+
+        message += alternatives.join("\n    ")
+      end
 
       raise ACON::Exceptions::CommandNotFound.new message
     end
@@ -517,6 +529,48 @@ class Athena::Console::Application
     end
 
     namespaces
+  end
+
+  private def find_alternatives(name : String, collection : Enumerable(String)) : Array(String)
+    alternatives = Hash(String, Int32).new
+    threshold = 1_000
+
+    collection_parts = Hash(String, Array(String)).new
+    collection.each do |item|
+      collection_parts[item] = item.split ':'
+    end
+
+    name.split(':').each_with_index do |sub_name, idx|
+      collection_parts.each do |collection_name, parts|
+        exists = alternatives.has_key? collection_name
+
+        if exists && parts[idx]?.nil?
+          alternatives[collection_name] += threshold
+          next
+        elsif parts[idx]?.nil?
+          next
+        end
+
+        lev = Levenshtein.distance sub_name, parts[idx]
+
+        if lev <= sub_name.size / 3 || !sub_name.empty? && parts[idx].includes? sub_name
+          alternatives[collection_name] = exists ? alternatives[collection_name] + lev : lev
+        elsif exists
+          alternatives[collection_name] += threshold
+        end
+      end
+    end
+
+    collection.each do |item|
+      lev = Levenshtein.distance name, item
+      if lev <= name.size / 3 || item.includes? name
+        alternatives[item] = (current = alternatives[item]?) ? current - lev : lev
+      end
+    end
+
+    alternatives.select! { |_, lev| lev < 2 * threshold }
+
+    alternatives.keys.sort!
   end
 
   private def init : Nil
