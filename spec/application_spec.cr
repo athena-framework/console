@@ -1,5 +1,14 @@
 require "./spec_helper"
 
+private RENDER_EXCEPTION1 = <<-OUTPUT
+
+                                 
+  Command 'foo' is not defined.  
+                                 
+
+
+OUTPUT
+
 @[ASPEC::TestCase::Focus]
 struct ApplicationTest < ASPEC::TestCase
   @col_size : Int32?
@@ -168,6 +177,23 @@ struct ApplicationTest < ASPEC::TestCase
     expect_raises ACON::Exceptions::NamespaceNotFound, "There are no commands defined in the 'bar' namespace." do
       app.find_namespace "bar"
     end
+  end
+
+  def test_find_namespace_does_not_fail_on_deep_similar_namespaces : Nil
+    app = ACON::Application.new "foo"
+
+    command1 = ACON::Spec::MockCommand.new "foo:sublong:bar" do
+      ACON::Command::Status::SUCCESS
+    end
+
+    command2 = ACON::Spec::MockCommand.new "bar:sub:foo" do
+      ACON::Command::Status::SUCCESS
+    end
+
+    app.add command1
+    app.add command2
+
+    app.find_namespace("f:sub").should eq "foo:sublong"
   end
 
   def test_find : Nil
@@ -392,8 +418,120 @@ struct ApplicationTest < ASPEC::TestCase
 
     ex.alternatives.should be_empty
     ex.message.should eq "Command 'Unknown command' is not defined."
+
+    # Test if "bar1" command throw a "CommandNotFoundException" and does not contain
+    # "foo:bar" as alternative because "bar1" is too far from "foo:bar"
+    ex = expect_raises ACON::Exceptions::CommandNotFound do
+      app.find "bar1"
+    end
+
+    ex.alternatives.should eq ["afoobar1", "foo:bar1"]
+
+    message = ex.message.should_not be_nil
+    message.should contain "Command 'bar1' is not defined"
+    message.should contain "afoobar1"
+    message.should contain "foo:bar1"
+    message.should_not match /foo:bar(?!1)/
   end
 
-  def ptest_find_alternative_commands_with_alias : Nil
+  def test_find_alternative_commands_with_alias : Nil
+    foo_command = FooCommand.new
+    foo_command.aliases = ["foo2"]
+
+    app = ACON::Application.new "foo"
+    app.command_loader = ACON::Loader::Factory.new({
+      "foo3" => ->{ foo_command.as ACON::Command },
+    })
+    app.add foo_command
+
+    app.find("foo").should be foo_command
+  end
+
+  def test_find_alternate_namespace : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add Foo1Command.new
+    app.add Foo2Command.new
+    app.add Foo3Command.new
+
+    ex = expect_raises ACON::Exceptions::CommandNotFound, "There are no commands defined in the 'Unknown-namespace' namespace." do
+      app.find "Unknown-namespace:Unknown-command"
+    end
+    ex.alternatives.should be_empty
+
+    ex = expect_raises ACON::Exceptions::CommandNotFound do
+      app.find "foo2:command"
+    end
+    ex.alternatives.should eq ["foo", "foo1", "foo3"]
+
+    message = ex.message.should_not be_nil
+    message.should contain "There are no commands defined in the 'foo2' namespace."
+    message.should contain "foo"
+    message.should contain "foo1"
+    message.should contain "foo3"
+  end
+
+  def test_find_alternates_output : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add Foo1Command.new
+    app.add Foo2Command.new
+    app.add Foo3Command.new
+    app.add FooHiddenCommand.new
+
+    expect_raises ACON::Exceptions::CommandNotFound, "There are no commands defined in the 'Unknown-namespace' namespace." do
+      app.find "Unknown-namespace:Unknown-command"
+    end.alternatives.should be_empty
+
+    expect_raises ACON::Exceptions::CommandNotFound, /Command 'foo' is not defined\..*Did you mean one of these\?.*/m do
+      app.find "foo"
+    end.alternatives.should eq ["afoobar", "afoobar1", "afoobar2", "foo1:bar", "foo3:bar", "foo:bar", "foo:bar1"]
+  end
+
+  def test_find_double_colon_doesnt_find_command : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add Foo4Command.new
+
+    expect_raises ACON::Exceptions::CommandNotFound, "Command 'foo::bar' is not defined." do
+      app.find "foo::bar"
+    end
+  end
+
+  def test_find_hidden_command_exact_name : Nil
+    app = ACON::Application.new "foo"
+    app.add FooHiddenCommand.new
+
+    app.find("foo:hidden").should be_a FooHiddenCommand
+    app.find("afoohidden").should be_a FooHiddenCommand
+  end
+
+  def test_find_ambiguous_commands_if_all_alternatives_are_hidden : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add FooHiddenCommand.new
+
+    app.find("foo:").should be_a FooCommand
+  end
+
+  def test_set_catch_exceptions : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    ENV["COLUMNS"] = "120"
+    tester = ACON::Spec::ApplicationTester.new app
+
+    app.catch_exceptions = true
+    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
+    tester.display.should eq RENDER_EXCEPTION1
+
+    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
+    tester.error_output.should eq RENDER_EXCEPTION1
+    tester.display.should be_empty
+
+    app.catch_exceptions = false
+
+    expect_raises Exception, "Command 'foo' is not defined." do
+      tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
+    end
   end
 end

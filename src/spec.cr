@@ -7,7 +7,16 @@ module Athena::Console::Spec
       self.output.to_s
     end
 
-    def init_output(decorated : Bool? = nil, interactive : Bool? = nil, @capture_stderr_separately : Bool = false) : Nil
+    def error_output : String
+      self.output.as(ACON::Output::ConsoleOutput).error_output.to_s
+    end
+
+    def init_output(
+      decorated : Bool? = nil,
+      interactive : Bool? = nil,
+      verbosity : ACON::Output::Verbosity? = nil,
+      @capture_stderr_separately : Bool = false
+    ) : Nil
       if !@capture_stderr_separately
         @output = ACON::Output::IO.new IO::Memory.new
 
@@ -15,6 +24,18 @@ module Athena::Console::Spec
           self.output.decorated = d
         end
       else
+        @output = ACON::Output::ConsoleOutput.new(
+          verbosity || ACON::Output::Verbosity::NORMAL,
+          decorated
+        )
+
+        error_output = ACON::Output::IO.new IO::Memory.new
+        error_output.formatter = self.output.formatter
+        error_output.verbosity = self.output.verbosity
+        error_output.decorated = self.output.decorated?
+
+        self.output.as(ACON::Output::ConsoleOutput).stderr = error_output
+        self.output.as(ACON::Output::IO).io = IO::Memory.new
       end
     end
   end
@@ -44,6 +65,16 @@ module Athena::Console::Spec
       )
 
       @status = @application.run self.input, self.output
+    end
+  end
+
+  class MockCommand < Athena::Console::Command
+    def initialize(name : String, &@callback : Proc(ACON::Input::Interface, ACON::Output::Interface, ACON::Command::Status))
+      super name
+    end
+
+    protected def execute(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
+      @callback.call input, output
     end
   end
 end

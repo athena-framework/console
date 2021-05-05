@@ -143,14 +143,16 @@ class Athena::Console::Application
 
     # Filter out aliases for commands which are already on the list.
     if commands.size > 1
-      # TOOD: Something with flipping command loader
       command_list = @commands.dup
-      commands.select! do |name_or_alias|
-        # if !command_list[name_or_alias].is_a? ACON::Command
-        #   command_list[name_or_alias] =
-        # end
 
-        command_name = command_list[name_or_alias].name
+      commands.select! do |name_or_alias|
+        command = unless command_list.has_key? name_or_alias
+          command_list[name_or_alias] = @command_loader.not_nil!.get name_or_alias
+        else
+          command_list[name_or_alias]
+        end
+
+        command_name = command.name
 
         aliases[name_or_alias] = command_name
 
