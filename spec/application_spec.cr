@@ -162,6 +162,179 @@ struct ApplicationTest < ASPEC::TestCase
     end
   end
 
-  def ptest_find_namespace_non_ambiguous : Nil
+  def test_find_namespace_invalid : Nil
+    app = ACON::Application.new "foo"
+
+    expect_raises ACON::Exceptions::NamespaceNotFound, "There are no commands defined in the 'bar' namespace." do
+      app.find_namespace "bar"
+    end
+  end
+
+  def test_find : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+
+    app.find("foo:bar").should be_a FooCommand
+    app.find("h").should be_a ACON::Commands::Help
+    app.find("f:bar").should be_a FooCommand
+    app.find("f:b").should be_a FooCommand
+    app.find("a").should be_a FooCommand
+  end
+
+  def test_find_non_ambiguous : Nil
+    app = ACON::Application.new "foo"
+    app.add TestAmbiguousCommandRegistering.new
+    app.add TestAmbiguousCommandRegistering2.new
+
+    app.find("test").name.should eq "test-ambiguous"
+  end
+
+  def test_find_unique_name_but_namespace_name : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add Foo1Command.new
+    app.add Foo2Command.new
+
+    expect_raises ACON::Exceptions::CommandNotFound, "Command 'foo1' is not defined." do
+      app.find "foo1"
+    end
+  end
+
+  def test_find_case_sensitive_first : Nil
+    app = ACON::Application.new "foo"
+    app.add FooSameCaseUppercaseCommand.new
+    app.add FooSameCaseLowercaseCommand.new
+
+    app.find("f:B").should be_a FooSameCaseUppercaseCommand
+    app.find("f:BAR").should be_a FooSameCaseUppercaseCommand
+    app.find("f:b").should be_a FooSameCaseLowercaseCommand
+    app.find("f:bar").should be_a FooSameCaseLowercaseCommand
+  end
+
+  def test_find_case_insensitive_fallback : Nil
+    app = ACON::Application.new "foo"
+    app.add FooSameCaseLowercaseCommand.new
+
+    app.find("f:b").should be_a FooSameCaseLowercaseCommand
+    app.find("f:B").should be_a FooSameCaseLowercaseCommand
+    app.find("foO:BaR").should be_a FooSameCaseLowercaseCommand
+  end
+
+  def test_find_case_insensitive_ambiguous : Nil
+    app = ACON::Application.new "foo"
+    app.add FooSameCaseUppercaseCommand.new
+    app.add FooSameCaseLowercaseCommand.new
+
+    expect_raises ACON::Exceptions::CommandNotFound, "Command 'FoO:BaR' is ambiguous." do
+      app.find "FoO:BaR"
+    end
+  end
+
+  def test_find_command_loader : Nil
+    app = ACON::Application.new "foo"
+
+    app.command_loader = ACON::Loader::Factory.new({
+      "foo:bar" => ->{ FooCommand.new.as ACON::Command },
+    })
+
+    app.find("foo:bar").should be_a FooCommand
+    app.find("h").should be_a ACON::Commands::Help
+    app.find("f:bar").should be_a FooCommand
+    app.find("f:b").should be_a FooCommand
+    app.find("a").should be_a FooCommand
+  end
+
+  @[DataProvider("ambiguous_abbreviations_provider")]
+  def test_find_ambiguous_abbreviations(abbreviation, expected_message) : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add Foo1Command.new
+    app.add Foo2Command.new
+
+    expect_raises ACON::Exceptions::CommandNotFound, expected_message do
+      app.find abbreviation
+    end
+  end
+
+  def ambiguous_abbreviations_provider : Tuple
+    {
+      {"f", "Command 'f' is not defined."},
+      {"a", "Command 'a' is ambiguous."},
+      {"foo:b", "Command 'foo:b' is ambiguous."},
+    }
+  end
+
+  def test_find_ambiguous_abbreviations_finds_command_if_alternatives_are_hidden : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add FooHiddenCommand.new
+
+    app.find("foo:").should be_a FooCommand
+  end
+
+  def test_find_command_equal_namespace
+    app = ACON::Application.new "foo"
+    app.add Foo3Command.new
+    app.add Foo4Command.new
+
+    app.find("foo3:bar").should be_a Foo3Command
+    app.find("foo3:bar:toh").should be_a Foo4Command
+  end
+
+  def test_find_ambiguous_namespace_but_unique_name
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add FooBarCommand.new
+
+    app.find("f:f").should be_a FooBarCommand
+  end
+
+  def test_find_missing_namespace
+    app = ACON::Application.new "foo"
+    app.add Foo4Command.new
+
+    app.find("f::t").should be_a Foo4Command
+  end
+
+  @[DataProvider("invalid_command_names_single_provider")]
+  def ptest_find_alternative_exception_message_single(name) : Nil
+    app = ACON::Application.new "foo"
+    app.add Foo3Command.new
+
+    expect_raises ACON::Exceptions::CommandNotFound, "Did you mean this" do
+      app.find name
+    end
+  end
+
+  def invalid_command_names_single_provider : Tuple
+    {
+      {"foo3:barr"},
+      {"fooo3:bar"},
+    }
+  end
+
+  def ptest_doesnt_run_alternative_namespace_name : Nil
+    app = ACON::Application.new "foo"
+    app.add Foo1Command.new
+    app.auto_exit = false
+
+    tester = ACON::Spec::ApplicationTester.new app
+    tester.run(ACON::Input::HashType{"command" => "foos:bar1"}, decorated: false)
+    puts tester.display
+  end
+
+  def ptest_run_alternate_command_name : Nil
+  end
+
+  def ptest_dont_run_alternate_command_name : Nil
+  end
+
+  def ptest_find_alternative_exception_message_multiple : Nil
+  end
+
+  def ptest_find_alternative_commands : Nil
+  end
+
+  def ptest_find_alternative_commands_with_alias : Nil
   end
 end

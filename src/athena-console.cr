@@ -46,9 +46,14 @@ end
 #   end
 # end
 
+# require "../spec/fixtures/io_command"
+# require "../spec/fixtures/*"
+
 # app = ACON::Application.new "Athena", "0.15.0"
 
-# app.add AFoo.new
-# app.add AFoo2.new
+# app.add FooCommand.new
+# app.add FooHiddenCommand.new
+
+# app.find "foo:"
 
 # app.run # input, output

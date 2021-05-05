@@ -93,7 +93,7 @@ class Athena::Console::Application
   def find(name : String) : ACON::Command
     self.init
 
-    aliases = [] of String
+    aliases = Hash(String, String).new
 
     @commands.each_value do |command|
       command.aliases.each do |a|
@@ -103,13 +103,86 @@ class Athena::Console::Application
 
     return self.get name if self.has? name
 
-    raise ACON::Exceptions::CommandNotFound.new "The command '#{name}' does not exist."
+    all_command_names = if command_loader = @command_loader
+                          command_loader.names + @commands.keys
+                        else
+                          @commands.keys
+                        end
+
+    expression = "#{name.split(':').join("[^:]*:", &->Regex.escape(String))}[^:]*"
+    commands = all_command_names.select(/^#{expression}/)
+
+    if commands.empty?
+      commands = all_command_names.select(/^#{expression}/i)
+    end
+
+    if commands.empty? || commands.select(/^#{expression}$/i).size < 1
+      if pos = name.index ':'
+        # Check if a namespace exists and contains commands
+        self.find_namespace name[0..pos]
+      end
+
+      message = "Command '#{name}' is not defined."
+
+      # TODO: Suggest alternatives
+
+      raise ACON::Exceptions::CommandNotFound.new message
+    end
+
+    # Filter out aliases for commands which are already on the list.
+    if commands.size > 1
+      # TOOD: Something with flipping command loader
+      command_list = @commands.dup
+      commands.select! do |name_or_alias|
+        # if !command_list[name_or_alias].is_a? ACON::Command
+        #   command_list[name_or_alias] =
+        # end
+
+        command_name = command_list[name_or_alias].name
+
+        aliases[name_or_alias] = command_name
+
+        command_name == name_or_alias || !commands.includes? command_name
+      end.uniq!
+
+      usable_width = @terminal.width - 10
+      max_len = commands.max_of &.size
+      abbreviations = commands.map do |name|
+        if command_list[name].hidden?
+          commands.delete name
+
+          next nil
+        end
+
+        abbreviation = "#{name.rjust max_len, ' '} #{command_list[name].description}"
+
+        abbreviation.size > usable_width ? "#{abbreviation[0, usable_width - 3]}..." : abbreviation
+      end
+
+      if commands.size > 1
+        suggestions = self.abbreviation_suggestions abbreviations.compact
+
+        raise ACON::Exceptions::CommandNotFound.new "Command '#{name}' is ambiguous.\nDid you mean one of these?\n#{suggestions}", commands
+      end
+    end
+
+    command = self.get commands.first
+
+    raise ACON::Exceptions::CommandNotFound.new "The command '#{name}' does not exist." if command.hidden?
+
+    command
   end
 
   def find_namespace(namespace : String) : String
     namespaces = self.namespaces
 
-    # TODO: Handle empty namespaces
+    if namespaces.empty?
+      message = "There are no commands defined in the '#{namespace}' namespace."
+
+      # TODO: Suggest alternatives
+
+      raise ACON::Exceptions::NamespaceNotFound.new message
+    end
 
     exact = namespaces.includes? namespace
 
@@ -237,7 +310,8 @@ class Athena::Console::Application
 
       command = self.find command_name
     rescue ex : Exception
-      # TODO: Handle missing commands.
+      # TODO: Handle missing commands
+      # TODO: Suggest alternatives
 
       raise ex
     end
@@ -422,6 +496,10 @@ class Athena::Console::Application
 
       break unless (ex = ex.cause)
     end
+  end
+
+  private def abbreviation_suggestions(abbreviations : Array(String)) : String
+    %(    #{abbreviations.join("\n    ")})
   end
 
   private def extract_all_namespaces(name : String) : Array(String)

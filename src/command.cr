@@ -25,7 +25,7 @@ abstract class Athena::Console::Command
     @@default_description
   end
 
-  getter name : String? = nil
+  getter! name : String
   getter description : String = ""
   getter help : String = ""
 
@@ -110,6 +110,10 @@ abstract class Athena::Console::Command
   end
 
   def help(@help : String) : self
+    self
+  end
+
+  def hidden(@hidden : Bool) : self
     self
   end
 
