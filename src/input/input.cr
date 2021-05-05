@@ -3,7 +3,7 @@ require "./interface"
 abstract class Athena::Console::Input
   include Athena::Console::Input::Interface
 
-  alias InputTypes = String | Bool | Nil
+  alias InputTypes = String | Bool | Nil | Number::Primitive
   alias InputType = InputTypes | Array(InputTypes)
   alias HashType = ::Hash(String, InputType)
 

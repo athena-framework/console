@@ -87,7 +87,7 @@ class Athena::Console::Application
 
     return self.get name if self.has? name
 
-    raise ACON::Exceptions::CommandNotFound.new "The command #{name} does not exist."
+    raise ACON::Exceptions::CommandNotFound.new "The command '#{name}' does not exist."
   end
 
   def find_namespace(namespace : String) : String
@@ -99,7 +99,7 @@ class Athena::Console::Application
 
     if namespaces.size > 1 && !exact
       # TODO: Suggest alternate commands.
-      raise ACON::Exceptions::NamespaceNotFound.new "The namespace '#{namespace}' is ambigious."
+      raise ACON::Exceptions::NamespaceNotFound.new "The namespace '#{namespace}' is ambiguous."
     end
 
     exact ? namespace : namespaces.first
@@ -115,7 +115,7 @@ class Athena::Console::Application
   def get(name : String) : ACON::Command
     self.init
 
-    raise ACON::Exceptions::CommandNotFound.new "The command #{name} does not exist." unless self.has? name
+    raise ACON::Exceptions::CommandNotFound.new "The command '#{name}' does not exist." unless self.has? name
 
     # TODO: Handle checking for loader based commands
 

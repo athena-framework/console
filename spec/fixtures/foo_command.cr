@@ -1,7 +1,4 @@
-class FooCommand < ACON::Command
-  getter input : ACON::Input::Interface? = nil
-  getter output : ACON::Output::Interface? = nil
-
+class FooCommand < IOCommand
   protected def configure : Nil
     self
       .name("foo:bar")
@@ -14,11 +11,8 @@ class FooCommand < ACON::Command
   end
 
   protected def execute(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
-    @input = input
-    @output = output
-
     output.puts "execute called"
 
-    ACON::Command::Status::SUCCESS
+    super
   end
 end

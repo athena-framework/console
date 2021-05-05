@@ -80,7 +80,51 @@ struct ApplicationTest < ASPEC::TestCase
     tester = ACON::Spec::ApplicationTester.new app
 
     tester.run(ACON::Input::HashType{"-h" => true, "-q" => true}, decorated: false)
-
     tester.display.should be_empty
+  end
+
+  def test_get_missing_command : Nil
+    app = ACON::Application.new "foo"
+
+    expect_raises ACON::Exceptions::CommandNotFound, "The command 'foofoo' does not exist." do
+      app.get "foofoo"
+    end
+  end
+
+  def test_namespaces : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add Foo1Command.new
+    app.namespaces.should eq ["foo"]
+  end
+
+  def test_find_namespace : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.find_namespace("foo").should eq "foo"
+    app.find_namespace("f").should eq "foo"
+    app.add Foo1Command.new
+    app.find_namespace("foo").should eq "foo"
+  end
+
+  def test_find_namespace_subnamespaces : Nil
+    app = ACON::Application.new "foo"
+    app.add FooSubnamespaced1Command.new
+    app.add FooSubnamespaced2Command.new
+    app.find_namespace("foo").should eq "foo"
+  end
+
+  def test_find_namespace_ambigous : Nil
+    app = ACON::Application.new "foo"
+    app.add FooCommand.new
+    app.add BarBucCommand.new
+    app.add Foo2Command.new
+
+    expect_raises ACON::Exceptions::NamespaceNotFound, "The namespace 'f' is ambiguous." do
+      app.find_namespace "f"
+    end
+  end
+
+  def ptest_find_namespace_non_ambiguous : Nil
   end
 end
