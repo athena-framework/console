@@ -9,6 +9,11 @@ struct TerminalTest < ASPEC::TestCase
     @line_size = ENV["LINES"]?.try &.to_i
   end
 
+  def tear_down : Nil
+    ENV.delete "COLUMNS"
+    ENV.delete "LINES"
+  end
+
   def test_height_width : Nil
     ENV["COLUMNS"] = "100"
     ENV["LINES"] = "50"

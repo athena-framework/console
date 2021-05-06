@@ -600,8 +600,12 @@ class Athena::Console::Application
   end
 
   private def split_string_by_width(line : String, width : Int32, & : String -> Nil) : Nil
-    line.split(/(.{#{width}}?)/) do |match|
-      yield match.as(String)
+    if line.empty?
+      return yield line
+    end
+
+    line.each_char.each_slice(width).map(&.join).each do |set|
+      yield set
     end
   end
 end

@@ -20,7 +20,61 @@ list [--raw] [--format FORMAT] [--short] [--] [<namespace>]
 
 OUTPUT
 
-@[ASPEC::TestCase::Focus]
+private RENDER_EXCEPTION3 = <<-OUTPUT
+
+At spec/fixtures/foo3_command.cr:16:7 in 'execute'
+                                              
+  Third exception <fg=blue;bg=red>comment</>  
+                                              
+
+At spec/fixtures/foo3_command.cr:13:9 in 'execute'
+                                               
+  Second exception <comment>comment</comment>  
+                                               
+
+At spec/fixtures/foo3_command.cr:11:9 in 'execute'
+                                       
+  First exception <p>this is html</p>  
+                                       
+
+foo3:bar
+
+
+OUTPUT
+
+private RENDER_EXCEPTION3_DECORATED = <<-OUTPUT
+
+\e[33mAt spec/fixtures/foo3_command.cr:16:7 in 'execute'\e[0m
+\e[97;41m                                              \e[0m
+\e[97;41m  Third exception <fg=blue;bg=red>comment</>  \e[0m
+\e[97;41m                                              \e[0m
+
+\e[33mAt spec/fixtures/foo3_command.cr:13:9 in 'execute'\e[0m
+\e[97;41m                                               \e[0m
+\e[97;41m  Second exception <comment>comment</comment>  \e[0m
+\e[97;41m                                               \e[0m
+
+\e[33mAt spec/fixtures/foo3_command.cr:11:9 in 'execute'\e[0m
+\e[97;41m                                       \e[0m
+\e[97;41m  First exception <p>this is html</p>  \e[0m
+\e[97;41m                                       \e[0m
+
+\e[32mfoo3:bar\e[0m
+
+
+OUTPUT
+
+private RENDER_EXCEPTION4 = <<-OUTPUT
+
+                               
+  Command 'foo' is not define  
+  d.                           
+                               
+
+
+OUTPUT
+
+# @[ASPEC::TestCase::Focus]
 struct ApplicationTest < ASPEC::TestCase
   @col_size : Int32?
 
@@ -560,5 +614,32 @@ struct ApplicationTest < ASPEC::TestCase
 
     tester.run(ACON::Input::HashType{"command" => "list", "--foo" => true}, decorated: false, capture_stderr_separately: true)
     tester.error_output.should eq RENDER_EXCEPTION2
+
+    app.add Foo3Command.new
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: false, capture_stderr_separately: true)
+    tester.error_output.should eq RENDER_EXCEPTION3
+
+    tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: false, verbosity: :verbose)
+    tester.display.should match /\[Exception\]\s*First exception/
+    tester.display.should match /\[Exception\]\s*Second exception/
+    tester.display.should match /\[Exception\]\s*Third exception/
+
+    tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: true)
+    tester.display.should eq RENDER_EXCEPTION3_DECORATED
+
+    tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: true, capture_stderr_separately: true)
+    tester.error_output.should eq RENDER_EXCEPTION3_DECORATED
+
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    ENV["COLUMNS"] = "32"
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
+    tester.error_output.should eq RENDER_EXCEPTION4
+
+    ENV["COLUMNS"] = "120"
   end
 end

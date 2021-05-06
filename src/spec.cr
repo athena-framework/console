@@ -8,6 +8,8 @@ module Athena::Console::Spec
     end
 
     def error_output : String
+      raise ACON::Exceptions::Logic.new "The error output is not available when the test is ran without 'capture_stderr_separately' set." unless @capture_stderr_separately
+
       self.output.as(ACON::Output::ConsoleOutput).error_output.to_s
     end
 
@@ -22,6 +24,10 @@ module Athena::Console::Spec
 
         decorated.try do |d|
           self.output.decorated = d
+        end
+
+        verbosity.try do |v|
+          self.output.verbosity = v
         end
       else
         @output = ACON::Output::ConsoleOutput.new(

@@ -79,7 +79,7 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
     # If expecting another argument, add it.
     if @definition.has_argument? count
       argument = @definition.argument count
-      @arguments[argument.name] = (argument.is_array? ? [token] : token).as InputType
+      @arguments[argument.name] = (argument.is_array? ? [token] of InputTypes : token)
 
       # If the last argument IS_ARRAY, append token to last argument.
     elsif @definition.has_argument?(count - 1) && @definition.argument(count - 1).is_array?
