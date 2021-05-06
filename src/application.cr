@@ -356,7 +356,7 @@ class Athena::Console::Application
     self.do_render_exception ex, output
 
     if running_command = @running_command
-      output.puts "<info>COMMAND NAME</info>", :quiet
+      output.puts "<info>#{running_command.synopsis}</info>", :quiet
       output.puts "", :quiet
     end
   end
@@ -514,7 +514,12 @@ class Athena::Console::Application
       end
 
       if (ACON::Output::Verbosity::VERBOSE <= output.verbosity) && (t = ex.backtrace?)
-        # TODO: Output the backtrace in verbose output mode.
+        output.puts "<comment>Exception trace:</comment>", :quiet
+
+        # TODO: Improve backtrace rendering.
+        t.each do |l|
+          output.puts " #{l}"
+        end
       end
 
       break unless (ex = ex.cause)

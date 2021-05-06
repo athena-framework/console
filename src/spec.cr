@@ -49,7 +49,7 @@ module Athena::Console::Spec
 
     def initialize(@application : ACON::Application); end
 
-    def run(input : ACON::Input::HashType, *, decorated : Bool? = nil, interactive : Bool? = nil, capture_stderr_separately : Bool = false) : ACON::Command::Status
+    def run(input : ACON::Input::HashType, *, decorated : Bool? = nil, interactive : Bool? = nil, capture_stderr_separately : Bool = false, verbosity : ACON::Output::Verbosity? = nil) : ACON::Command::Status
       @input = ACON::Input::Hash.new input
 
       interactive.try do |i|
@@ -61,7 +61,8 @@ module Athena::Console::Spec
       self.init_output(
         decorated: decorated,
         interactive: interactive,
-        capture_stderr_separately: capture_stderr_separately
+        capture_stderr_separately: capture_stderr_separately,
+        verbosity: verbosity
       )
 
       @status = @application.run self.input, self.output

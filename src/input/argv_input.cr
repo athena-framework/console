@@ -107,10 +107,10 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
 
   private def add_long_option(name : String, value : String?) : Nil
     unless @definition.has_option?(name)
-      raise "The '--#{name}' option does not exist." unless @definition.has_negation? name
+      raise ACON::Exceptions::InvalidOption.new "The '--#{name}' option does not exist." unless @definition.has_negation? name
 
       option_name = @definition.negation_to_name name
-      raise "The '--#{name}' option does not accept a value." unless value.nil?
+      raise ACON::Exceptions::InvalidOption.new "The '--#{name}' option does not accept a value." unless value.nil?
 
       @options[option_name] = false
 
@@ -120,7 +120,7 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
     option = @definition.option name
 
     if !value.nil? && !option.accepts_value?
-      raise "The --#{option.name} option does not accept a value."
+      raise ACON::Exceptions::InvalidOption.new "The --#{option.name} option does not accept a value."
     end
 
     if value.in?("", nil) && option.accepts_value? && !@parsed.empty?
@@ -134,7 +134,7 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
     end
 
     if value.nil?
-      raise "The --#{option.name} option requires a value." if option.value_required?
+      raise ACON::Exceptions::InvalidOption.new "The --#{option.name} option requires a value." if option.value_required?
       value = true if !option.is_array? && !option.value_optional?
     end
 
@@ -163,7 +163,7 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
   private def parse_short_option_set(name : String) : Nil
     length = name.size
     name.each_char_with_index do |char, idx|
-      raise "The -#{char} option does not exist." unless @definition.has_shortcut? char
+      raise ACON::Exceptions::InvalidOption.new "The -#{char} option does not exist." unless @definition.has_shortcut? char
 
       option = @definition.option_for_shortcut char
 
@@ -180,7 +180,7 @@ class Athena::Console::Input::ARGVInput < Athena::Console::Input
   private def add_short_option(name : String | Char, value : String?) : Nil
     name = name.to_s
 
-    raise "The -#{name} option does not exist." if !@definition.has_shortcut? name
+    raise ACON::Exceptions::InvalidOption.new "The -#{name} option does not exist." if !@definition.has_shortcut? name
 
     self.add_long_option @definition.option_for_shortcut(name).name, value
   end

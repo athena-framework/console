@@ -9,6 +9,17 @@ private RENDER_EXCEPTION1 = <<-OUTPUT
 
 OUTPUT
 
+private RENDER_EXCEPTION2 = <<-OUTPUT
+
+                                      
+  The '--foo' option does not exist.  
+                                      
+
+list [--raw] [--format FORMAT] [--short] [--] [<namespace>]
+
+
+OUTPUT
+
 @[ASPEC::TestCase::Focus]
 struct ApplicationTest < ASPEC::TestCase
   @col_size : Int32?
@@ -533,5 +544,21 @@ struct ApplicationTest < ASPEC::TestCase
     expect_raises Exception, "Command 'foo' is not defined." do
       tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
     end
+  end
+
+  def test_render_exception : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    ENV["COLUMNS"] = "120"
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
+    tester.error_output.should eq RENDER_EXCEPTION1
+
+    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true, verbosity: :verbose)
+    tester.error_output.should contain "Exception trace"
+
+    tester.run(ACON::Input::HashType{"command" => "list", "--foo" => true}, decorated: false, capture_stderr_separately: true)
+    tester.error_output.should eq RENDER_EXCEPTION2
   end
 end
