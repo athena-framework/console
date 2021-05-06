@@ -27,7 +27,7 @@ abstract class Athena::Console::Command
 
   getter! name : String
   getter description : String = ""
-  getter help : String = ""
+  property help : String = ""
 
   getter! application : ACON::Application
   property aliases : Array(String) = [] of String

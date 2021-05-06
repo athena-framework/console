@@ -1,8 +1,8 @@
-class Athena::Console::Input::ARGVInput < Athena::Console::Input
+class Athena::Console::Input::ARGV < Athena::Console::Input
   @tokens : Array(String)
   @parsed : Array(String) = [] of String
 
-  def initialize(@tokens : Array(String) = ARGV, definition : ACON::Input::Definition? = nil)
+  def initialize(@tokens : Array(String) = ::ARGV, definition : ACON::Input::Definition? = nil)
     super definition
   end
 

@@ -55,6 +55,10 @@ class Athena::Console::Application
     command
   end
 
+  def each_command(namespace : String? = nil, & : ACON::Command -> Nil) : Nil
+    self.commands(namespace).each_value { |c| yield c }
+  end
+
   def commands(namespace : String? = nil) : Hash(String, ACON::Command)
     self.init
 
@@ -277,7 +281,7 @@ class Athena::Console::Application
     namespaces.reject!(&.blank?).uniq!
   end
 
-  def run(input : ACON::Input::Interface = ACON::Input::ARGVInput.new, output : ACON::Output::Interface = ACON::Output::ConsoleOutput.new) : ACON::Command::Status
+  def run(input : ACON::Input::Interface = ACON::Input::ARGV.new, output : ACON::Output::Interface = ACON::Output::ConsoleOutput.new) : ACON::Command::Status
     ENV["LINES"] = @terminal.height.to_s
     ENV["COLUMNS"] = @terminal.width.to_s
 

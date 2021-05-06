@@ -18,10 +18,15 @@ module Athena::Console
   VERSION = "0.1.0"
 end
 
+# require "./spec"
 # require "../spec/fixtures/io_command"
 # require "../spec/fixtures/*"
 
 # app = ACON::Application.new "Athena", "0.15.0"
-# app.add Foo1Command.new
+# # app.add Foo1Command.new
+
+# app.add(ACON::Spec::MockCommand.new "foo" do
+#   raise "エラーメッセージ"
+# end)
 
 # app.run # output: output

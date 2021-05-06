@@ -74,7 +74,103 @@ private RENDER_EXCEPTION4 = <<-OUTPUT
 
 OUTPUT
 
-# @[ASPEC::TestCase::Focus]
+private RENDER_EXCEPTION_DOUBLE_WIDTH = <<-OUTPUT
+
+At spec/application_spec.cr:666:7 in '->'
+                    
+  エラーメッセージ    
+                    
+
+foo
+
+
+OUTPUT
+
+private RENDER_EXCEPTION_ESCAPESLINES = <<-OUTPUT
+
+At spec/application_spec.cr:711:7 in '->'
+                     
+  dont break here <  
+  info>!</info>      
+                     
+
+foo
+
+
+OUTPUT
+
+private RENDER_EXCEPTION_LINE_BREAKS = <<-OUTPUT
+
+At spec/application_spec.cr:726:7 in '->'
+                                    
+  line 1 with extra spaces          
+  line 2                            
+                                    
+  line 4                            
+                                    
+
+foo
+
+
+OUTPUT
+
+private APPLICATION_RUN1 = <<-OUTPUT
+foo 0.1.0
+
+Usage:
+  command [options] [arguments]
+
+Options:
+  -h, --help            Display help for the given command. When no command is given display help for the list command
+  -q, --quiet           Do not output any message
+  -V, --version         Display this application version
+      --ansi|--no-ansi  Force (or disable --no-ansi) ANSI output
+  -n, --no-interaction  Do not ask any interactive question
+  -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+
+Available commands:
+  help  Display help for a command
+  list  List commands
+
+OUTPUT
+
+private APPLICATION_RUN2 = <<-OUTPUT
+Description:
+  List commands
+
+Usage:
+  list [options] [--] [<namespace>]
+
+Arguments:
+  namespace             Only list commands in this namespace
+
+Options:
+      --raw             To output raw command list
+      --format=FORMAT   The output format (txt) [default: txt]
+      --short           To skip describing command's arguments
+  -h, --help            Display help for the given command. When no command is given display help for the list command
+  -q, --quiet           Do not output any message
+  -V, --version         Display this application version
+      --ansi|--no-ansi  Force (or disable --no-ansi) ANSI output
+  -n, --no-interaction  Do not ask any interactive question
+  -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+
+Help:
+  The list command lists all commands:
+  
+    console list
+  
+  You can also display the commands for a specific namespace:
+  
+    console list test
+  
+  It's also possible to get raw list of commands (useful for embedding command runner):
+  
+    console list --raw
+
+OUTPUT
+
+@[ASPEC::TestCase::Focus]
 struct ApplicationTest < ASPEC::TestCase
   @col_size : Int32?
 
@@ -90,6 +186,12 @@ struct ApplicationTest < ASPEC::TestCase
     end
 
     ENV.delete "SHELL_VERBOSITY"
+  end
+
+  protected def ensure_static_command_help(application : ACON::Application) : Nil
+    application.each_command do |command|
+      command.help = command.help.gsub("%command.full_name%", "console %command.name%")
+    end
   end
 
   def test_long_version : Nil
@@ -641,5 +743,91 @@ struct ApplicationTest < ASPEC::TestCase
     tester.error_output.should eq RENDER_EXCEPTION4
 
     ENV["COLUMNS"] = "120"
+  end
+
+  def ptest_render_exception_double_width_characters : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    ENV["COLUMNS"] = "120"
+    tester = ACON::Spec::ApplicationTester.new app
+
+    app.add(ACON::Spec::MockCommand.new "foo" do
+      raise "エラーメッセージ"
+    end)
+
+    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
+    tester.error_output.should eq RENDER_EXCEPTION_DOUBLE_WIDTH
+  end
+
+  # TODO: Make this test less flaky
+  def ptest_render_exception_escapes_lines : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    ENV["COLUMNS"] = "22"
+    app.add(ACON::Spec::MockCommand.new "foo" do
+      raise "dont break here <info>!</info>"
+    end)
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
+    tester.display.should eq RENDER_EXCEPTION_ESCAPESLINES
+
+    ENV["COLUMNS"] = "120"
+  end
+
+  # TODO: Make this test less flaky
+  def ptest_render_exception_line_breaks : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    ENV["COLUMNS"] = "120"
+    app.add(ACON::Spec::MockCommand.new "foo" do
+      raise "\n\nline 1 with extra spaces        \nline 2\n\nline 4\n"
+    end)
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
+    tester.display.should eq RENDER_EXCEPTION_LINE_BREAKS
+  end
+
+  def test_run_passes_io_thru : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+    app.add command = Foo1Command.new
+
+    input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo:bar1"}
+    output = ACON::Output::IO.new IO::Memory.new
+
+    app.run input, output
+
+    command.input.should be input
+    command.output.should be output
+  end
+
+  def test_run_default_command : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    self.ensure_static_command_help app
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run ACON::Input::HashType.new, decorated: false
+    tester.display.should eq APPLICATION_RUN1
+  end
+
+  def test_run_help_command : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    self.ensure_static_command_help app
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run ACON::Input::HashType{"--help" => true}, decorated: false
+    tester.display.should eq APPLICATION_RUN2
+
+    tester.run ACON::Input::HashType{"-h" => true}, decorated: false
+    tester.display.should eq APPLICATION_RUN2
   end
 end

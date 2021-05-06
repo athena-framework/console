@@ -1,8 +1,8 @@
 require "../spec_helper"
 
-struct ARGVInputTest < ASPEC::TestCase
+struct ARGVTest < ASPEC::TestCase
   def test_parse : Nil
-    input = ACON::Input::ARGVInput.new ["foo"]
+    input = ACON::Input::ARGV.new ["foo"]
 
     input.bind ACON::Input::Definition.new ACON::Input::Argument.new "name"
     input.arguments.should eq({"name" => "foo"})
@@ -12,26 +12,26 @@ struct ARGVInputTest < ASPEC::TestCase
   end
 
   def test_array_argument : Nil
-    input = ACON::Input::ARGVInput.new ["foo", "bar", "baz", "bat"]
+    input = ACON::Input::ARGV.new ["foo", "bar", "baz", "bat"]
     input.bind ACON::Input::Definition.new ACON::Input::Argument.new "name", :is_array
 
     input.arguments.should eq(ACON::Input::HashType{"name" => ["foo", "bar", "baz", "bat"] of ACON::Input::InputTypes})
   end
 
   def test_array_option : Nil
-    input = ACON::Input::ARGVInput.new ["--name=foo", "--name=bar", "--name=baz"]
+    input = ACON::Input::ARGV.new ["--name=foo", "--name=bar", "--name=baz"]
     input.bind ACON::Input::Definition.new ACON::Input::Option.new "name", value_mode: ACON::Input::Option::Value::OPTIONAL | ACON::Input::Option::Value::IS_ARRAY
     input.options.should eq({"name" => ["foo", "bar", "baz"]})
 
-    input = ACON::Input::ARGVInput.new ["--name", "foo", "--name", "bar", "--name", "baz"]
+    input = ACON::Input::ARGV.new ["--name", "foo", "--name", "bar", "--name", "baz"]
     input.bind ACON::Input::Definition.new ACON::Input::Option.new "name", value_mode: ACON::Input::Option::Value::OPTIONAL | ACON::Input::Option::Value::IS_ARRAY
     input.options.should eq({"name" => ["foo", "bar", "baz"]})
 
-    input = ACON::Input::ARGVInput.new ["--name=foo", "--name=bar", "--name="]
+    input = ACON::Input::ARGV.new ["--name=foo", "--name=bar", "--name="]
     input.bind ACON::Input::Definition.new ACON::Input::Option.new "name", value_mode: ACON::Input::Option::Value::OPTIONAL | ACON::Input::Option::Value::IS_ARRAY
     input.options.should eq({"name" => ["foo", "bar", ""]})
 
-    input = ACON::Input::ARGVInput.new ["--name=foo", "--name=bar", "--name", "--anotherOption"]
+    input = ACON::Input::ARGV.new ["--name=foo", "--name=bar", "--name", "--anotherOption"]
     input.bind ACON::Input::Definition.new(
       ACON::Input::Option.new("name", value_mode: ACON::Input::Option::Value::OPTIONAL | ACON::Input::Option::Value::IS_ARRAY),
       ACON::Input::Option.new("anotherOption", value_mode: :none),
@@ -40,11 +40,11 @@ struct ARGVInputTest < ASPEC::TestCase
   end
 
   def test_parse_negative_number_after_double_dash : Nil
-    input = ACON::Input::ARGVInput.new ["--", "-1"]
+    input = ACON::Input::ARGV.new ["--", "-1"]
     input.bind ACON::Input::Definition.new ACON::Input::Argument.new "number"
     input.arguments.should eq({"number" => "-1"})
 
-    input = ACON::Input::ARGVInput.new ["-f", "bar", "--", "-1"]
+    input = ACON::Input::ARGV.new ["-f", "bar", "--", "-1"]
     input.bind ACON::Input::Definition.new(
       ACON::Input::Argument.new("number"),
       ACON::Input::Option.new("foo", "f", :optional),
@@ -55,7 +55,7 @@ struct ARGVInputTest < ASPEC::TestCase
   end
 
   def test_parse_empty_string_argument : Nil
-    input = ACON::Input::ARGVInput.new ["-f", "bar", ""]
+    input = ACON::Input::ARGV.new ["-f", "bar", ""]
     input.bind ACON::Input::Definition.new(
       ACON::Input::Argument.new("empty"),
       ACON::Input::Option.new("foo", "f", :optional),
@@ -67,7 +67,7 @@ struct ARGVInputTest < ASPEC::TestCase
 
   @[DataProvider("parse_options_provider")]
   def test_parse_options(input_args : Array(String), options : Array(ACON::Input::Option | ACON::Input::Argument), expected : Hash) : Nil
-    input = ACON::Input::ARGVInput.new input_args
+    input = ACON::Input::ARGV.new input_args
     input.bind ACON::Input::Definition.new options
 
     input.options.should eq expected
@@ -180,7 +180,7 @@ struct ARGVInputTest < ASPEC::TestCase
 
   @[DataProvider("parse_options_negatable_provider")]
   def test_parse_options_negatble(input_args : Array(String), options : Array(ACON::Input::Option | ACON::Input::Argument), expected : Hash) : Nil
-    input = ACON::Input::ARGVInput.new input_args
+    input = ACON::Input::ARGV.new input_args
     input.bind ACON::Input::Definition.new options
 
     input.options.should eq expected
