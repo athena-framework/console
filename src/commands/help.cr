@@ -2,12 +2,14 @@ class Athena::Console::Commands::Help < Athena::Console::Command
   setter command : ACON::Command? = nil
 
   protected def configure : Nil
+    self.ignore_validation_errors
+
     self
       .name("help")
       .definition(
         ACON::Input::Argument.new("command_name", :optional, "The command name", "help"),
-        ACON::Input::Option.new("raw", nil, :none, "To output raw command help"),
         ACON::Input::Option.new("format", nil, :required, "The output format (txt)", "txt"),
+        ACON::Input::Option.new("raw", nil, :none, "To output raw command help"),
       )
       .description("Display help for a command")
       .help(
@@ -15,10 +17,6 @@ class Athena::Console::Commands::Help < Athena::Console::Command
         The <info>%command.name%</info> command displays help for a given command:
 
           <info>%command.full_name% list</info>
-
-        You can also output the help in other formats by using the <comment>--format</comment> option:
-
-          <info>%command.full_name% --format=xml list</info>
 
         To display the list of available commands, please use the <info>list</info> command.
         HELP

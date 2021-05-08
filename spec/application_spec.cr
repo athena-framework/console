@@ -1,6 +1,5 @@
 require "./spec_helper"
 
-@[ASPEC::TestCase::Focus]
 struct ApplicationTest < ASPEC::TestCase
   @col_size : Int32?
 
@@ -662,5 +661,125 @@ struct ApplicationTest < ASPEC::TestCase
 
     tester.run ACON::Input::HashType{"-h" => true}, decorated: false
     self.assert_file_equals_string "text/application_run2.txt", tester.display
+  end
+
+  def test_run_help_list_command : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    self.ensure_static_command_help app
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run ACON::Input::HashType{"command" => "list", "--help" => true}, decorated: false
+    self.assert_file_equals_string "text/application_run3.txt", tester.display
+
+    tester.run ACON::Input::HashType{"command" => "list", "-h" => true}, decorated: false
+    self.assert_file_equals_string "text/application_run3.txt", tester.display
+  end
+
+  def test_run_ansi : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run ACON::Input::HashType{"--ansi" => true}
+    tester.output.decorated?.should be_true
+
+    tester.run ACON::Input::HashType{"--no-ansi" => true}
+    tester.output.decorated?.should be_false
+  end
+
+  def test_run_version : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run ACON::Input::HashType{"--version" => true}, decorated: false
+    self.assert_file_equals_string "text/application_run4.txt", tester.display
+
+    tester.run ACON::Input::HashType{"-V" => true}, decorated: false
+    self.assert_file_equals_string "text/application_run4.txt", tester.display
+  end
+
+  def test_run_quest : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run ACON::Input::HashType{"command" => "list", "--quiet" => true}, decorated: false
+    tester.display.should be_empty
+    tester.input.interactive?.should be_false
+
+    tester.run ACON::Input::HashType{"command" => "list", "-q" => true}, decorated: false
+    tester.display.should be_empty
+    tester.input.interactive?.should be_false
+  end
+
+  def test_run_verbosity : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    self.ensure_static_command_help app
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run ACON::Input::HashType{"command" => "list", "--verbose" => true}, decorated: false
+    tester.output.verbosity.should eq ACON::Output::Verbosity::VERBOSE
+
+    tester.run ACON::Input::HashType{"command" => "list", "--verbose" => 1}, decorated: false
+    tester.output.verbosity.should eq ACON::Output::Verbosity::VERBOSE
+
+    tester.run ACON::Input::HashType{"command" => "list", "--verbose" => 2}, decorated: false
+    tester.output.verbosity.should eq ACON::Output::Verbosity::VERY_VERBOSE
+
+    tester.run ACON::Input::HashType{"command" => "list", "--verbose" => 3}, decorated: false
+    tester.output.verbosity.should eq ACON::Output::Verbosity::DEBUG
+
+    tester.run ACON::Input::HashType{"command" => "list", "--verbose" => 4}, decorated: false
+    tester.output.verbosity.should eq ACON::Output::Verbosity::VERBOSE
+
+    tester.run ACON::Input::HashType{"command" => "list", "-v" => true}, decorated: false
+    tester.output.verbosity.should eq ACON::Output::Verbosity::VERBOSE
+
+    tester.run ACON::Input::HashType{"command" => "list", "-vv" => true}, decorated: false
+    tester.output.verbosity.should eq ACON::Output::Verbosity::VERY_VERBOSE
+
+    tester.run ACON::Input::HashType{"command" => "list", "-vvv" => true}, decorated: false
+    tester.output.verbosity.should eq ACON::Output::Verbosity::DEBUG
+  end
+
+  def test_run_help_help_command : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    self.ensure_static_command_help app
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run ACON::Input::HashType{"command" => "help", "--help" => true}, decorated: false
+    self.assert_file_equals_string "text/application_run5.txt", tester.display
+
+    tester.run ACON::Input::HashType{"command" => "help", "-h" => true}, decorated: false
+    self.assert_file_equals_string "text/application_run5.txt", tester.display
+  end
+
+  def test_run_no_interaction : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    app.add FooCommand.new
+
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run ACON::Input::HashType{"command" => "foo:bar", "--no-interaction" => true}, decorated: false
+    tester.display.should eq "execute called\n"
+
+    tester.run ACON::Input::HashType{"command" => "foo:bar", "-n" => true}, decorated: false
+    tester.display.should eq "execute called\n"
   end
 end

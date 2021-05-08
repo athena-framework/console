@@ -23,10 +23,12 @@ end
 # require "../spec/fixtures/**"
 
 # app = ACON::Application.new "foo"
-# app.auto_exit = false
-# ENV["COLUMNS"] = "22"
-# app.add(ACON::Spec::MockCommand.new "foo" do
-#   raise "dont break here <info>!</info>"
-# end)
-
 # app.run
+# app.run
+# app.auto_exit = false
+# app.catch_exceptions = false
+
+# tester = ACON::Spec::ApplicationTester.new app
+
+# tester.run ACON::Input::HashType{"command" => "list", "--verbose" => 2}, decorated: false
+# pp tester.output.verbosity

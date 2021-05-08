@@ -417,10 +417,10 @@ class Athena::Console::Application
       output.verbosity = :quiet
       shell_verbosity = -1
     else
-      if input.has_parameter?("-vvv", "--verbose=3", only_params: true) || "3" == input.parameter("--verbose", false, true)
+      if input.has_parameter?("-vvv", "--verbose=3", only_params: true) || 3 == input.parameter("--verbose", false, true)
         output.verbosity = :debug
         shell_verbosity = 3
-      elsif input.has_parameter?("-vv", "--verbose=2", only_params: true) || "2" == input.parameter("--verbose", false, true)
+      elsif input.has_parameter?("-vv", "--verbose=2", only_params: true) || 2 == input.parameter("--verbose", false, true)
         output.verbosity = :very_verbose
         shell_verbosity = 2
       elsif input.has_parameter?("-v", "--verbose=1", only_params: true) || input.has_parameter?("--verbose") || input.parameter("--verbose", false, true)
