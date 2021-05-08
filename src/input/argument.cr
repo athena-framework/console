@@ -19,17 +19,19 @@ class Athena::Console::Input::Argument
     @description : String = "",
     default : String | Array(String) | Bool | Nil = nil
   )
+    raise ACON::Exceptions::InvalidArgument.new "An argument name cannot be blank." if name.blank?
+
     self.default = default
   end
 
   def default=(default : String | Array(String) | Bool | Nil = nil)
-    raise ArgumentError.new "Cannot set a default value when the argument is required." if @mode.required? && !default.nil?
+    raise ACON::Exceptions::Logic.new "Cannot set a default value when the argument is required." if @mode.required? && !default.nil?
 
     if @mode.is_array?
       if default.nil?
         default = [] of String
-      else
-        raise ArgumentError.new "Default value for an array argument must be an array." unless default.is_a? Array
+      elsif !default.is_a? Array
+        raise ACON::Exceptions::Logic.new "Default value for an array argument must be an array."
       end
     end
 

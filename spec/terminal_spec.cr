@@ -5,8 +5,8 @@ struct TerminalTest < ASPEC::TestCase
   @line_size : Int32?
 
   def initialize
-    @col_size = ENV["COLUMNS"]?.try &.to_i
-    @line_size = ENV["LINES"]?.try &.to_i
+    @col_size = ENV["COLUMNS"]?.try &.to_i?
+    @line_size = ENV["LINES"]?.try &.to_i?
   end
 
   def tear_down : Nil

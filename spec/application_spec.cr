@@ -877,7 +877,7 @@ struct ApplicationTest < ASPEC::TestCase
   def already_set_definition_element_provider : Tuple
     {
       {ACON::Input::Argument.new("command", :required)},
-      {ACON::Input::Option.new("quiet", "", :none)},
+      {ACON::Input::Option.new("quiet", value_mode: :none)},
       {ACON::Input::Option.new("query", "q", :none)},
     }
   end

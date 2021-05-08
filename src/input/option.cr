@@ -1,7 +1,7 @@
 class Athena::Console::Input::Option
   @[Flags]
   enum Value
-    NONE
+    NONE      = 0
     REQUIRED
     OPTIONAL
     IS_ARRAY
@@ -29,40 +29,39 @@ class Athena::Console::Input::Option
   )
     @name = name.lchop "--"
 
-    raise ArgumentError.new " An option name cannot be blank." if name.blank?
+    raise ACON::Exceptions::InvalidArgument.new "An option name cannot be blank." if name.blank?
 
     unless shortcut.nil?
       if shortcut.is_a? Array
         shortcut = shortcut.join '|'
       end
 
-      shortcut = shortcut.lchop('-').split(/(?:\|)-?/, remove_empty: true).map(&.strip).join '|'
+      shortcut = shortcut.lchop('-').split(/(?:\|)-?/, remove_empty: true).map(&.strip.lchop('-')).join '|'
 
-      raise ArgumentError.new "An option shortcut cannot be empty." if shortcut.nil?
+      raise ACON::Exceptions::InvalidArgument.new "An option shortcut cannot be blank." if shortcut.blank?
     end
 
     @shortcut = shortcut
 
     if @value_mode.is_array? && !self.accepts_value?
-      raise ArgumentError.new " Cannot have IS_ARRAY option mode when the option does not accept a value."
+      raise ACON::Exceptions::InvalidArgument.new " Cannot have VALUE::IS_ARRAY option mode when the option does not accept a value."
     end
 
     if @value_mode.negatable? && self.accepts_value?
-      raise ArgumentError.new " Cannot have NEGATABLE option mode if the option also accepts a value."
+      raise ACON::Exceptions::InvalidArgument.new " Cannot have VALUE::NEGATABLE option mode if the option also accepts a value."
     end
 
     self.default = default
   end
 
   def default=(default : String | Array(String) | Bool | Nil) : Nil
-    raise ArgumentError.new "Cannot set a default value when using Value::NONE mode." if @value_mode.none? && !default.nil?
-    raise ArgumentError.new "Cannot set a default value when using Value::NEGATABLE mode." if @value_mode.negatable? && !default.nil?
+    raise ACON::Exceptions::Logic.new "Cannot set a default value when using Value::NONE mode." if @value_mode.none? && !default.nil?
 
     if @value_mode.is_array?
       if default.nil?
         default = [] of String
       else
-        raise ArgumentError.new "Default value for an array argument must be an array." unless default.is_a? Array
+        raise ACON::Exceptions::Logic.new "Default value for an array option must be an array." unless default.is_a? Array
       end
     end
 
