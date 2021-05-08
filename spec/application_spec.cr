@@ -1,175 +1,5 @@
 require "./spec_helper"
 
-private RENDER_EXCEPTION1 = <<-OUTPUT
-
-                                 
-  Command 'foo' is not defined.  
-                                 
-
-
-OUTPUT
-
-private RENDER_EXCEPTION2 = <<-OUTPUT
-
-                                      
-  The '--foo' option does not exist.  
-                                      
-
-list [--raw] [--format FORMAT] [--short] [--] [<namespace>]
-
-
-OUTPUT
-
-private RENDER_EXCEPTION3 = <<-OUTPUT
-
-At spec/fixtures/foo3_command.cr:16:7 in 'execute'
-                                              
-  Third exception <fg=blue;bg=red>comment</>  
-                                              
-
-At spec/fixtures/foo3_command.cr:13:9 in 'execute'
-                                               
-  Second exception <comment>comment</comment>  
-                                               
-
-At spec/fixtures/foo3_command.cr:11:9 in 'execute'
-                                       
-  First exception <p>this is html</p>  
-                                       
-
-foo3:bar
-
-
-OUTPUT
-
-private RENDER_EXCEPTION3_DECORATED = <<-OUTPUT
-
-\e[33mAt spec/fixtures/foo3_command.cr:16:7 in 'execute'\e[0m
-\e[97;41m                                              \e[0m
-\e[97;41m  Third exception <fg=blue;bg=red>comment</>  \e[0m
-\e[97;41m                                              \e[0m
-
-\e[33mAt spec/fixtures/foo3_command.cr:13:9 in 'execute'\e[0m
-\e[97;41m                                               \e[0m
-\e[97;41m  Second exception <comment>comment</comment>  \e[0m
-\e[97;41m                                               \e[0m
-
-\e[33mAt spec/fixtures/foo3_command.cr:11:9 in 'execute'\e[0m
-\e[97;41m                                       \e[0m
-\e[97;41m  First exception <p>this is html</p>  \e[0m
-\e[97;41m                                       \e[0m
-
-\e[32mfoo3:bar\e[0m
-
-
-OUTPUT
-
-private RENDER_EXCEPTION4 = <<-OUTPUT
-
-                               
-  Command 'foo' is not define  
-  d.                           
-                               
-
-
-OUTPUT
-
-private RENDER_EXCEPTION_DOUBLE_WIDTH = <<-OUTPUT
-
-At spec/application_spec.cr:666:7 in '->'
-                    
-  エラーメッセージ    
-                    
-
-foo
-
-
-OUTPUT
-
-private RENDER_EXCEPTION_ESCAPESLINES = <<-OUTPUT
-
-At spec/application_spec.cr:711:7 in '->'
-                     
-  dont break here <  
-  info>!</info>      
-                     
-
-foo
-
-
-OUTPUT
-
-private RENDER_EXCEPTION_LINE_BREAKS = <<-OUTPUT
-
-At spec/application_spec.cr:726:7 in '->'
-                                    
-  line 1 with extra spaces          
-  line 2                            
-                                    
-  line 4                            
-                                    
-
-foo
-
-
-OUTPUT
-
-private APPLICATION_RUN1 = <<-OUTPUT
-foo 0.1.0
-
-Usage:
-  command [options] [arguments]
-
-Options:
-  -h, --help            Display help for the given command. When no command is given display help for the list command
-  -q, --quiet           Do not output any message
-  -V, --version         Display this application version
-      --ansi|--no-ansi  Force (or disable --no-ansi) ANSI output
-  -n, --no-interaction  Do not ask any interactive question
-  -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-
-Available commands:
-  help  Display help for a command
-  list  List commands
-
-OUTPUT
-
-private APPLICATION_RUN2 = <<-OUTPUT
-Description:
-  List commands
-
-Usage:
-  list [options] [--] [<namespace>]
-
-Arguments:
-  namespace             Only list commands in this namespace
-
-Options:
-      --raw             To output raw command list
-      --format=FORMAT   The output format (txt) [default: txt]
-      --short           To skip describing command's arguments
-  -h, --help            Display help for the given command. When no command is given display help for the list command
-  -q, --quiet           Do not output any message
-  -V, --version         Display this application version
-      --ansi|--no-ansi  Force (or disable --no-ansi) ANSI output
-  -n, --no-interaction  Do not ask any interactive question
-  -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-
-Help:
-  The list command lists all commands:
-  
-    console list
-  
-  You can also display the commands for a specific namespace:
-  
-    console list test
-  
-  It's also possible to get raw list of commands (useful for embedding command runner):
-  
-    console list --raw
-
-OUTPUT
-
 @[ASPEC::TestCase::Focus]
 struct ApplicationTest < ASPEC::TestCase
   @col_size : Int32?
@@ -186,6 +16,11 @@ struct ApplicationTest < ASPEC::TestCase
     end
 
     ENV.delete "SHELL_VERBOSITY"
+  end
+
+  protected def assert_file_equals_string(filepath : String, string : String) : Nil
+    normalized_path = File.join __DIR__, "fixtures", filepath
+    string.should match Regex.new File.read(normalized_path)
   end
 
   protected def ensure_static_command_help(application : ACON::Application) : Nil
@@ -689,10 +524,10 @@ struct ApplicationTest < ASPEC::TestCase
 
     app.catch_exceptions = true
     tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
-    tester.display.should eq RENDER_EXCEPTION1
+    self.assert_file_equals_string "text/application_renderexception1.txt", tester.display
 
     tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
-    tester.error_output.should eq RENDER_EXCEPTION1
+    self.assert_file_equals_string "text/application_renderexception1.txt", tester.error_output
     tester.display.should be_empty
 
     app.catch_exceptions = false
@@ -709,19 +544,19 @@ struct ApplicationTest < ASPEC::TestCase
     tester = ACON::Spec::ApplicationTester.new app
 
     tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
-    tester.error_output.should eq RENDER_EXCEPTION1
+    self.assert_file_equals_string "text/application_renderexception1.txt", tester.error_output
 
     tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true, verbosity: :verbose)
     tester.error_output.should contain "Exception trace"
 
     tester.run(ACON::Input::HashType{"command" => "list", "--foo" => true}, decorated: false, capture_stderr_separately: true)
-    tester.error_output.should eq RENDER_EXCEPTION2
+    self.assert_file_equals_string "text/application_renderexception2.txt", tester.error_output
 
     app.add Foo3Command.new
     tester = ACON::Spec::ApplicationTester.new app
 
     tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: false, capture_stderr_separately: true)
-    tester.error_output.should eq RENDER_EXCEPTION3
+    self.assert_file_equals_string "text/application_renderexception3.txt", tester.error_output
 
     tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: false, verbosity: :verbose)
     tester.display.should match /\[Exception\]\s*First exception/
@@ -729,10 +564,10 @@ struct ApplicationTest < ASPEC::TestCase
     tester.display.should match /\[Exception\]\s*Third exception/
 
     tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: true)
-    tester.display.should eq RENDER_EXCEPTION3_DECORATED
+    self.assert_file_equals_string "text/application_renderexception3_decorated.txt", tester.display
 
     tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: true, capture_stderr_separately: true)
-    tester.error_output.should eq RENDER_EXCEPTION3_DECORATED
+    self.assert_file_equals_string "text/application_renderexception3_decorated.txt", tester.error_output
 
     app = ACON::Application.new "foo"
     app.auto_exit = false
@@ -740,7 +575,7 @@ struct ApplicationTest < ASPEC::TestCase
     tester = ACON::Spec::ApplicationTester.new app
 
     tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
-    tester.error_output.should eq RENDER_EXCEPTION4
+    self.assert_file_equals_string "text/application_renderexception4.txt", tester.error_output
 
     ENV["COLUMNS"] = "120"
   end
@@ -759,8 +594,7 @@ struct ApplicationTest < ASPEC::TestCase
     tester.error_output.should eq RENDER_EXCEPTION_DOUBLE_WIDTH
   end
 
-  # TODO: Make this test less flaky
-  def ptest_render_exception_escapes_lines : Nil
+  def test_render_exception_escapes_lines : Nil
     app = ACON::Application.new "foo"
     app.auto_exit = false
     ENV["COLUMNS"] = "22"
@@ -770,13 +604,12 @@ struct ApplicationTest < ASPEC::TestCase
     tester = ACON::Spec::ApplicationTester.new app
 
     tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
-    tester.display.should eq RENDER_EXCEPTION_ESCAPESLINES
+    self.assert_file_equals_string "text/application_renderexception_escapeslines.txt", tester.display
 
     ENV["COLUMNS"] = "120"
   end
 
-  # TODO: Make this test less flaky
-  def ptest_render_exception_line_breaks : Nil
+  def test_render_exception_line_breaks : Nil
     app = ACON::Application.new "foo"
     app.auto_exit = false
     ENV["COLUMNS"] = "120"
@@ -786,7 +619,7 @@ struct ApplicationTest < ASPEC::TestCase
     tester = ACON::Spec::ApplicationTester.new app
 
     tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
-    tester.display.should eq RENDER_EXCEPTION_LINE_BREAKS
+    self.assert_file_equals_string "text/application_renderexception_linebreaks.txt", tester.display
   end
 
   def test_run_passes_io_thru : Nil
@@ -813,7 +646,7 @@ struct ApplicationTest < ASPEC::TestCase
     tester = ACON::Spec::ApplicationTester.new app
 
     tester.run ACON::Input::HashType.new, decorated: false
-    tester.display.should eq APPLICATION_RUN1
+    self.assert_file_equals_string "text/application_run1.txt", tester.display
   end
 
   def test_run_help_command : Nil
@@ -825,9 +658,9 @@ struct ApplicationTest < ASPEC::TestCase
     tester = ACON::Spec::ApplicationTester.new app
 
     tester.run ACON::Input::HashType{"--help" => true}, decorated: false
-    tester.display.should eq APPLICATION_RUN2
+    self.assert_file_equals_string "text/application_run2.txt", tester.display
 
     tester.run ACON::Input::HashType{"-h" => true}, decorated: false
-    tester.display.should eq APPLICATION_RUN2
+    self.assert_file_equals_string "text/application_run2.txt", tester.display
   end
 end

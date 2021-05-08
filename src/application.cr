@@ -496,7 +496,17 @@ class Athena::Console::Application
 
       if !ex.is_a?(ACON::Exceptions::ConsoleException) || ACON::Output::Verbosity::VERBOSE <= output.verbosity
         if trace = ex.backtrace?.try &.first
-          messages << "<comment>At #{ACON::Formatter::OutputFormatter.escape trace}</comment>" # TODO: Finish this line/file message.
+          filename = nil
+          line = nil
+
+          if match = trace.match(/(\w+\.cr):(\d+)/)
+            filename = if f = match[1]?
+                         File.basename f
+                       end
+            line = match[2]?
+          end
+
+          messages << %(<comment>#{ACON::Formatter::OutputFormatter.escape "In #{filename || "n/a"} line #{line || "n/a"}:"}</comment>)
         end
       end
 
@@ -524,6 +534,8 @@ class Athena::Console::Application
         t.each do |l|
           output.puts " #{l}"
         end
+
+        output.puts "", :quiet
       end
 
       break unless (ex = ex.cause)

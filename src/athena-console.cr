@@ -19,14 +19,14 @@ module Athena::Console
 end
 
 # require "./spec"
-# require "../spec/fixtures/io_command"
-# require "../spec/fixtures/*"
+# require "../spec/fixtures/commands/io_command"
+# require "../spec/fixtures/**"
 
-# app = ACON::Application.new "Athena", "0.15.0"
-# # app.add Foo1Command.new
-
+# app = ACON::Application.new "foo"
+# app.auto_exit = false
+# ENV["COLUMNS"] = "22"
 # app.add(ACON::Spec::MockCommand.new "foo" do
-#   raise "エラーメッセージ"
+#   raise "dont break here <info>!</info>"
 # end)
 
-# app.run # output: output
+# app.run
