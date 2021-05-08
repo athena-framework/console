@@ -10,10 +10,18 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
     is_option = false
 
     @tokens.each_with_index do |token, idx|
-      if !token.empty? && '-' == token.char_at 0
-        next if !token.includes?('=') || @tokens[idx + 1]?.nil?
+      if !token.empty? && token.starts_with? '-'
+        next if token.includes?('=') || @tokens[idx + 1]?.nil?
 
         name = '-' == token.char_at(1) ? token[2..] : token[-1..]
+
+        if !@options.has_key?(name) && !@definition.has_shortcut?(name)
+          # noop
+        elsif (@options.has_key?(name) || @options.has_key?(name = @definition.shortcut_to_name(name))) && @tokens[idx + 1]? == @options[name]
+          is_option = true
+        end
+
+        next
       end
 
       if is_option

@@ -782,4 +782,230 @@ struct ApplicationTest < ASPEC::TestCase
     tester.run ACON::Input::HashType{"command" => "foo:bar", "-n" => true}, decorated: false
     tester.display.should eq "execute called\n"
   end
+
+  def test_run_global_option_and_no_command : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+    app.definition << ACON::Input::Option.new "foo", "f", :optional
+
+    input = ACON::Input::ARGV.new ["--foo", "bar"]
+
+    app.run(input, ACON::Output::Null.new).should eq ACON::Command::Status::SUCCESS
+  end
+
+  def test_run_verbose_value_doesnt_break_arguments : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+    app.add FooCommand.new
+
+    output = ACON::Output::IO.new IO::Memory.new
+    input = ACON::Input::ARGV.new ["-v", "foo:bar"]
+
+    app.run(input, output).should eq ACON::Command::Status::SUCCESS
+
+    input = ACON::Input::ARGV.new ["--verbose", "foo:bar"]
+
+    app.run(input, output).should eq ACON::Command::Status::SUCCESS
+  end
+
+  def test_run_returns_status_with_custom_code_on_exception : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.add(ACON::Spec::MockCommand.new "foo" do
+      raise ACON::Exceptions::Logic.new "", code: 5
+    end)
+
+    input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
+
+    app.run(input, ACON::Output::Null.new).value.should eq 5
+  end
+
+  def test_run_returns_failure_status_on_exception : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.add(ACON::Spec::MockCommand.new "foo" do
+      raise ""
+    end)
+
+    input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
+
+    app.run(input, ACON::Output::Null.new).value.should eq 1
+  end
+
+  def test_add_option_duplicate_shortcut : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+    app.definition << ACON::Input::Option.new "--env", "-e", :required, "Environment"
+
+    app.add(ACON::Spec::MockCommand.new "foo" do
+      ACON::Command::Status::SUCCESS
+    end
+      .aliases("f")
+      .definition(
+        ACON::Input::Option.new("survey", "e", :required, "Option with shortcut")
+      )
+    )
+
+    input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
+
+    expect_raises ACON::Exceptions::Logic, "An option with shortcut 'e' already exists." do
+      app.run input, ACON::Output::Null.new
+    end
+  end
+
+  @[DataProvider("already_set_definition_element_provider")]
+  def test_adding_already_set_definition_element(element) : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    app.add(
+      ACON::Spec::MockCommand.new("foo") { ACON::Command::Status::SUCCESS }
+        .definition(element)
+    )
+
+    input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
+
+    expect_raises ACON::Exceptions::Logic do
+      app.run input, ACON::Output::Null.new
+    end
+  end
+
+  def already_set_definition_element_provider : Tuple
+    {
+      {ACON::Input::Argument.new("command", :required)},
+      {ACON::Input::Option.new("quiet", "", :none)},
+      {ACON::Input::Option.new("query", "q", :none)},
+    }
+  end
+
+  def ptest_helper_set_contains_default_helpers : Nil
+  end
+
+  # TODO: Add helper related specs
+
+  def test_default_input_definition_returns_default_values : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    definition = app.definition
+
+    definition.has_argument?("command").should be_true
+
+    definition.has_option?("help").should be_true
+    definition.has_option?("quiet").should be_true
+    definition.has_option?("verbose").should be_true
+    definition.has_option?("version").should be_true
+    definition.has_option?("ansi").should be_true
+    definition.has_option?("no-interaction").should be_true
+    definition.has_negation?("no-ansi").should be_true
+    definition.has_option?("no-ansi").should be_false
+  end
+
+  # TODO: Test custom application type's defaults.
+
+  def test_setting_custom_input_definition_overrides_default_values : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    app.definition = ACON::Input::Definition.new(
+      ACON::Input::Option.new "--custom", "-c", :none, "Set the custom input definition"
+    )
+
+    definition = app.definition
+
+    definition.has_argument?("command").should be_false
+
+    definition.has_option?("help").should be_false
+    definition.has_option?("quiet").should be_false
+    definition.has_option?("verbose").should be_false
+    definition.has_option?("version").should be_false
+    definition.has_option?("ansi").should be_false
+    definition.has_option?("no-interaction").should be_false
+    definition.has_negation?("no-ansi").should be_false
+
+    definition.has_option?("custom").should be_true
+  end
+
+  # TODO: Add dispatcher related specs
+
+  def test_run_custom_default_command : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.add command = FooCommand.new
+    app.default_command command.name
+
+    tester = ACON::Spec::ApplicationTester.new app
+    tester.run interactive: false
+    tester.display.should eq "execute called\n"
+
+    # TODO: Test custom application default.
+  end
+
+  def test_run_custom_default_command_with_option : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.add command = FooOptCommand.new
+    app.default_command command.name
+
+    tester = ACON::Spec::ApplicationTester.new app
+    tester.run ACON::Input::HashType{"--fooopt" => "opt"}, interactive: false
+    tester.display.should eq "execute called\nopt\n"
+  end
+
+  def test_run_custom_single_default_command : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.add command = FooOptCommand.new
+    app.default_command command.name, true
+
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.run
+    tester.display.should contain "execute called"
+
+    tester.run ACON::Input::HashType{"--help" => true}
+    tester.display.should contain "The foo:bar command"
+  end
+
+  def test_find_alternative_does_not_load_same_namespace_commands_on_exact_match : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+
+    loaded = Hash(String, Bool).new
+
+    app.command_loader = ACON::Loader::Factory.new({
+      "foo:bar" => ->do
+        loaded["foo:bar"] = true
+
+        ACON::Spec::MockCommand.new("foo:bar") { ACON::Command::Status::SUCCESS }.as ACON::Command
+      end,
+      "foo" => ->do
+        loaded["foo"] = true
+
+        ACON::Spec::MockCommand.new("foo") { ACON::Command::Status::SUCCESS }.as ACON::Command
+      end,
+    })
+
+    app.run ACON::Input::Hash.new(ACON::Input::HashType{"command" => "foo"}), ACON::Output::Null.new
+
+    loaded.should eq({"foo" => true})
+  end
+
+  def test_command_name_mismatch_with_command_loader_raises : Nil
+    app = ACON::Application.new "foo"
+
+    app.command_loader = ACON::Loader::Factory.new({
+      "foo" => ->{ ACON::Spec::MockCommand.new("bar") { ACON::Command::Status::SUCCESS }.as ACON::Command },
+    })
+
+    expect_raises ACON::Exceptions::CommandNotFound, "The 'foo' command cannot be found because it is registered under multiple names.  Make sure you don't set a different name via constructor or 'name='." do
+      app.get "foo"
+    end
+  end
 end

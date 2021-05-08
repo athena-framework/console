@@ -36,6 +36,8 @@ class Athena::Console::Input::Option
         shortcut = shortcut.join '|'
       end
 
+      shortcut = shortcut.lchop('-').split(/(?:\|)-?/, remove_empty: true).map(&.strip).join '|'
+
       raise ArgumentError.new "An option shortcut cannot be empty." if shortcut.nil?
     end
 

@@ -5,7 +5,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
     new args.to_h.transform_keys(&.to_s).transform_values(&.as(InputType))
   end
 
-  def initialize(@parameters : HashType, definition : ACON::Input::Definition? = nil)
+  def initialize(@parameters : HashType = HashType.new, definition : ACON::Input::Definition? = nil)
     super definition
   end
 

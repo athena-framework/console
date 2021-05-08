@@ -7,7 +7,7 @@ class Athena::Console::Application
   getter version : SemanticVersion
   getter name : String
 
-  setter default_command : String = "list"
+  @default_command : String = "list"
   property? auto_exit : Bool = true
   property? catch_exceptions : Bool = true
   getter? single_command : Bool = false
@@ -93,6 +93,18 @@ class Athena::Console::Application
     end
 
     commands
+  end
+
+  def default_command(name : String, single_command : Bool = false) : self
+    @default_command = name
+
+    if single_command
+      self.find name
+
+      @single_command = true
+    end
+
+    self
   end
 
   def find(name : String) : ACON::Command
@@ -234,7 +246,7 @@ class Athena::Console::Application
     raise ACON::Exceptions::CommandNotFound.new "The command '#{name}' does not exist." unless self.has? name
 
     if !@commands.has_key? name
-      raise ACON::Exceptions::CommandNotFound.new "The '#{name}' command cannot be found because it is registered under multiple names."
+      raise ACON::Exceptions::CommandNotFound.new "The '#{name}' command cannot be found because it is registered under multiple names.  Make sure you don't set a different name via constructor or 'name='."
     end
 
     command = @commands[name]
@@ -294,7 +306,11 @@ class Athena::Console::Application
 
       self.render_exception ex, output
 
-      exit_status = ACON::Command::Status::FAILURE
+      exit_status = if ex.is_a? ACON::Exceptions::ConsoleException
+                      ACON::Command::Status.new ex.code.zero? ? 1 : ex.code
+                    else
+                      ACON::Command::Status::FAILURE
+                    end
     end
 
     if @auto_exit
@@ -337,8 +353,15 @@ class Athena::Console::Application
 
       command = self.find command_name
     rescue ex : Exception
-      # TODO: Handle missing commands
-      # TODO: Suggest alternatives
+      if !(ex.is_a?(ACON::Exceptions::CommandNotFound) && !ex.is_a?(ACON::Exceptions::NamespaceNotFound)) ||
+         1 != (alternatives = ex.alternatives).size ||
+         !input.interactive?
+        # TODO: Handle dispatching
+
+        raise ex
+      end
+
+      alternative = alternatives.not_nil!.first
 
       raise ex
     end

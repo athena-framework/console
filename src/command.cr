@@ -75,6 +75,16 @@ abstract class Athena::Console::Command
     @full_definition = nil
   end
 
+  def argument(name : String, mode : ACON::Input::Argument::Mode = :optional, description : String = "", default = nil) : self
+    @definition << ACON::Input::Argument.new name, mode, description, default
+
+    if full_definition = @full_definition
+      full_definition << ACON::Input::Argument.new name, mode, description, default
+    end
+
+    self
+  end
+
   def definition : ACON::Input::Definition
     @full_definition || self.native_definition
   end
@@ -114,6 +124,16 @@ abstract class Athena::Console::Command
   end
 
   def hidden(@hidden : Bool) : self
+    self
+  end
+
+  def option(name : String, shotcut : String? = nil, value_mode : ACON::Input::Option::Value = :none, description : String = "", default = nil) : self
+    @definition << ACON::Input::Option.new name, shotcut, value_mode, description, default
+
+    if full_definition = @full_definition
+      full_definition << ACON::Input::Option.new name, shotcut, value_mode, description, default
+    end
+
     self
   end
 

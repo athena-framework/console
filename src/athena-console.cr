@@ -23,12 +23,7 @@ end
 # require "../spec/fixtures/**"
 
 # app = ACON::Application.new "foo"
-# app.run
-# app.run
-# app.auto_exit = false
-# app.catch_exceptions = false
-
-# tester = ACON::Spec::ApplicationTester.new app
-
-# tester.run ACON::Input::HashType{"command" => "list", "--verbose" => 2}, decorated: false
-# pp tester.output.verbosity
+# app.definition << ACON::Input::Option.new "foo", "f", :optional
+# # app.add FooCommand.new
+# input = ACON::Input::ARGV.new ["--foo", "bar", "-vv"]
+# app.run input
