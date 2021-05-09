@@ -142,7 +142,7 @@ abstract class Athena::Console::Command
     prog_name = Path.new(PROGRAM_NAME).basename
     full_name = is_single_command ? prog_name : "#{prog_name} #{@name}"
 
-    processed_help = self.help || self.description
+    processed_help = self.help.presence || self.description
 
     { {"%command.name%", @name}, {"%command.full_name%", full_name} }.each do |(placeholder, replacement)|
       processed_help = processed_help.gsub placeholder, replacement
@@ -162,8 +162,8 @@ abstract class Athena::Console::Command
   end
 
   def usage(usage : String) : self
-    unless usage.starts_with? @name
-      usage = "#{@name} #{usage}"
+    unless (name = @name) && usage.starts_with? name
+      usage = "#{name} #{usage}"
     end
 
     @usages << usage
@@ -238,6 +238,6 @@ abstract class Athena::Console::Command
   end
 
   private def validate_name(name : String) : Nil
-    raise ArgumentError.new "Command name '#{name}' is invalid." unless name.matches? /^[^:]++(:[^:]++)*$/
+    raise ACON::Exceptions::InvalidArgument.new "Command name '#{name}' is invalid." if name.blank? || !name.matches? /^[^:]++(:[^:]++)*$/
   end
 end

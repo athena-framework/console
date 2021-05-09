@@ -44,9 +44,7 @@ class Athena::Console::Application
 
     # TODO: Do something about LazyCommands?
 
-    raise ArgumentError.new "The #{command.class} command cannot have an empty name." unless (command_name = command.name)
-
-    @commands[command_name] = command
+    @commands[command.name] = command
 
     command.aliases.each do |a|
       @commands[a] = command

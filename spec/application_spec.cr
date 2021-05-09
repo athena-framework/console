@@ -126,7 +126,7 @@ struct ApplicationTest < ASPEC::TestCase
 
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run(ACON::Input::HashType{"-h" => true, "-q" => true}, decorated: false)
+    tester.run("-h": true, "-q": true, decorated: false)
     tester.display.should be_empty
   end
 
@@ -346,7 +346,7 @@ struct ApplicationTest < ASPEC::TestCase
     app.auto_exit = false
 
     tester = ACON::Spec::ApplicationTester.new app
-    tester.run(ACON::Input::HashType{"command" => "foos:bar1"}, decorated: false)
+    tester.run command: "foos:bar1", decorated: false
     tester.display.should eq(
       <<-OUTPUT
 
@@ -522,17 +522,17 @@ struct ApplicationTest < ASPEC::TestCase
     tester = ACON::Spec::ApplicationTester.new app
 
     app.catch_exceptions = true
-    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
+    tester.run command: "foo", decorated: false
     self.assert_file_equals_string "text/application_renderexception1.txt", tester.display
 
-    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
+    tester.run command: "foo", decorated: false, capture_stderr_separately: true
     self.assert_file_equals_string "text/application_renderexception1.txt", tester.error_output
     tester.display.should be_empty
 
     app.catch_exceptions = false
 
     expect_raises Exception, "Command 'foo' is not defined." do
-      tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
+      tester.run command: "foo", decorated: false
     end
   end
 
@@ -542,19 +542,19 @@ struct ApplicationTest < ASPEC::TestCase
     ENV["COLUMNS"] = "120"
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
+    tester.run command: "foo", decorated: false, capture_stderr_separately: true
     self.assert_file_equals_string "text/application_renderexception1.txt", tester.error_output
 
-    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true, verbosity: :verbose)
+    tester.run command: "foo", decorated: false, capture_stderr_separately: true, verbosity: :verbose
     tester.error_output.should contain "Exception trace"
 
-    tester.run(ACON::Input::HashType{"command" => "list", "--foo" => true}, decorated: false, capture_stderr_separately: true)
+    tester.run command: "list", "--foo": true, decorated: false, capture_stderr_separately: true
     self.assert_file_equals_string "text/application_renderexception2.txt", tester.error_output
 
     app.add Foo3Command.new
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: false, capture_stderr_separately: true)
+    tester.run command: "foo3:bar", decorated: false, capture_stderr_separately: true
     self.assert_file_equals_string "text/application_renderexception3.txt", tester.error_output
 
     tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: false, verbosity: :verbose)
@@ -562,10 +562,10 @@ struct ApplicationTest < ASPEC::TestCase
     tester.display.should match /\[Exception\]\s*Second exception/
     tester.display.should match /\[Exception\]\s*Third exception/
 
-    tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: true)
+    tester.run command: "foo3:bar", decorated: true
     self.assert_file_equals_string "text/application_renderexception3_decorated.txt", tester.display
 
-    tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: true, capture_stderr_separately: true)
+    tester.run command: "foo3:bar", decorated: true, capture_stderr_separately: true
     self.assert_file_equals_string "text/application_renderexception3_decorated.txt", tester.error_output
 
     app = ACON::Application.new "foo"
@@ -573,7 +573,7 @@ struct ApplicationTest < ASPEC::TestCase
     ENV["COLUMNS"] = "32"
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
+    tester.run command: "foo", decorated: false, capture_stderr_separately: true
     self.assert_file_equals_string "text/application_renderexception4.txt", tester.error_output
 
     ENV["COLUMNS"] = "120"
@@ -589,7 +589,7 @@ struct ApplicationTest < ASPEC::TestCase
       raise "エラーメッセージ"
     end)
 
-    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false, capture_stderr_separately: true)
+    tester.run command: "foo", decorated: false, capture_stderr_separately: true
     tester.error_output.should eq RENDER_EXCEPTION_DOUBLE_WIDTH
   end
 
@@ -602,7 +602,7 @@ struct ApplicationTest < ASPEC::TestCase
     end)
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
+    tester.run command: "foo", decorated: false
     self.assert_file_equals_string "text/application_renderexception_escapeslines.txt", tester.display
 
     ENV["COLUMNS"] = "120"
@@ -617,7 +617,7 @@ struct ApplicationTest < ASPEC::TestCase
     end)
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run(ACON::Input::HashType{"command" => "foo"}, decorated: false)
+    tester.run command: "foo", decorated: false
     self.assert_file_equals_string "text/application_renderexception_linebreaks.txt", tester.display
   end
 
@@ -644,7 +644,7 @@ struct ApplicationTest < ASPEC::TestCase
     self.ensure_static_command_help app
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run ACON::Input::HashType.new, decorated: false
+    tester.run decorated: false
     self.assert_file_equals_string "text/application_run1.txt", tester.display
   end
 
@@ -656,10 +656,10 @@ struct ApplicationTest < ASPEC::TestCase
     self.ensure_static_command_help app
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run ACON::Input::HashType{"--help" => true}, decorated: false
+    tester.run "--help": true, decorated: false
     self.assert_file_equals_string "text/application_run2.txt", tester.display
 
-    tester.run ACON::Input::HashType{"-h" => true}, decorated: false
+    tester.run "-h": true, decorated: false
     self.assert_file_equals_string "text/application_run2.txt", tester.display
   end
 
@@ -671,10 +671,10 @@ struct ApplicationTest < ASPEC::TestCase
     self.ensure_static_command_help app
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run ACON::Input::HashType{"command" => "list", "--help" => true}, decorated: false
+    tester.run command: "list", "--help": true, decorated: false
     self.assert_file_equals_string "text/application_run3.txt", tester.display
 
-    tester.run ACON::Input::HashType{"command" => "list", "-h" => true}, decorated: false
+    tester.run command: "list", "-h": true, decorated: false
     self.assert_file_equals_string "text/application_run3.txt", tester.display
   end
 
@@ -684,10 +684,10 @@ struct ApplicationTest < ASPEC::TestCase
     app.catch_exceptions = false
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run ACON::Input::HashType{"--ansi" => true}
+    tester.run "--ansi": true
     tester.output.decorated?.should be_true
 
-    tester.run ACON::Input::HashType{"--no-ansi" => true}
+    tester.run "--no-ansi": true
     tester.output.decorated?.should be_false
   end
 
@@ -697,10 +697,10 @@ struct ApplicationTest < ASPEC::TestCase
     app.catch_exceptions = false
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run ACON::Input::HashType{"--version" => true}, decorated: false
+    tester.run "--version": true, decorated: false
     self.assert_file_equals_string "text/application_run4.txt", tester.display
 
-    tester.run ACON::Input::HashType{"-V" => true}, decorated: false
+    tester.run "-V": true, decorated: false
     self.assert_file_equals_string "text/application_run4.txt", tester.display
   end
 
@@ -710,11 +710,11 @@ struct ApplicationTest < ASPEC::TestCase
     app.catch_exceptions = false
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run ACON::Input::HashType{"command" => "list", "--quiet" => true}, decorated: false
+    tester.run command: "list", "--quiet": true, decorated: false
     tester.display.should be_empty
     tester.input.interactive?.should be_false
 
-    tester.run ACON::Input::HashType{"command" => "list", "-q" => true}, decorated: false
+    tester.run command: "list", "-q": true, decorated: false
     tester.display.should be_empty
     tester.input.interactive?.should be_false
   end
@@ -727,28 +727,28 @@ struct ApplicationTest < ASPEC::TestCase
     self.ensure_static_command_help app
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run ACON::Input::HashType{"command" => "list", "--verbose" => true}, decorated: false
+    tester.run command: "list", "--verbose": true, decorated: false
     tester.output.verbosity.should eq ACON::Output::Verbosity::VERBOSE
 
-    tester.run ACON::Input::HashType{"command" => "list", "--verbose" => 1}, decorated: false
+    tester.run command: "list", "--verbose": 1, decorated: false
     tester.output.verbosity.should eq ACON::Output::Verbosity::VERBOSE
 
-    tester.run ACON::Input::HashType{"command" => "list", "--verbose" => 2}, decorated: false
+    tester.run command: "list", "--verbose": 2, decorated: false
     tester.output.verbosity.should eq ACON::Output::Verbosity::VERY_VERBOSE
 
-    tester.run ACON::Input::HashType{"command" => "list", "--verbose" => 3}, decorated: false
+    tester.run command: "list", "--verbose": 3, decorated: false
     tester.output.verbosity.should eq ACON::Output::Verbosity::DEBUG
 
-    tester.run ACON::Input::HashType{"command" => "list", "--verbose" => 4}, decorated: false
+    tester.run command: "list", "--verbose": 4, decorated: false
     tester.output.verbosity.should eq ACON::Output::Verbosity::VERBOSE
 
-    tester.run ACON::Input::HashType{"command" => "list", "-v" => true}, decorated: false
+    tester.run command: "list", "-v": true, decorated: false
     tester.output.verbosity.should eq ACON::Output::Verbosity::VERBOSE
 
-    tester.run ACON::Input::HashType{"command" => "list", "-vv" => true}, decorated: false
+    tester.run command: "list", "-vv": true, decorated: false
     tester.output.verbosity.should eq ACON::Output::Verbosity::VERY_VERBOSE
 
-    tester.run ACON::Input::HashType{"command" => "list", "-vvv" => true}, decorated: false
+    tester.run command: "list", "-vvv": true, decorated: false
     tester.output.verbosity.should eq ACON::Output::Verbosity::DEBUG
   end
 
@@ -760,10 +760,10 @@ struct ApplicationTest < ASPEC::TestCase
     self.ensure_static_command_help app
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run ACON::Input::HashType{"command" => "help", "--help" => true}, decorated: false
+    tester.run command: "help", "--help": true, decorated: false
     self.assert_file_equals_string "text/application_run5.txt", tester.display
 
-    tester.run ACON::Input::HashType{"command" => "help", "-h" => true}, decorated: false
+    tester.run command: "help", "-h": true, decorated: false
     self.assert_file_equals_string "text/application_run5.txt", tester.display
   end
 
@@ -776,10 +776,10 @@ struct ApplicationTest < ASPEC::TestCase
 
     tester = ACON::Spec::ApplicationTester.new app
 
-    tester.run ACON::Input::HashType{"command" => "foo:bar", "--no-interaction" => true}, decorated: false
+    tester.run command: "foo:bar", "--no-interaction": true, decorated: false
     tester.display.should eq "execute called\n"
 
-    tester.run ACON::Input::HashType{"command" => "foo:bar", "-n" => true}, decorated: false
+    tester.run command: "foo:bar", "-n": true, decorated: false
     tester.display.should eq "execute called\n"
   end
 
@@ -954,7 +954,7 @@ struct ApplicationTest < ASPEC::TestCase
     app.default_command command.name
 
     tester = ACON::Spec::ApplicationTester.new app
-    tester.run ACON::Input::HashType{"--fooopt" => "opt"}, interactive: false
+    tester.run "--fooopt": "opt", interactive: false
     tester.display.should eq "execute called\nopt\n"
   end
 
@@ -969,7 +969,7 @@ struct ApplicationTest < ASPEC::TestCase
     tester.run
     tester.display.should contain "execute called"
 
-    tester.run ACON::Input::HashType{"--help" => true}
+    tester.run "--help": true
     tester.display.should contain "The foo:bar command"
   end
 

@@ -55,7 +55,26 @@ module Athena::Console::Spec
 
     def initialize(@application : ACON::Application); end
 
-    def run(input : ACON::Input::HashType = ACON::Input::HashType.new, *, decorated : Bool? = nil, interactive : Bool? = nil, capture_stderr_separately : Bool = false, verbosity : ACON::Output::Verbosity? = nil) : ACON::Command::Status
+    def run(
+      decorated : Bool = false,
+      interactive : Bool? = nil,
+      capture_stderr_separately : Bool = false,
+      verbosity : ACON::Output::Verbosity? = nil,
+      **args : ACON::Input::InputType
+    )
+      input = args.to_h.transform_keys(&.to_s).transform_values(&.as(ACON::Input::InputType))
+
+      self.run input, decorated: decorated, interactive: interactive, capture_stderr_separately: capture_stderr_separately, verbosity: verbosity
+    end
+
+    def run(
+      input : ACON::Input::HashType = ACON::Input::HashType.new,
+      *,
+      decorated : Bool? = nil,
+      interactive : Bool? = nil,
+      capture_stderr_separately : Bool = false,
+      verbosity : ACON::Output::Verbosity? = nil
+    ) : ACON::Command::Status
       @input = ACON::Input::Hash.new input
 
       interactive.try do |i|
@@ -72,6 +91,57 @@ module Athena::Console::Spec
       )
 
       @status = @application.run self.input, self.output
+    end
+  end
+
+  struct CommandTester
+    include Tester
+
+    getter! input : ACON::Input::Interface
+    getter status : ACON::Command::Status? = nil
+
+    def initialize(@command : ACON::Command); end
+
+    def execute(
+      decorated : Bool = false,
+      interactive : Bool? = nil,
+      capture_stderr_separately : Bool = false,
+      verbosity : ACON::Output::Verbosity? = nil,
+      **args : ACON::Input::InputType
+    )
+      input = args.to_h.transform_keys(&.to_s).transform_values(&.as(ACON::Input::InputType))
+
+      self.execute input, decorated: decorated, interactive: interactive, capture_stderr_separately: capture_stderr_separately, verbosity: verbosity
+    end
+
+    def execute(
+      input : ACON::Input::HashType = ACON::Input::HashType.new,
+      *,
+      decorated : Bool = false,
+      interactive : Bool? = nil,
+      capture_stderr_separately : Bool = false,
+      verbosity : ACON::Output::Verbosity? = nil
+    ) : ACON::Command::Status
+      if !input.has_key?("command") && (application = @command.application?) && application.definition.has_argument?("command")
+        input["command"] = @command.name
+      end
+
+      @input = ACON::Input::Hash.new input
+
+      # TODO: Set the input stream?
+
+      interactive.try do |i|
+        self.input.interactive = i
+      end
+
+      self.init_output(
+        decorated: decorated,
+        interactive: interactive,
+        capture_stderr_separately: capture_stderr_separately,
+        verbosity: verbosity
+      )
+
+      @status = @command.run self.input, self.output
     end
   end
 
