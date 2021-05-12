@@ -1,14 +1,8 @@
-abstract class Athena::Console::Helper; end
-
 class Athena::Console::Helper::Descriptor < Athena::Console::Helper
   @descriptors = Hash(String, ACON::Descriptor::Interface).new
 
   def initialize
     self.register "txt", ACON::Descriptor::Text.new
-  end
-
-  def name : String
-    "descriptor"
   end
 
   def describe(output : ACON::Output::Interface, object : _, context : ACON::Descriptor::Context) : Nil

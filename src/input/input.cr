@@ -1,11 +1,15 @@
 require "./interface"
+require "./streamable"
 
 abstract class Athena::Console::Input
   include Athena::Console::Input::Interface
+  include Athena::Console::Input::Streamable
 
   alias InputTypes = String | Bool | Nil | Number::Primitive
   alias InputType = InputTypes | Array(InputTypes)
   alias HashType = ::Hash(String, InputType)
+
+  property stream : IO? = nil
 
   property? interactive : Bool = true
 

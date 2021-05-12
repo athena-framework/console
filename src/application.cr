@@ -361,7 +361,17 @@ class Athena::Console::Application
 
       alternative = alternatives.not_nil!.first
 
-      raise ex
+      style = ACON::Style::Athena.new input, output
+
+      style.block "\nCommand '#{command_name}' is not defined.\n", style: "error"
+
+      unless style.confirm "Do you want to run '#{alternative}' instead?", false
+        # TODO: Handle dispatching
+
+        return ACON::Command::Status::FAILURE
+      end
+
+      command = self.find alternative
     end
 
     @running_command = command
