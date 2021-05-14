@@ -1,6 +1,6 @@
 module Athena::Console::Output::Interface
-  abstract def puts(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
-  abstract def print(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+  abstract def puts(message : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+  abstract def print(message : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
   abstract def verbosity : ACON::Output::Verbosity
   abstract def verbosity=(verbosity : ACON::Output::Verbosity)
   abstract def decorated=(decorated : Bool)

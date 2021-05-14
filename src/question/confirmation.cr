@@ -1,5 +1,3 @@
-class Athena::Console::Question(T); end
-
 class Athena::Console::Question::Confirmation < Athena::Console::Question(Bool)
   @true_answer_regex : Regex
 

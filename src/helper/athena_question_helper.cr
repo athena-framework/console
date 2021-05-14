@@ -13,6 +13,10 @@ class Athena::Console::Helper::AthenaQuestionHelper < Athena::Console::Helper::Q
              " <info>#{text}</info>"
            elsif question.is_a? ACON::Question::Confirmation
              %( <info>#{text} (yes/no)</info> [<comment>#{default ? "yes" : "no"}</comment>])
+           elsif question.is_a? ACON::Question::Choice && question.multi_select?
+             ""
+           elsif question.is_a? ACON::Question::Choice
+             ""
            else
              " <info>#{text}</info> [<comment>#{ACON::Formatter::OutputFormatter.escape default.to_s}</comment>]"
            end
@@ -21,7 +25,11 @@ class Athena::Console::Helper::AthenaQuestionHelper < Athena::Console::Helper::Q
 
     prompt = " > "
 
-    # TODO: Handle choice questions
+    if question.is_a? ACON::Question::Choice
+      output.puts self.format_choice_question_choices question, "comment"
+
+      prompt = question.prompt
+    end
 
     output.print prompt
   end

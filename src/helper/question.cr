@@ -12,7 +12,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
       output = output.error_output
     end
 
-    return question.default unless input.interactive?
+    return self.default_answer question unless input.interactive?
 
     if input.is_a?(ACON::Input::Streamable) && (stream = input.stream)
       @stream = stream
@@ -31,12 +31,38 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     end
   end
 
+  protected def format_choice_question_choices(question : ACON::Question::Choice, tag : String) : Array(String)
+    messages = Array(String).new
+
+    messages
+  end
+
   protected def write_prompt(output : ACON::Output::Interface, question : ACON::Question) : Nil
     message = question.question
 
     # TODO: Handle Choice questions
 
     output.print message
+  end
+
+  private def default_answer(question : ACON::Question)
+    default = question.default
+
+    return default if default.nil?
+
+    if validator = question.validator
+      validator.call default
+    elsif question.is_a? ACON::Question::Choice
+      choices = question.choices
+
+      # unless question.multi_select?
+      #   return choices[default]? || default
+      # end
+
+      # TODO: Handle multiselect
+    end
+
+    default
   end
 
   private def do_ask(output : ACON::Output::Interface, question : ACON::Question)

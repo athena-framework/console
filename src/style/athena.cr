@@ -60,6 +60,22 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.block message, "CAUTION", "fg=white;bg=red", " ! ", true
   end
 
+  def choice(question : String, choices : Hash, default = nil)
+    if default && (value = choices[default]?)
+      default = value
+    end
+
+    self.choice question, choices.values, default
+  end
+
+  def choice(question : String, choices : Enumerable, default = nil)
+    unless default.nil?
+      default = choices.find(default) { |c| c == default }
+    end
+
+    self.ask ACON::Question::Choice.new question, choices, default
+  end
+
   def comment(message : String) : Nil
     self.block message, prefix: "<fg=default;bg=default> // </>", escape: false
   end
@@ -80,6 +96,18 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.block message, "INFO", "fg=green", padding: true
   end
 
+  def listing(*elements : String) : Nil
+    self.listing elements
+  end
+
+  def listing(elements : Enumerable) : Nil
+    self.auto_prepend_text
+    elements.each do |element|
+      self.puts " * #{element}"
+    end
+    self.new_line
+  end
+
   def new_line(count : Int32 = 1) : Nil
     super
     @buffered_output.print "\n" * count
@@ -89,7 +117,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.block message, "NOTE", "fg=yellow", " ! "
   end
 
-  def puts(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+  def puts(message , verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
     super
     self.write_buffer message, true, verbosity, output_type
   end
@@ -109,6 +137,9 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
   def success(message : String) : Nil
     self.block message, "OK", "fg=black;bg=green", padding: true
   end
+
+  # def table(headers : Enumerable, rows : Enumerable(Enumerable)) : Nil
+  # end
 
   def text(message : String) : Nil
     self.auto_prepend_text

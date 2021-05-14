@@ -35,9 +35,12 @@ style = ACON::Style::Athena.new input, output
 # style.info "Oh noes! Bad things?"
 
 style.title "Hello from Athena!"
-style.section "Part 1"
-style.comment "Getting Started"
-style.text "foo bar baz"
+# style.section "Part 1"
+# style.comment "Getting Started"
+# style.text "foo bar baz"
+# style.listing "one", "two", "three"
+
+style.choice "What is your fav color?", {"Red", "Blue", "Green"}
 
 # question_helper = ACON::Helper::Question.new
 # question = ACON::Question::Confirmation.new "Are you sure you want to do this?", false

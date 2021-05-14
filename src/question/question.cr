@@ -7,7 +7,7 @@ class Athena::Console::Question(T)
   getter autocompleter : Proc(String, Array(String))? = nil
 
   property normalizer : Proc(T | String, T)? = nil
-  property validator : Proc(String?, String?)? = nil
+  property validator : Proc(T, T)? = nil
 
   property? multi_line : Bool = false
   property? hidden_fallback : Bool = true
