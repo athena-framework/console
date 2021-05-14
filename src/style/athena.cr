@@ -60,12 +60,20 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.block message, "CAUTION", "fg=white;bg=red", " ! ", true
   end
 
+  def comment(message : String) : Nil
+    self.block message, prefix: "<fg=default;bg=default> // </>", escape: false
+  end
+
   def confirm(question : String, default : Bool = true) : Bool
     self.ask ACON::Question::Confirmation.new question, default
   end
 
   def error(message : String) : Nil
     self.block message, "ERROR", "fg=white;bg=red", padding: true
+  end
+
+  def error_style : self
+    self.class.new @input, self.error_output
   end
 
   def info(message : String) : Nil
@@ -81,13 +89,38 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.block message, "NOTE", "fg=yellow", " ! "
   end
 
+  def puts(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+    super
+    self.write_buffer message, true, verbosity, output_type
+  end
+
+  def print(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+    super
+    self.write_buffer message, false, verbosity, output_type
+  end
+
+  def section(message : String) : Nil
+    self.auto_prepend_block
+    self.puts "<comment>#{ACON::Formatter::OutputFormatter.escape_trailing_backslash message}</>"
+    self.puts %(<comment>#{"-" * ACON::Helper.remove_decoration(self.formatter, message).size}</>)
+    self.new_line
+  end
+
   def success(message : String) : Nil
     self.block message, "OK", "fg=black;bg=green", padding: true
   end
 
-  # def text(message : String) : Nil
-  #   self.auto_prepend_text
-  # end
+  def text(message : String) : Nil
+    self.auto_prepend_text
+    self.puts " #{message}"
+  end
+
+  def title(message : String) : Nil
+    self.auto_prepend_block
+    self.puts "<comment>#{ACON::Formatter::OutputFormatter.escape_trailing_backslash message}</>"
+    self.puts %(<comment>#{"=" * ACON::Helper.remove_decoration(self.formatter, message).size}</>)
+    self.new_line
+  end
 
   def warning(message : String) : Nil
     self.block message, "WARNING", "fg=black;bg=yellow", padding: true
@@ -110,6 +143,11 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     end
 
     self.new_line 2 - chars.count '\n'
+  end
+
+  private def auto_prepend_text : Nil
+    fetched = @buffered_output.fetch
+    self.new_line unless fetched.ends_with? "\n"
   end
 
   private def create_block(messages : Enumerable(String), type : String? = nil, style : String? = nil, prefix : String = " ", padding : Bool = false, escape : Bool = true) : Array(String)
@@ -154,5 +192,9 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
 
       line
     end
+  end
+
+  private def write_buffer(message : String, new_line : Bool, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+    @buffered_output.write message, new_line, verbosity, output_type
   end
 end

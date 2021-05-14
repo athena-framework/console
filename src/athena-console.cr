@@ -27,12 +27,17 @@ output = ACON::Output::ConsoleOutput.new
 
 style = ACON::Style::Athena.new input, output
 
-style.caution "Oh noes! Bad things?"
-style.error "Oh noes! Bad things?"
-style.warning "Oh noes! Bad things?"
-style.note "Oh noes! Bad things?"
-style.success "Oh noes! Bad things?"
-style.info "Oh noes! Bad things?"
+# style.caution "Oh noes! Bad things?"
+# style.error "Oh noes! Bad things?"
+# style.warning "Oh noes! Bad things?"
+# style.note "Oh noes! Bad things?"
+# style.success "Oh noes! Bad things?"
+# style.info "Oh noes! Bad things?"
+
+style.title "Hello from Athena!"
+style.section "Part 1"
+style.comment "Getting Started"
+style.text "foo bar baz"
 
 # question_helper = ACON::Helper::Question.new
 # question = ACON::Question::Confirmation.new "Are you sure you want to do this?", false
