@@ -15,6 +15,14 @@ struct Athena::Console::Formatter::OutputFormatterStyle
     @options |= option
   end
 
+  def background=(color : String)
+    @background = Colorize::ColorANSI.parse color
+  end
+
+  def foreground=(color : String)
+    @foreground = Colorize::ColorANSI.parse color
+  end
+
   def remove_option(option : ACON::Formatter::Mode) : Nil
     @options &= option
   end

@@ -51,13 +51,12 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
       response = nil
 
       if question.hidden?
-        # TODO: Handle hidden responses
-        # begin
-        #   hidden_response = self.hidden_response output, input_stream, question.trimmable?
-        #   response = question.trimmable? ? hidden_response.strip : hidden_response
-        # rescue ex : ACON::Exceptions::ConsoleException
-        #   raise ex unless question.hidden_fallback?
-        # end
+        begin
+          hidden_response = self.hidden_response output, input_stream
+          response = question.trimmable? ? hidden_response.strip : hidden_response
+        rescue ex : ACON::Exceptions::ConsoleException
+          raise ex unless question.hidden_fallback?
+        end
       end
 
       if response.nil?
@@ -71,6 +70,29 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     # TODO: Handle output sections
 
     question.process_response response
+  end
+
+  private def hidden_response(output : ACON::Output::Interface, input_stream : IO) : String
+    # TODO: Support Windows
+    {% raise "Athena::Console component does not support Windows yet." if flag?(:win32) %}
+
+    if @@stty && ACON::Terminal.has_stty_available?
+      stty_mode = `stty -g`
+      system "stty -echo"
+    elsif input_stream.tty?
+    end
+
+    response = input_stream.gets 4096
+
+    if @@stty && ACON::Terminal.has_stty_available?
+      system "stty #{stty_mode}"
+    end
+
+    raise ACON::Exceptions::MissingInput.new "Aborted." if response.nil?
+
+    output.puts ""
+
+    response
   end
 
   private def read_input(input_stream : IO, question : ACON::Question) : String?

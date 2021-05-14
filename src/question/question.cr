@@ -35,6 +35,6 @@ class Athena::Console::Question(T)
       return normalizer.call response
     end
 
-    return @default
+    return response
   end
 end

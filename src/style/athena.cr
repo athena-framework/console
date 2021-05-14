@@ -19,7 +19,11 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     super output
   end
 
-  def ask_question(question : ACON::Question)
+  def ask(question : String, default : _)
+    self.ask ACON::Question.new question, default
+  end
+
+  def ask(question : ACON::Question)
     if @input.interactive?
       self.auto_prepend_block
     end
@@ -34,6 +38,14 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     answer
   end
 
+  def ask_hidden(question : String)
+    question = ACON::Question(String?).new question, nil
+
+    question.hidden = true
+
+    self.ask question
+  end
+
   def block(messages : String | Enumerable(String), type : String? = nil, style : String? = nil, prefix : String = " ", padding : Bool = false, escape : Bool = true) : Nil
     messages = messages.is_a?(Enumerable(String)) ? messages : {messages}
 
@@ -44,14 +56,51 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.new_line
   end
 
+  def caution(message : String) : Nil
+    self.block message, "CAUTION", "fg=white;bg=red", " ! ", true
+  end
+
   def confirm(question : String, default : Bool = true) : Bool
-    self.ask_question ACON::Question::Confirmation.new question, default
+    self.ask ACON::Question::Confirmation.new question, default
+  end
+
+  def error(message : String) : Nil
+    self.block message, "ERROR", "fg=white;bg=red", padding: true
+  end
+
+  def info(message : String) : Nil
+    self.block message, "INFO", "fg=green", padding: true
   end
 
   def new_line(count : Int32 = 1) : Nil
     super
     @buffered_output.print "\n" * count
   end
+
+  def note(message : String) : Nil
+    self.block message, "NOTE", "fg=yellow", " ! "
+  end
+
+  def success(message : String) : Nil
+    self.block message, "OK", "fg=black;bg=green", padding: true
+  end
+
+  # def text(message : String) : Nil
+  #   self.auto_prepend_text
+  # end
+
+  def warning(message : String) : Nil
+    self.block message, "WARNING", "fg=black;bg=yellow", padding: true
+  end
+
+  # def progress_start(max : Int32 = 0) : Nil
+  # end
+
+  # def progress_advance(step : Int32 = 1) : Nil
+  # end
+
+  # def progress_finish : Nil
+  # end
 
   private def auto_prepend_block : Nil
     chars = @buffered_output.fetch
@@ -69,7 +118,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     lines = [] of String
 
     unless type.nil?
-      type = "[#{type}]"
+      type = "[#{type}] "
       indent_length = type.size
       line_indentation = " " * indent_length
     end
@@ -100,7 +149,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
       line += " " * Math.max @line_length - ACON::Helper.remove_decoration(self.formatter, line).size, 0
 
       if style
-        line = "<#{style}>#{line}</#{style}>"
+        line = "<#{style}>#{line}</>"
       end
 
       line

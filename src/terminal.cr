@@ -36,8 +36,8 @@ struct Athena::Console::Terminal
   end
 
   protected def self.init_dimensions : Nil
-    {% raise "Athena::Console component does not support Windows yet." if flag?(:win32) %}
     # TODO: Support Windows
+    {% raise "Athena::Console component does not support Windows yet." if flag?(:win32) %}
 
     self.init_dimensions_via_stty
   end

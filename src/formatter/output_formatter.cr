@@ -69,7 +69,7 @@ class Athena::Console::Formatter::OutputFormatter
               match[3]? || ""
             end
 
-      if !open && !tag
+      if !open && !tag.presence
         @style_stack.pop
       elsif (style = self.create_style_from_string(tag)).nil?
         output += self.apply_current_style text, output, width
@@ -129,13 +129,22 @@ class Athena::Console::Formatter::OutputFormatter
     lines.join "\n"
   end
 
-  private def create_style_from_string(tag : String) : ACON::Formatter::OutputFormatterStyleInterface?
-    if style = @styles[tag]?
+  private def create_style_from_string(string : String) : ACON::Formatter::OutputFormatterStyleInterface?
+    if style = @styles[string]?
       return style
     end
 
-    # TODO: Handle creating generic styles.
+    style = ACON::Formatter::OutputFormatterStyle.new
+    string.scan /([^=]+)=([^;]+)(;|$)/ do |match|
+      case type = match[1].downcase
+      when "fg" then style.foreground = match[2]
+      when "bg" then style.background = match[2]
+      else
+        # TODO: Handle href and options
+        return nil
+      end
+    end
 
-    nil
+    style
   end
 end
