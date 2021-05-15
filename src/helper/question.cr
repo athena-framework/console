@@ -23,7 +23,9 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
         return self.do_ask output, question
       end
 
-      exit 1
+      self.validate_attempts(output, question) do
+        self.do_ask output, question
+      end
     rescue ex : ACON::Exceptions::MissingInput
       input.interactive = false
 
@@ -34,7 +36,27 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
   protected def format_choice_question_choices(question : ACON::Question::Choice, tag : String) : Array(String)
     messages = Array(String).new
 
+    choices = question.choices
+
+    max_width = choices.keys.max_of &.size
+
+    choices.each do |k, v|
+      padding = " " * (max_width - k.size)
+
+      messages << "  [<#{tag}>#{k}#{padding}</#{tag}>] #{v}"
+    end
+
     messages
+  end
+
+  protected def write_error(output : ACON::Output::Interface, error : Exception) : Nil
+    message = if (helper_set = self.helper_set) && (formatter_helper = helper_set[ACON::Helper::Formatter]?)
+                formatter_helper.format_block error.message || "", "error"
+              else
+                "<error>#{error.message}</error>"
+              end
+
+    output.puts message
   end
 
   protected def write_prompt(output : ACON::Output::Interface, question : ACON::Question) : Nil
@@ -129,5 +151,25 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     # TODO: Handle multi line input
 
     nil
+  end
+
+  private def validate_attempts(output : ACON::Output::Interface, question : ACON::Question)
+    error = nil
+    attempts = question.max_attempts
+
+    while attempts.nil? || attempts > 0
+      begin
+        self.write_error output, error if error
+
+        return question.validator.not_nil!.call yield
+      rescue ex : ACON::Exceptions::ValidationFailed
+        pp ex
+        raise ex
+      rescue ex : Exception
+        error = ex
+      end
+    end
+
+    raise error.not_nil!
   end
 end

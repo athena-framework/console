@@ -29,13 +29,13 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     end
 
     answer = self.question_helper.ask @input, self, question
+    exit
+    # if @input.interactive?
+    #   self.new_line
+    #   @buffered_output.print "\n"
+    # end
 
-    if @input.interactive?
-      self.new_line
-      @buffered_output.print "\n"
-    end
-
-    answer
+    # answer
   end
 
   def ask_hidden(question : String)
@@ -50,9 +50,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     messages = messages.is_a?(Enumerable(String)) ? messages : {messages}
 
     self.auto_prepend_block
-    self.create_block(messages, type, style, prefix, padding, escape).each do |line|
-      self.puts line
-    end
+    self.puts self.create_block(messages, type, style, prefix, padding, escape)
     self.new_line
   end
 
@@ -60,19 +58,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.block message, "CAUTION", "fg=white;bg=red", " ! ", true
   end
 
-  def choice(question : String, choices : Hash, default = nil)
-    if default && (value = choices[default]?)
-      default = value
-    end
-
-    self.choice question, choices.values, default
-  end
-
-  def choice(question : String, choices : Enumerable, default = nil)
-    unless default.nil?
-      default = choices.find(default) { |c| c == default }
-    end
-
+  def choice(question : String, choices : Indexable | Hash, default = nil)
     self.ask ACON::Question::Choice.new question, choices, default
   end
 
@@ -117,14 +103,22 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.block message, "NOTE", "fg=yellow", " ! "
   end
 
-  def puts(message , verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
-    super
-    self.write_buffer message, true, verbosity, output_type
+  def puts(messages : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+    messages = messages.is_a?(String) ? {messages} : messages
+
+    messages.each do |message|
+      super message, verbosity, output_type
+      self.write_buffer message, true, verbosity, output_type
+    end
   end
 
-  def print(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
-    super
-    self.write_buffer message, false, verbosity, output_type
+  def print(messages : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+    messages = messages.is_a?(String) ? {messages} : messages
+
+    messages.each do |message|
+      super message, verbosity, output_type
+      self.write_buffer message, false, verbosity, output_type
+    end
   end
 
   def section(message : String) : Nil
@@ -225,7 +219,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     end
   end
 
-  private def write_buffer(message : String, new_line : Bool, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+  private def write_buffer(message : String | Enumerable(String), new_line : Bool, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
     @buffered_output.write message, new_line, verbosity, output_type
   end
 end

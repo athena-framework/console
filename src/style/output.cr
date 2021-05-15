@@ -28,11 +28,11 @@ abstract class Athena::Console::Style::Output
     @output.print "\n" * count
   end
 
-  def puts(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+  def puts(message : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
     @output.puts message, verbosity, output_type
   end
 
-  def print(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+  def print(message : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
     @output.print message, verbosity, output_type
   end
 

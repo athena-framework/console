@@ -24,6 +24,6 @@ class Athena::Console::Output::SizedBuffer < Athena::Console::Output
 
     @buffer += "\n" if new_line
 
-    @buffer = @buffer[-@max_length..-1]? || ""
+    @buffer = @buffer.chars.last(@max_length).join
   end
 end
