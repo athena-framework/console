@@ -124,17 +124,16 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     # TODO: Support Windows
     {% raise "Athena::Console component does not support Windows yet." if flag?(:win32) %}
 
-    if @@stty && ACON::Terminal.has_stty_available?
-      stty_mode = `stty -g`
-      system "stty -echo"
-    elsif input_stream.tty?
-    end
+    response = if input_stream.tty? && input_stream.responds_to? :noecho
+                 input_stream.noecho &.gets 4096
+               elsif @@stty && ACON::Terminal.has_stty_available?
+                 stty_mode = `stty -g`
+                 system "stty -echo"
 
-    response = input_stream.gets 4096
-
-    if @@stty && ACON::Terminal.has_stty_available?
-      system "stty #{stty_mode}"
-    end
+                 input_stream.gets(4096).tap { system "stty #{stty_mode}" }
+               elsif input_stream.tty?
+                 raise ACON::Exceptions::MissingInput.new "Aborted."
+               end
 
     raise ACON::Exceptions::MissingInput.new "Aborted." if response.nil?
 

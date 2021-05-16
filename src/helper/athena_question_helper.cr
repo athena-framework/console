@@ -29,7 +29,7 @@ class Athena::Console::Helper::AthenaQuestionHelper < Athena::Console::Helper::Q
            elsif question.is_a? ACON::Question::Choice
              choices = question.choices
 
-             " <info>#{text}</info> [<comment>#{ACON::Formatter::OutputFormatter.escape choices[default]? || default}</comment>]:"
+             " <info>#{text}</info> [<comment>#{ACON::Formatter::OutputFormatter.escape choices[default]?.try &.to_s || default.to_s}</comment>]:"
            else
              " <info>#{text}</info> [<comment>#{ACON::Formatter::OutputFormatter.escape default.to_s}</comment>]"
            end

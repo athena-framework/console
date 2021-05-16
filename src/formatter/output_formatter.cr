@@ -11,6 +11,10 @@ class Athena::Console::Formatter::OutputFormatter
 
   def self.escape_trailing_backslash(text : String) : String
     if text.ends_with? '\\'
+      len = text.size
+      text = text.rstrip '\\'
+      text = text.gsub "\0", ""
+      text += "\0" * (len - text.size)
     end
 
     text
@@ -70,6 +74,7 @@ class Athena::Console::Formatter::OutputFormatter
             end
 
       if !open && !tag.presence
+        # </>
         @style_stack.pop
       elsif (style = self.create_style_from_string(tag)).nil?
         output += self.apply_current_style text, output, width
@@ -80,7 +85,13 @@ class Athena::Console::Formatter::OutputFormatter
       end
     end
 
-    output += self.apply_current_style message[offset..], output, width
+    output += self.apply_current_style message[offset...], output, width
+
+    if output.includes? '\0'
+      return output
+        .gsub("\0", '\\')
+        .gsub("\\<", '<')
+    end
 
     output.gsub /\\</, "<"
   end
@@ -121,8 +132,8 @@ class Athena::Console::Formatter::OutputFormatter
     end
 
     if self.decorated?
-      lines.each_with_index do |line, idx|
-        lines[idx] = @style_stack.current.apply(line)
+      lines.map! do |line|
+        @style_stack.current.apply line
       end
     end
 

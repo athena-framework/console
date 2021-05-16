@@ -29,13 +29,13 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     end
 
     answer = self.question_helper.ask @input, self, question
-    exit
-    # if @input.interactive?
-    #   self.new_line
-    #   @buffered_output.print "\n"
-    # end
 
-    # answer
+    if @input.interactive?
+      self.new_line
+      @buffered_output.print "\n"
+    end
+
+    answer
   end
 
   def ask_hidden(question : String)

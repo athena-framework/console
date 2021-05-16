@@ -31,12 +31,20 @@ abstract class Athena::Console::Output
     self.write message, true, verbosity, output_type
   end
 
+  def puts(message : _, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+    self.puts message.to_s, verbosity, output_type
+  end
+
   def print(*messages : String) : Nil
     self.print messages
   end
 
   def print(message : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
     self.write message, false, verbosity, output_type
+  end
+
+  def print(message : _, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+    self.print message.to_s, verbosity, output_type
   end
 
   protected def write(
