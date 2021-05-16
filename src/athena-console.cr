@@ -23,10 +23,9 @@ end
 
 # ACON::Application.new("foo").run
 # input = ACON::Input::ARGV.new
-# output = ACON::Output::ConsoleOutput.new
+output = ACON::Output::ConsoleOutput.new
 
 # style = ACON::Style::Athena.new input, output
-
 # cursor = ACON::Cursor.new output
 
 # lib LibC
@@ -67,8 +66,4 @@ end
 
 # formatter = ACON::Formatter::OutputFormatter.new(true)
 
-# escaped = formatter.class.escape "z>=2.0,<\\<<a2.3\\"
-
-# pp escaped
-
-# pp formatter.format %((<info>#{escaped}</info>))
+# output.puts formatter.format_and_wrap("Lorem <error>ipsum</error> dolor <info>sit</info> amet", 8)

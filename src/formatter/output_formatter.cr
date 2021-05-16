@@ -51,7 +51,7 @@ class Athena::Console::Formatter::OutputFormatter
     self.format_and_wrap message, 0
   end
 
-  def format_and_wrap(message : String?, width : Int32?) : String
+  def format_and_wrap(message : String?, width : Int32) : String
     offset = 0
     output = ""
 
@@ -96,6 +96,33 @@ class Athena::Console::Formatter::OutputFormatter
     output.gsub /\\</, "<"
   end
 
+  protected def create_style_from_string(string : String) : ACON::Formatter::OutputFormatterStyleInterface?
+    if style = @styles[string]?
+      return style
+    end
+
+    matches = string.scan /([^=]+)=([^;]+)(;|$)/
+
+    return nil if matches.empty?
+
+    style = ACON::Formatter::OutputFormatterStyle.new
+    matches.each do |match|
+      case type = match[1].downcase
+      when "fg"   then style.foreground = match[2]
+      when "bg"   then style.background = match[2]
+      when "href" then style.href = match[2]
+      when "options"
+        match[2].downcase.scan /([^,;]+)/ do |option|
+          style.add_option option[1]
+        end
+      else
+        return nil
+      end
+    end
+
+    style
+  end
+
   private def apply_current_style(text : String, current : String, width : Int32)
     return "" if text.empty?
 
@@ -110,16 +137,16 @@ class Athena::Console::Formatter::OutputFormatter
     if !@current_line_length.zero?
       i = width - @current_line_length
       prefix = "#{text[0, i]}\n"
-      text = text[i..]
+      text = text[i...]? || ""
     else
       prefix = ""
     end
 
     # TODO: Something about matching `~(\\n)$~`.
-    text = prefix + text.gsub(/([^\n]{#{width}})\ */, "\\0\n")
-    text = text.rstrip
+    text = "#{prefix}#{text.gsub(/([^\\n]{#{width}})\ */, "\\1\n")}"
+    text = text.chomp
 
-    if !@current_line_length.zero? && !current.empty? && "\n" != current[-1]
+    if @current_line_length.zero? && !current.empty? && !current.ends_with? "\n"
       text = "\n#{text}"
     end
 
@@ -128,7 +155,7 @@ class Athena::Console::Formatter::OutputFormatter
     lines.each do |line|
       @current_line_length += line.size
 
-      @current_line_length = 0 if width < @current_line_length
+      @current_line_length = 0 if width <= @current_line_length
     end
 
     if self.decorated?
@@ -138,24 +165,5 @@ class Athena::Console::Formatter::OutputFormatter
     end
 
     lines.join "\n"
-  end
-
-  private def create_style_from_string(string : String) : ACON::Formatter::OutputFormatterStyleInterface?
-    if style = @styles[string]?
-      return style
-    end
-
-    style = ACON::Formatter::OutputFormatterStyle.new
-    string.scan /([^=]+)=([^;]+)(;|$)/ do |match|
-      case type = match[1].downcase
-      when "fg" then style.foreground = match[2]
-      when "bg" then style.background = match[2]
-      else
-        # TODO: Handle href and options
-        return nil
-      end
-    end
-
-    style
   end
 end
