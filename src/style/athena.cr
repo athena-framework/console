@@ -123,7 +123,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
 
   def section(message : String) : Nil
     self.auto_prepend_block
-    self.puts "<comment>#{ACON::Formatter::OutputFormatter.escape_trailing_backslash message}</>"
+    self.puts "<comment>#{ACON::Formatter::Output.escape_trailing_backslash message}</>"
     self.puts %(<comment>#{"-" * ACON::Helper.remove_decoration(self.formatter, message).size}</>)
     self.new_line
   end
@@ -142,7 +142,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
 
   def title(message : String) : Nil
     self.auto_prepend_block
-    self.puts "<comment>#{ACON::Formatter::OutputFormatter.escape_trailing_backslash message}</>"
+    self.puts "<comment>#{ACON::Formatter::Output.escape_trailing_backslash message}</>"
     self.puts %(<comment>#{"=" * ACON::Helper.remove_decoration(self.formatter, message).size}</>)
     self.new_line
   end
@@ -187,7 +187,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     end
 
     messages.each_with_index do |message, idx|
-      message = ACON::Formatter::OutputFormatter.escape message if escape
+      message = ACON::Formatter::Output.escape message if escape
 
       decoration_length = message.size - ACON::Helper.remove_decoration(self.formatter, message).size
       message_line_length = Math.min(@line_length - prefix_length - indent_length + decoration_length, @line_length)

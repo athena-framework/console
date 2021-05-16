@@ -6,7 +6,7 @@ class Athena::Console::Helper::Formatter < Athena::Console::Helper
     lines = [] of String
 
     messages.each do |message|
-      message = ACON::Formatter::OutputFormatter.escape message
+      message = ACON::Formatter::Output.escape message
       lines << (large ? "  #{message}  " : " #{message} ")
       len = Math.max (message.size + (large ? 4 : 2)), len
     end

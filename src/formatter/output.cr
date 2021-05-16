@@ -1,7 +1,7 @@
 require "./wrappable_output_formatter_interface"
 
-class Athena::Console::Formatter::OutputFormatter
-  include Athena::Console::Formatter::WrappableOutputFormatterInterface
+class Athena::Console::Formatter::Output
+  include Athena::Console::Formatter::WrappableInterface
 
   def self.escape(string : String) : String
     text = string.gsub /([^\\\\]?)</, "\\1\\<"
@@ -20,22 +20,22 @@ class Athena::Console::Formatter::OutputFormatter
     text
   end
 
-  getter style_stack : ACON::Formatter::OutputFormatterStyleStack = ACON::Formatter::OutputFormatterStyleStack.new
+  getter style_stack : ACON::Formatter::OutputStyleStack = ACON::Formatter::OutputStyleStack.new
 
   # :inherit:
   property? decorated : Bool
 
-  @styles = Hash(String, ACON::Formatter::OutputFormatterStyleInterface).new
+  @styles = Hash(String, ACON::Formatter::OutputStyleInterface).new
   @current_line_length = 0
 
   def initialize(@decorated : Bool = false, styles : ACON::Formatter::Mode? = nil)
-    self.set_style "error", ACON::Formatter::OutputFormatterStyle.new(:white, :red)
-    self.set_style "info", ACON::Formatter::OutputFormatterStyle.new(:green)
-    self.set_style "comment", ACON::Formatter::OutputFormatterStyle.new(:yellow)
-    self.set_style "question", ACON::Formatter::OutputFormatterStyle.new(:black, :cyan)
+    self.set_style "error", ACON::Formatter::OutputStyle.new(:white, :red)
+    self.set_style "info", ACON::Formatter::OutputStyle.new(:green)
+    self.set_style "comment", ACON::Formatter::OutputStyle.new(:yellow)
+    self.set_style "question", ACON::Formatter::OutputStyle.new(:black, :cyan)
   end
 
-  def set_style(name : String, style : ACON::Formatter::OutputFormatterStyleInterface) : Nil
+  def set_style(name : String, style : ACON::Formatter::OutputStyleInterface) : Nil
     @styles[name.downcase] = style
   end
 
@@ -43,7 +43,7 @@ class Athena::Console::Formatter::OutputFormatter
     @styles.has_key? name.downcase
   end
 
-  def style(name : String) : ACON::Formatter::OutputFormatterStyleInterface
+  def style(name : String) : ACON::Formatter::OutputStyleInterface
     @styles[name.downcase]
   end
 
@@ -96,7 +96,7 @@ class Athena::Console::Formatter::OutputFormatter
     output.gsub /\\</, "<"
   end
 
-  protected def create_style_from_string(string : String) : ACON::Formatter::OutputFormatterStyleInterface?
+  protected def create_style_from_string(string : String) : ACON::Formatter::OutputStyleInterface?
     if style = @styles[string]?
       return style
     end
@@ -105,7 +105,7 @@ class Athena::Console::Formatter::OutputFormatter
 
     return nil if matches.empty?
 
-    style = ACON::Formatter::OutputFormatterStyle.new
+    style = ACON::Formatter::OutputStyle.new
     matches.each do |match|
       case type = match[1].downcase
       when "fg"   then style.foreground = match[2]

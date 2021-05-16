@@ -537,7 +537,7 @@ class Athena::Console::Application
             line = match[2]?
           end
 
-          messages << %(<comment>#{ACON::Formatter::OutputFormatter.escape "In #{filename || "n/a"} line #{line || "n/a"}:"}</comment>)
+          messages << %(<comment>#{ACON::Formatter::Output.escape "In #{filename || "n/a"} line #{line || "n/a"}:"}</comment>)
         end
       end
 
@@ -548,7 +548,7 @@ class Athena::Console::Application
       end
 
       lines.each do |line|
-        messages << "<error>  #{ACON::Formatter::OutputFormatter.escape line[0]}  #{" "*(len - line[1])}</error>"
+        messages << "<error>  #{ACON::Formatter::Output.escape line[0]}  #{" "*(len - line[1])}</error>"
       end
 
       messages << empty_line

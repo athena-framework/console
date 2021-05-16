@@ -1,11 +1,10 @@
 require "../spec_helper"
 
-@[ASPEC::TestCase::Focus]
 struct OutputFormatterTest < ASPEC::TestCase
-  @formatter : ACON::Formatter::OutputFormatter
+  @formatter : ACON::Formatter::Output
 
   def initialize
-    @formatter = ACON::Formatter::OutputFormatter.new true
+    @formatter = ACON::Formatter::Output.new true
   end
 
   def test_format_empty_tag : Nil
@@ -18,7 +17,7 @@ struct OutputFormatterTest < ASPEC::TestCase
     @formatter.format("foo << bar \\").should eq "foo << bar \\"
     @formatter.format("foo << <info>bar \\ baz</info> \\").should eq "foo << \e[32mbar \\ baz\e[0m \\"
     @formatter.format("\\<info>some info\\</info>").should eq "<info>some info</info>"
-    ACON::Formatter::OutputFormatter.escape("<info>some info</info>").should eq "\\<info>some info\\</info>"
+    ACON::Formatter::Output.escape("<info>some info</info>").should eq "\\<info>some info\\</info>"
 
     @formatter.format("<comment>Some\\Path\\ToFile does work very well!</comment>").should eq "\e[33mSome\\Path\\ToFile does work very well!\e[0m"
   end
@@ -59,13 +58,13 @@ struct OutputFormatterTest < ASPEC::TestCase
   end
 
   def test_format_custom_style : Nil
-    style = ACON::Formatter::OutputFormatterStyle.new :blue, :white
+    style = ACON::Formatter::OutputStyle.new :blue, :white
     @formatter.set_style "test", style
 
     @formatter.style("test").should eq style
     @formatter.style("info").should_not eq style
 
-    style = ACON::Formatter::OutputFormatterStyle.new :blue, :white
+    style = ACON::Formatter::OutputStyle.new :blue, :white
     @formatter.set_style "b", style
 
     @formatter.format("<test>some message</test><b>custom</b>").should eq "\e[34;107msome message\e[0m\e[34;107mcustom\e[0m"
@@ -73,7 +72,7 @@ struct OutputFormatterTest < ASPEC::TestCase
   end
 
   def test_format_redefine_style : Nil
-    style = ACON::Formatter::OutputFormatterStyle.new :blue, :white
+    style = ACON::Formatter::OutputStyle.new :blue, :white
     @formatter.set_style "info", style
 
     @formatter.format("<info>some custom message</info>").should eq "\e[34;107msome custom message\e[0m"
@@ -99,7 +98,7 @@ struct OutputFormatterTest < ASPEC::TestCase
       expected = "#{tag}#{input}</#{style_string}>"
       @formatter.format(expected).should eq expected
     else
-      style.should be_a ACON::Formatter::OutputFormatterStyle
+      style.should be_a ACON::Formatter::OutputStyle
       @formatter.format("#{tag}#{input}</>").should eq expected
       @formatter.format("#{tag}#{input}</#{style_string}>").should eq expected
     end
@@ -131,7 +130,7 @@ struct OutputFormatterTest < ASPEC::TestCase
   end
 
   def test_has_style : Nil
-    @formatter = ACON::Formatter::OutputFormatter.new
+    @formatter = ACON::Formatter::Output.new
 
     @formatter.has_style?("error").should be_true
     @formatter.has_style?("info").should be_true
@@ -145,8 +144,8 @@ struct OutputFormatterTest < ASPEC::TestCase
     ENV["TERMINAL_EMULATOR"] = term_emulator
 
     begin
-      ACON::Formatter::OutputFormatter.new(true).format(input).should eq expected_decorated_output
-      ACON::Formatter::OutputFormatter.new(false).format(input).should eq expected_non_decorated_output
+      ACON::Formatter::Output.new(true).format(input).should eq expected_decorated_output
+      ACON::Formatter::Output.new(false).format(input).should eq expected_non_decorated_output
     ensure
       if previous_term_emulator
         ENV["TERMINAL_EMULATOR"] = previous_term_emulator
@@ -188,7 +187,7 @@ struct OutputFormatterTest < ASPEC::TestCase
   end
 
   def test_format_and_wrap_non_decorated : Nil
-    @formatter = ACON::Formatter::OutputFormatter.new
+    @formatter = ACON::Formatter::Output.new
 
     @formatter.format_and_wrap("foo<error>bar</error> baz", 2).should eq "fo\nob\nar\nba\nz"
     @formatter.format_and_wrap("pre <error>foo bar baz</error> post", 2).should eq "pr\ne \nfo\no \nba\nr \nba\nz \npo\nst"

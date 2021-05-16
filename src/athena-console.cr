@@ -64,6 +64,6 @@ output = ACON::Output::ConsoleOutput.new
 
 # pp answer, typeof(answer)
 
-# formatter = ACON::Formatter::OutputFormatter.new(true)
+# formatter = ACON::Formatter::Output.new(true)
 
 # output.puts formatter.format_and_wrap("Lorem <error>ipsum</error> dolor <info>sit</info> amet", 8)

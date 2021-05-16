@@ -109,7 +109,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
 
     ([command.synopsis(true)] + command.aliases + command.usages).each do |usage|
       self.write_text "\n"
-      self.write_text "  #{ACON::Formatter::OutputFormatter.escape usage}", context
+      self.write_text "  #{ACON::Formatter::Output.escape usage}", context
     end
 
     self.write_text "\n"

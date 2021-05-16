@@ -26,7 +26,7 @@ class Athena::Console::Output::Null
   end
 
   def formatter : ACON::Formatter::Interface
-    @formatter ||= ACON::Formatter::NullFormatter.new
+    @formatter ||= ACON::Formatter::Null.new
   end
 
   def formatter=(formatter : ACON::Formatter::Interface)

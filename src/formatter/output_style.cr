@@ -1,8 +1,8 @@
 require "colorize"
 require "./output_formatter_style_interface"
 
-struct Athena::Console::Formatter::OutputFormatterStyle
-  include Athena::Console::Formatter::OutputFormatterStyleInterface
+struct Athena::Console::Formatter::OutputStyle
+  include Athena::Console::Formatter::OutputStyleInterface
 
   setter foreground : Colorize::Color
   setter background : Colorize::Color

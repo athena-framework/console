@@ -15,7 +15,7 @@ class Athena::Console::Helper::AthenaQuestionHelper < Athena::Console::Helper::Q
   end
 
   protected def write_prompt(output : ACON::Output::Interface, question : ACON::Question) : Nil
-    text = ACON::Formatter::OutputFormatter.escape_trailing_backslash question.question
+    text = ACON::Formatter::Output.escape_trailing_backslash question.question
     default = question.default
 
     # TODO: Handle multi line questions
@@ -29,9 +29,9 @@ class Athena::Console::Helper::AthenaQuestionHelper < Athena::Console::Helper::Q
            elsif question.is_a? ACON::Question::Choice
              choices = question.choices
 
-             " <info>#{text}</info> [<comment>#{ACON::Formatter::OutputFormatter.escape choices[default]?.try &.to_s || default.to_s}</comment>]:"
+             " <info>#{text}</info> [<comment>#{ACON::Formatter::Output.escape choices[default]?.try &.to_s || default.to_s}</comment>]:"
            else
-             " <info>#{text}</info> [<comment>#{ACON::Formatter::OutputFormatter.escape default.to_s}</comment>]"
+             " <info>#{text}</info> [<comment>#{ACON::Formatter::Output.escape default.to_s}</comment>]"
            end
 
     output.puts text
