@@ -47,7 +47,7 @@ struct Athena::Console::Formatter::OutputStyle
   end
 
   def remove_option(option : ACON::Formatter::Mode) : Nil
-    @options &= option
+    @options ^= option
   end
 
   def apply(text : String) : String
