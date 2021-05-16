@@ -2,6 +2,7 @@ module Athena::Console::Spec
   module Tester
     @capture_stderr_separately : Bool = false
     getter! output : ACON::Output::Interface
+    setter inputs : Array(String)? = nil
 
     def display : String
       self.output.to_s
@@ -81,7 +82,17 @@ module Athena::Console::Spec
         self.input.interactive = i
       end
 
-      # TODO: Something about inputs?
+      if inputs = @inputs
+        input_stream = IO::Memory.new
+
+        inputs.each do |input|
+          input_stream << input
+        end
+
+        input_stream.rewind
+
+        self.input.stream = input_stream
+      end
 
       self.init_output(
         decorated: decorated,

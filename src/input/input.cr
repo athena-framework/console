@@ -2,7 +2,6 @@ require "./interface"
 require "./streamable"
 
 abstract class Athena::Console::Input
-  include Athena::Console::Input::Interface
   include Athena::Console::Input::Streamable
 
   alias InputTypes = String | Bool | Nil | Number::Primitive

@@ -496,7 +496,10 @@ class Athena::Console::Application
   end
 
   protected def default_helper_set : ACON::Helper::HelperSet
-    ACON::Helper::HelperSet.new
+    ACON::Helper::HelperSet.new(
+      ACON::Helper::Formatter.new,
+      ACON::Helper::Question.new
+    )
   end
 
   protected def do_render_exception(ex : Exception, output : ACON::Output::Interface) : Nil

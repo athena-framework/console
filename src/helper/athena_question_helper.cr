@@ -23,7 +23,7 @@ class Athena::Console::Helper::AthenaQuestionHelper < Athena::Console::Helper::Q
     text = if default.nil?
              " <info>#{text}</info>:"
            elsif question.is_a? ACON::Question::Confirmation
-             %( <info>#{text} (yes/no)</info> [<comment>#{default ? "yes" : "no"}</comment>])
+             %( <info>#{text} (yes/no)</info> [<comment>#{default ? "yes" : "no"}</comment>]:)
            elsif question.is_a? ACON::Question::Choice && question.multi_select?
              ""
            elsif question.is_a? ACON::Question::Choice
@@ -31,7 +31,7 @@ class Athena::Console::Helper::AthenaQuestionHelper < Athena::Console::Helper::Q
 
              " <info>#{text}</info> [<comment>#{ACON::Formatter::Output.escape choices[default]?.try &.to_s || default.to_s}</comment>]:"
            else
-             " <info>#{text}</info> [<comment>#{ACON::Formatter::Output.escape default.to_s}</comment>]"
+             " <info>#{text}</info> [<comment>#{ACON::Formatter::Output.escape default.to_s}</comment>]:"
            end
 
     output.puts text

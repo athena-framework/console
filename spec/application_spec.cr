@@ -362,10 +362,31 @@ struct ApplicationTest < ASPEC::TestCase
     )
   end
 
-  def ptest_run_alternate_command_name : Nil
+  def test_run_alternate_command_name : Nil
+    app = ACON::Application.new "foo"
+    app.add FooWithoutAliasCommand.new
+    app.auto_exit = false
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.inputs = ["y"]
+    tester.run command: "foos", decorated: false
+    output = tester.display.strip
+    output.should contain "Command 'foos' is not defined"
+    output.should contain "Do you want to run 'foo' instead? (yes/no) [no]:"
+    output.should contain "execute called"
   end
 
-  def ptest_dont_run_alternate_command_name : Nil
+  def test_dont_run_alternate_command_name : Nil
+    app = ACON::Application.new "foo"
+    app.add FooWithoutAliasCommand.new
+    app.auto_exit = false
+    tester = ACON::Spec::ApplicationTester.new app
+
+    tester.inputs = ["n"]
+    tester.run(command: "foos", decorated: false).should eq ACON::Command::Status::FAILURE
+    output = tester.display.strip
+    output.should contain "Command 'foos' is not defined"
+    output.should contain "Do you want to run 'foo' instead? (yes/no) [no]:"
   end
 
   def test_find_alternative_exception_message_multiple : Nil
@@ -882,10 +903,28 @@ struct ApplicationTest < ASPEC::TestCase
     }
   end
 
-  def ptest_helper_set_contains_default_helpers : Nil
+  def test_helper_set_contains_default_helpers : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    helper_set = app.helper_set
+
+    helper_set.has?(ACON::Helper::Question).should be_true
+    helper_set.has?(ACON::Helper::Formatter).should be_true
   end
 
-  # TODO: Add helper related specs
+  def test_adding_single_helper_overwrites_default : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.catch_exceptions = false
+
+    app.helper_set = ACON::Helper::HelperSet.new(ACON::Helper::Formatter.new)
+
+    helper_set = app.helper_set
+    helper_set.has?(ACON::Helper::Question).should be_false
+    helper_set.has?(ACON::Helper::Formatter).should be_true
+  end
 
   def test_default_input_definition_returns_default_values : Nil
     app = ACON::Application.new "foo"
@@ -906,7 +945,7 @@ struct ApplicationTest < ASPEC::TestCase
     definition.has_option?("no-ansi").should be_false
   end
 
-  # TODO: Test custom application type's defaults.
+  # TODO: Test custom application type's helper set.
 
   def test_setting_custom_input_definition_overrides_default_values : Nil
     app = ACON::Application.new "foo"
