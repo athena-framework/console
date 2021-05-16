@@ -1,4 +1,4 @@
-require "./wrappable_output_formatter_interface"
+require "./wrappable_interface"
 
 class Athena::Console::Formatter::Output
   include Athena::Console::Formatter::WrappableInterface

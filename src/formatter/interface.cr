@@ -1,4 +1,4 @@
-require "./output_formatter_style_interface"
+require "./output_style_interface"
 
 module Athena::Console::Formatter::Interface
   abstract def decorated=(@decorated : Bool)

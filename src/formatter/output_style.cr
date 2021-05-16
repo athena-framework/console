@@ -1,5 +1,5 @@
 require "colorize"
-require "./output_formatter_style_interface"
+require "./output_style_interface"
 
 struct Athena::Console::Formatter::OutputStyle
   include Athena::Console::Formatter::OutputStyleInterface

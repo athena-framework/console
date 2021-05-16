@@ -1,9 +1,9 @@
-class Athena::Console::Formatter::OutputFormatterStyleStack
-  property empty_style : ACON::Formatter::OutputFormatterStyleInterface
+class Athena::Console::Formatter::OutputStyleStack
+  property empty_style : ACON::Formatter::OutputStyleInterface
 
-  @styles = Array(ACON::Formatter::OutputFormatterStyleInterface).new
+  @styles = Array(ACON::Formatter::OutputStyleInterface).new
 
-  def initialize(@empty_style : ACON::Formatter::OutputFormatterStyleInterface = ACON::Formatter::OutputFormatterStyle.new)
+  def initialize(@empty_style : ACON::Formatter::OutputStyleInterface = ACON::Formatter::OutputStyle.new)
     self.reset
   end
 
@@ -11,11 +11,11 @@ class Athena::Console::Formatter::OutputFormatterStyleStack
     @styles.clear
   end
 
-  def <<(style : ACON::Formatter::OutputFormatterStyleInterface) : Nil
+  def <<(style : ACON::Formatter::OutputStyleInterface) : Nil
     @styles << style
   end
 
-  def pop(style : ACON::Formatter::OutputFormatterStyleInterface? = nil) : ACON::Formatter::OutputFormatterStyleInterface
+  def pop(style : ACON::Formatter::OutputStyleInterface? = nil) : ACON::Formatter::OutputStyleInterface
     return @empty_style if @styles.empty?
 
     return @styles.pop if style.nil?
@@ -31,7 +31,7 @@ class Athena::Console::Formatter::OutputFormatterStyleStack
     raise ArgumentError.new "Provided style is not present in the stack."
   end
 
-  def current : ACON::Formatter::OutputFormatterStyleInterface
+  def current : ACON::Formatter::OutputStyleInterface
     @styles.last? || @empty_style
   end
 end
