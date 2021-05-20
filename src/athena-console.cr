@@ -22,10 +22,10 @@ module Athena::Console
 end
 
 # ACON::Application.new("foo").run
-# input = ACON::Input::ARGV.new
+input = ACON::Input::ARGV.new
 output = ACON::Output::ConsoleOutput.new
 
-# style = ACON::Style::Athena.new input, output
+style = ACON::Style::Athena.new input, output
 # cursor = ACON::Cursor.new output
 
 # lib LibC
@@ -52,11 +52,17 @@ output = ACON::Output::ConsoleOutput.new
 
 # pp style.ask_hidden "what is your password?"
 
-# pp style.choice "What is your fav color?", {"Red", "Blue", "Green"}
+pp style.choice "What is your fav color?", {"Red", "Blue", "Green"}
 # style.choice "What is your fav color?", {"r" => "Red", "g" => "Green", "b" => "Blue"}
-# pp ACON::Question::Choice.new "What is your fav color?", {"Red", "Blue", "Green"}
-# pp ACON::Question::Choice.new "What is your fav color?", {"r" => "Red", "g" => "Green", "b" => "Blue"}
+# q = ACON::Question::Choice.new "What is your fav color?", {"Red", "Blue", "Green"}
 
+# pp q.autocompleter_values
+
+# q = ACON::Question::Choice.new "What is your fav color?", {"r" => "Red", "g" => "Green", "b" => "Blue"}
+
+# pp q.autocompleter_values
+
+# pp ACON::Question::Choice.new "What is your fav color?", {"r" => "Red", "g" => "Green", "b" => "Blue"}
 # question_helper = ACON::Helper::Question.new
 # question = ACON::Question::Confirmation.new "Are you sure you want to do this?", false
 

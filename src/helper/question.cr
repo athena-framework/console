@@ -38,10 +38,10 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
 
     choices = question.choices
 
-    max_width = choices.keys.max_of &.size
+    max_width = choices.keys.max_of { |k| k.is_a?(String) ? k.size : k.digits.size }
 
     choices.each do |k, v|
-      padding = " " * (max_width - k.size)
+      padding = " " * (max_width - (k.is_a?(String) ? k.size : k.digits.size))
 
       messages << "  [<#{tag}>#{k}#{padding}</#{tag}>] #{v}"
     end
@@ -91,7 +91,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     self.write_prompt output, question
 
     input_stream = @stream || STDIN
-    autocomplete = question.autocompleter
+    autocomplete = question.autocompleter_callback
 
     # TODO: Handle invalid input IO
 
@@ -162,7 +162,6 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
 
         return question.validator.not_nil!.call yield
       rescue ex : ACON::Exceptions::ValidationFailed
-        pp ex
         raise ex
       rescue ex : Exception
         error = ex

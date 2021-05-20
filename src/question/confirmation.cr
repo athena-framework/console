@@ -7,7 +7,7 @@ class Athena::Console::Question::Confirmation < Athena::Console::Question(Bool)
     self.normalizer = ->default_normalizer(String | Bool)
   end
 
-  private def default_normalizer(answer : String | Bool) : Bool?
+  private def default_normalizer(answer : String | Bool) : Bool
     if answer.is_a? Bool
       return answer
     end
