@@ -28,7 +28,7 @@ class Athena::Console::Question(T)
   end
 
   def autocompleter_values=(values : Hash?) : self
-    self.autocompleter_values = values.keys.map(&.to_s) + values.values
+    self.autocompleter_values = values.values
   end
 
   def autocompleter_values=(values : Indexable?) : self
@@ -52,10 +52,19 @@ class Athena::Console::Question(T)
     @autocompleter_callback = block
   end
 
-  def hidden=(hidden : Bool) : Nil
+  def hidden=(hidden : Bool) : self
     raise ACON::Exceptions::Logic.new "A hidden question cannot use the autocompleter." if @autocompleter_callback
 
     @hidden = hidden
+
+    self
+  end
+
+  def max_attempts=(attempts : Int32?) : self
+    raise ACON::Exceptions::InvalidArgument.new "Maximum number of attempts must be a positive value." if attempts && attempts < 0
+
+    @max_attempts = attempts
+    self
   end
 
   protected def process_response(response : String) : T

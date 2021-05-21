@@ -50,7 +50,7 @@ class Athena::Console::Question::Choice(T) < Athena::Console::Question(T?)
 
       raise ACON::Exceptions::InvalidArgument.new "Amb" if results.size > 1
 
-      result = @choices.values.find { |v| v == value }
+      result = @choices.find { |(k, v)| v == value || k.to_s == value }.try &.first.to_s
 
       # If none of the keys are a string, assume the original choices was an Indexable.
       if !@choices.keys.any? { |k| !k.is_a? String }

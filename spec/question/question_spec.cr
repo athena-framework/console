@@ -1,6 +1,5 @@
 require "../spec_helper"
 
-@[ASPEC::TestCase::Focus]
 struct QuestionTest < ASPEC::TestCase
   @question : ACON::Question(Nil)
 
@@ -21,5 +20,33 @@ struct QuestionTest < ASPEC::TestCase
     expect_raises ACON::Exceptions::Logic, "A hidden question cannot use the autocompleter" do
       @question.hidden = true
     end
+  end
+
+  @[DataProvider("autocompleter_values_provider")]
+  def test_get_set_autocompleter_values(values : Indexable | Hash, expected : Array(String)) : Nil
+    @question.autocompleter_values = values
+
+    @question.autocompleter_values.should eq expected
+  end
+
+  def autocompleter_values_provider : Hash
+    {
+      "tuple" => {
+        {"a", "b", "c"},
+        ["a", "b", "c"],
+      },
+      "array" => {
+        ["a", "b", "c"],
+        ["a", "b", "c"],
+      },
+      "string key hash" => {
+        {"a" => "b", "c" => "d"},
+        ["a", "c", "b", "d"],
+      },
+      "int key hash" => {
+        {0 => "b", 1 => "d"},
+        ["b", "d"],
+      },
+    }
   end
 end

@@ -91,11 +91,11 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     self.write_prompt output, question
 
     input_stream = @stream || STDIN
-    autocomplete = question.autocompleter_callback
+    autocompleter = question.autocompleter_callback
 
     # TODO: Handle invalid input IO
 
-    if autocomplete.nil? || !@@stty || !ACON::Terminal.has_stty_available?
+    if autocompleter.nil? || !@@stty || !ACON::Terminal.has_stty_available?
       response = nil
 
       if question.hidden?
@@ -112,12 +112,17 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
         response = response.strip if question.trimmable?
       end
     else
-      response = ""
+      autocomplete = self.autocomplete output, question, input_stream, autocompleter
+      response = question.trimmable? ? autocomplete.strip : autocomplete
     end
 
     # TODO: Handle output sections
 
     question.process_response response
+  end
+
+  private def autocomplete(output : ACON::Output::Interface, question : ACON::Question, input_stream : IO, autocompleter) : String
+    self.read_input(input_stream, question) || ""
   end
 
   private def hidden_response(output : ACON::Output::Interface, input_stream : IO) : String
@@ -157,14 +162,16 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     attempts = question.max_attempts
 
     while attempts.nil? || attempts > 0
-      begin
-        self.write_error output, error if error
+      self.write_error output, error if error
 
+      begin
         return question.validator.not_nil!.call yield
       rescue ex : ACON::Exceptions::ValidationFailed
         raise ex
       rescue ex : Exception
         error = ex
+      ensure
+        attempts -= 1 if attempts
       end
     end
 
