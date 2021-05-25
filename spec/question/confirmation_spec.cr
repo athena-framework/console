@@ -2,7 +2,7 @@ require "../spec_helper"
 
 struct ConfirmationQuestionTest < ASPEC::TestCase
   @[DataProvider("normalizer_provider")]
-  def test_default_regex(default : Bool, answers : Tuple, expected : Bool) : Nil
+  def test_default_regex(default : Bool, answers : Array, expected : Bool) : Nil
     question = ACON::Question::Confirmation.new "A question", default
 
     answers.each do |answer|
@@ -16,22 +16,22 @@ struct ConfirmationQuestionTest < ASPEC::TestCase
     {
       {
         true,
-        {"y", "Y", "yes", "YES", "yEs", ""},
+        ["y", "Y", "yes", "YES", "yEs", ""],
         true,
       },
       {
         true,
-        {"n", "N", "no", "NO", "nO", "foo", "1", "0"},
+        ["n", "N", "no", "NO", "nO", "foo", "1", "0"],
         false,
       },
       {
         false,
-        {"y", "Y", "yes", "YES", "yEs"},
+        ["y", "Y", "yes", "YES", "yEs"],
         true,
       },
       {
         false,
-        {"n", "N", "no", "NO", "nO", "foo", "1", "0", ""},
+        ["n", "N", "no", "NO", "nO", "foo", "1", "0", ""],
         false,
       },
     }
