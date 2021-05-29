@@ -2,7 +2,7 @@ require "../spec_helper"
 
 describe ACON::Formatter::OutputStyle do
   it ".new" do
-    ACON::Formatter::OutputStyle.new(:green, :black, ACON::Formatter::Mode::Bold | ACON::Formatter::Mode::Underline)
+    ACON::Formatter::OutputStyle.new(:green, :black, ACON::Formatter::Mode.flags Bold, Underline)
       .apply("foo").should eq "\e[32;40;1;4mfoo\e[0m"
 
     ACON::Formatter::OutputStyle.new(:red, options: ACON::Formatter::Mode::Blink)

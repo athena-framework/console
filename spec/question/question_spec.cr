@@ -1,10 +1,10 @@
 require "../spec_helper"
 
 struct QuestionTest < ASPEC::TestCase
-  @question : ACON::Question(Nil)
+  @question : ACON::Question(String?)
 
   def initialize
-    @question = ACON::Question(Nil).new "Test Question", nil
+    @question = ACON::Question(String?).new "Test Question", nil
   end
 
   def test_default : Nil

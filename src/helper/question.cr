@@ -7,7 +7,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
 
   @stream : IO? = nil
 
-  def ask(input : ACON::Input::Interface, output : ACON::Output::Interface, question : ACON::Question)
+  def ask(input : ACON::Input::Interface, output : ACON::Output::Interface, question : ACON::Question::QuestionBase)
     if output.is_a? ACON::Output::ConsoleOutputInterface
       output = output.error_output
     end
@@ -33,7 +33,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     end
   end
 
-  protected def format_choice_question_choices(question : ACON::Question::Choice, tag : String) : Array(String)
+  protected def format_choice_question_choices(question : ACON::Question::AbstractChoice, tag : String) : Array(String)
     messages = Array(String).new
 
     choices = question.choices
@@ -59,35 +59,40 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     output.puts message
   end
 
-  protected def write_prompt(output : ACON::Output::Interface, question : ACON::Question) : Nil
+  protected def write_prompt(output : ACON::Output::Interface, question : ACON::Question::QuestionBase) : Nil
     message = question.question
 
-    # TODO: Handle Choice questions
+    if question.is_a? ACON::Question::AbstractChoice
+      output.puts question.question
+      output.puts self.format_choice_question_choices question, "info"
+
+      message = question.prompt
+    end
 
     output.print message
   end
 
-  private def default_answer(question : ACON::Question)
+  private def default_answer(question : ACON::Question::QuestionBase)
     default = question.default
 
     return default if default.nil?
 
     if validator = question.validator
       validator.call default
-    elsif question.is_a? ACON::Question::Choice
+    elsif question.is_a? ACON::Question::AbstractChoice
       choices = question.choices
 
-      # unless question.multi_select?
-      #   return choices[default]? || default
-      # end
+      unless question.is_a? ACON::Question::MultipleChoice
+        return choices[default]? || default
+      end
 
-      # TODO: Handle multiselect
+      # default = default.split ','
     end
 
     default
   end
 
-  private def do_ask(output : ACON::Output::Interface, question : ACON::Question)
+  private def do_ask(output : ACON::Output::Interface, question : ACON::Question::QuestionBase)
     self.write_prompt output, question
 
     input_stream = @stream || STDIN
@@ -121,7 +126,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     question.process_response response
   end
 
-  private def autocomplete(output : ACON::Output::Interface, question : ACON::Question, input_stream : IO, autocompleter) : String
+  private def autocomplete(output : ACON::Output::Interface, question : ACON::Question::QuestionBase, input_stream : IO, autocompleter) : String
     self.read_input(input_stream, question) || ""
   end
 
@@ -147,17 +152,15 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     response
   end
 
-  private def read_input(input_stream : IO, question : ACON::Question) : String?
+  private def read_input(input_stream : IO, question : ACON::Question::QuestionBase) : String?
     unless question.multi_line?
       return input_stream.gets 4096
     end
 
-    # TODO: Handle multi line input
-
-    nil
+    input_stream.gets_to_end
   end
 
-  private def validate_attempts(output : ACON::Output::Interface, question : ACON::Question)
+  private def validate_attempts(output : ACON::Output::Interface, question : ACON::Question::QuestionBase)
     error = nil
     attempts = question.max_attempts
 

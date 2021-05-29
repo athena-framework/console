@@ -4,4 +4,7 @@ class Athena::Console::Question(T)
   include Athena::Console::Question::QuestionBase(T)
 
   property validator : Proc(T, T)? = nil
+
+  def set_validator(&@validator : T -> T) : Nil
+  end
 end

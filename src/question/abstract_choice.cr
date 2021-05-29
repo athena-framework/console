@@ -6,7 +6,7 @@ abstract class Athena::Console::Question::AbstractChoice(T, ChoiceType)
   include Athena::Console::Question::QuestionBase(T?)
 
   getter choices : Hash(String | Int32, T)
-  getter error_message : String = "Value '%s' is invalid"
+  getter error_message : String = "Value '%s' is invalid."
 
   property prompt : String = " > "
   property validator : Proc(T?, ChoiceType)? = nil
@@ -30,6 +30,15 @@ abstract class Athena::Console::Question::AbstractChoice(T, ChoiceType)
 
     self.validator = ->default_validator(T?)
     self.autocompleter_values = choices
+  end
+
+  def error_message=(@error_message : String) : self
+    self.validator = ->default_validator(T?)
+
+    self
+  end
+
+  def set_validator(&@validator : T? -> ChoiceType) : Nil
   end
 
   private def selected_choices(answer : String?) : Array(T)

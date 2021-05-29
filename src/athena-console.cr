@@ -22,10 +22,30 @@ module Athena::Console
 end
 
 # ACON::Application.new("foo").run
-input = ACON::Input::ARGV.new
-output = ACON::Output::ConsoleOutput.new
+# input = ACON::Input::ARGV.new
+# output = ACON::Output::ConsoleOutput.new
 
-style = ACON::Style::Athena.new input, output
+# style = ACON::Style::Athena.new input, output
+
+# question = ACON::Question(String?).new "Write an essay", nil
+# question.multi_line = true
+
+# pp style.ask question
+
+# str = "abc123def456"
+# width = 4
+# count = 0
+# str.each_char do |char|
+#   if count == width
+#     print "\n"
+#     count = 0
+#   end
+
+#   print char
+# ensure
+#   count += 1
+# end
+
 # cursor = ACON::Cursor.new output
 # lib LibC
 #   fun wherex : LibC::Int
@@ -51,11 +71,11 @@ style = ACON::Style::Athena.new input, output
 
 # pp style.ask_hidden "what is your password?"
 
-# pp style.choice "What is your fav color?", {"Red", "Blue", "Green"}
+# pp style.choice "What is your fav color?", {"Red", "Blue", "Green"}, default: "Blue"
 # pp style.choice "What is your fav color?", {"r" => "Red", "g" => "Green", "b" => "Blue"}
-# q = ACON::Question::Choice.new "What is your fav color?", {"Red", "Blue", "Green"}
+# q = ACON::Question::MultipleChoice.new "What is your fav color?", {"Red", "Blue", "Green"}, "Red,  Green  "
+# pp style.ask q
 # pp q.autocompleter_values
-
 # q = ACON::Question::Choice.new "What is your fav color?", {"r" => "Red", "g" => "Green", "b" => "Blue"}
 
 # pp q.autocompleter_values

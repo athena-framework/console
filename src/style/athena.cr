@@ -23,7 +23,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.ask ACON::Question.new question, default
   end
 
-  def ask(question : ACON::Question)
+  def ask(question : ACON::Question::QuestionBase)
     if @input.interactive?
       self.auto_prepend_block
     end

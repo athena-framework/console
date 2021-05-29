@@ -12,7 +12,9 @@ module Athena::Console::Question::QuestionBase(T)
   property? hidden_fallback : Bool = true
   property? trimmable : Bool = true
 
-  def initialize(@question : String, @default : T); end
+  def initialize(@question : String, @default : T)
+    {% T.raise "An ACON::Question generic argument cannot be 'Nil'.  Use 'String?' instead." if T == Nil %}
+  end
 
   def autocompleter_values : Array(String)?
     if callback = @autocompleter_callback
@@ -66,7 +68,7 @@ module Athena::Console::Question::QuestionBase(T)
     self
   end
 
-  protected def process_response(response : String) : T
+  protected def process_response(response : String)
     response = response.presence || @default
 
     # Only call the normalizer with the actual response or a non nil default.
@@ -74,6 +76,6 @@ module Athena::Console::Question::QuestionBase(T)
       return normalizer.call response
     end
 
-    return response.as T
+    response.as T
   end
 end
