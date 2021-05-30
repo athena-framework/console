@@ -23,28 +23,22 @@ end
 
 # ACON::Application.new("foo").run
 # input = ACON::Input::ARGV.new
+# input.interactive = false
 # output = ACON::Output::ConsoleOutput.new
 
 # style = ACON::Style::Athena.new input, output
+
+# heros = ["Superman", "Batman", "Spiderman"]
+
+# question = ACON::Question::MultipleChoice.new "Who are your favorite superheros?", heros, "0,1"
+# # question.validator = nil
+
+# pp style.ask question
 
 # question = ACON::Question(String?).new "Write an essay", nil
 # question.multi_line = true
 
 # pp style.ask question
-
-# str = "abc123def456"
-# width = 4
-# count = 0
-# str.each_char do |char|
-#   if count == width
-#     print "\n"
-#     count = 0
-#   end
-
-#   print char
-# ensure
-#   count += 1
-# end
 
 # cursor = ACON::Cursor.new output
 # lib LibC

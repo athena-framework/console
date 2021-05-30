@@ -78,7 +78,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     return default if default.nil?
 
     if validator = question.validator
-      validator.call default
+      return validator.call default
     elsif question.is_a? ACON::Question::AbstractChoice
       choices = question.choices
 
@@ -86,7 +86,17 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
         return choices[default]? || default
       end
 
-      # default = default.split ','
+      default = case default
+                when String then default.split(',').map! do |item|
+                  if idx = item.to_i?
+                    item = idx
+                  end
+
+                  choices[item]? || item.to_s
+                end
+                else
+                  default
+                end
     end
 
     default
@@ -127,6 +137,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
   end
 
   private def autocomplete(output : ACON::Output::Interface, question : ACON::Question::QuestionBase, input_stream : IO, autocompleter) : String
+    # TODO: Support autocompletion.
     self.read_input(input_stream, question) || ""
   end
 

@@ -1,11 +1,13 @@
 require "../spec_helper"
+require "./abstract_question_helper_testcase"
 
-struct AthenaQuestionHelperTest < ASPEC::TestCase
+struct AthenaQuestionHelperTest < AbstractQuestionHelperTest
+  @helper : ACON::Helper::Question
+
   def initialize
     @helper = ACON::Helper::AthenaQuestionHelper.new
-    @helper_set = ACON::Helper::HelperSet.new ACON::Helper::Formatter.new
 
-    @output = ACON::Output::IO.new IO::Memory.new
+    super
   end
 
   def test_ask_choice_question : Nil
@@ -171,20 +173,5 @@ struct AthenaQuestionHelperTest < ASPEC::TestCase
     end
 
     self.assert_output_contains expected
-  end
-
-  private def with_input(data : String, & : ACON::Input::Interface -> Nil) : Nil
-    input_stream = IO::Memory.new data
-    input = ACON::Input::Hash.new
-    input.stream = input_stream
-
-    yield input
-  end
-
-  private def assert_output_contains(string : String) : Nil
-    stream = @output.io
-    stream.rewind
-
-    stream.to_s.should contain string
   end
 end
