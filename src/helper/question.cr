@@ -168,7 +168,14 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
       return input_stream.gets 4096
     end
 
-    input_stream.gets_to_end
+    # Can't just do `.gets_to_end` becuse we need to be able
+    # to return early if the only input provided is a newline.
+    String.build do |io|
+      input_stream.each_char do |char|
+        break if '\n' == char && io.empty?
+        io << char
+      end
+    end
   end
 
   private def validate_attempts(output : ACON::Output::Interface, question : ACON::Question::QuestionBase)

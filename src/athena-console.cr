@@ -28,13 +28,10 @@ end
 
 # style = ACON::Style::Athena.new input, output
 
-# heros = ["Superman", "Batman", "Spiderman"]
+# question = ACON::Question::Choice.new "Some question", ["a", "b"]
 
-# question = ACON::Question::MultipleChoice.new "Who are your favorite superheros?", heros, "0,1"
-# # question.validator = nil
-
+# ACON::Helper::Question.new.ask input, output, question
 # pp style.ask question
-
 # question = ACON::Question(String?).new "Write an essay", nil
 # question.multi_line = true
 

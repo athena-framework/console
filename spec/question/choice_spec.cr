@@ -1,6 +1,12 @@
 require "../spec_helper"
 
 struct ChoiceQuestionTest < ASPEC::TestCase
+  def test_new_empty_choices : Nil
+    expect_raises ACON::Exceptions::Logic, "Choice questions must have at least 1 choice available." do
+      ACON::Question::Choice.new "A question", Array(String).new
+    end
+  end
+
   def test_validator_exact_match : Nil
     question = ACON::Question::Choice.new(
       "A question",

@@ -86,7 +86,7 @@ module Athena::Console::Spec
         input_stream = IO::Memory.new
 
         inputs.each do |input|
-          input_stream << input
+          input_stream << "#{input}\n"
         end
 
         input_stream.rewind
