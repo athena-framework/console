@@ -161,10 +161,10 @@ class Athena::Console::Application
       command_list = @commands.dup
 
       commands.select! do |name_or_alias|
-        command = if !command_list.has_key? name_or_alias
-                    command_list[name_or_alias]
-                  else
+        command = if !command_list.has_key?(name_or_alias)
                     command_list[name_or_alias] = @command_loader.not_nil!.get name_or_alias
+                  else
+                    command_list[name_or_alias]
                   end
 
         command_name = command.name
@@ -183,7 +183,7 @@ class Athena::Console::Application
           next nil
         end
 
-        abbreviation = "#{name.rjust max_len, ' '} #{command_list[name].description}"
+        abbreviation = "#{n.rjust max_len, ' '} #{command_list[n].description}"
 
         abbreviation.size > usable_width ? "#{abbreviation[0, usable_width - 3]}..." : abbreviation
       end

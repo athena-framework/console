@@ -1,6 +1,20 @@
 class Athena::Console::Input::Hash < Athena::Console::Input
   @parameters : HashType
 
+  def self.new(*args : InputType) : self
+    new args
+  end
+
+  def self.new(args : Enumerable(InputType)) : self
+    hash = HashType.new
+
+    args.each do |arg|
+      hash[arg] = nil
+    end
+
+    new hash
+  end
+
   def self.new(**args : InputType) : self
     new args.to_h.transform_keys(&.to_s).transform_values(&.as(InputType))
   end
@@ -53,7 +67,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
   end
 
   private def add_argument(name : String, value : InputType) : Nil
-    raise ACON::Exceptions::InvalidArgument.new "The #{name} argument does not exist." if !@definition.has_argument? name
+    raise ACON::Exceptions::InvalidArgument.new "The '#{name}' argument does not exist." if !@definition.has_argument? name
 
     @arguments[name] = value
   end
@@ -71,7 +85,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
     option = @definition.option name
 
     if value.nil?
-      raise ACON::Exceptions::InvalidOption.new "The --#{option.name} option requires a value." if option.value_required?
+      raise ACON::Exceptions::InvalidOption.new "The '--#{option.name}' option requires a value." if option.value_required?
       value = true if !option.is_array? && !option.value_optional?
     end
 
@@ -81,7 +95,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
   private def add_short_option(name : String, value : InputType) : Nil
     name = name.to_s
 
-    raise ACON::Exceptions::InvalidOption.new "The -#{name} option does not exist." if !@definition.has_shortcut? name
+    raise ACON::Exceptions::InvalidOption.new "The '-#{name}' option does not exist." if !@definition.has_shortcut? name
 
     self.add_long_option @definition.option_for_shortcut(name).name, value
   end

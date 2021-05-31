@@ -8,11 +8,12 @@ module Athena::Console::Input::Interface
   abstract def validate : Nil
   abstract def arguments : ::Hash
   abstract def argument(name : String)
-  # abstract def set_argument(name : String, value : String | Array(String) | Nil) : Nil
+  abstract def set_argument(name : String, value : String | Array(String) | Nil) : Nil
+  abstract def has_argument?(name : String) : Bool
   abstract def options : ::Hash
   abstract def option(name : String)
-  # abstract def set_option(name : String, value : String | Array(String) | Bool | Nil) : Nil
-  # abstract def has_option?(name : String) : Bool
+  abstract def set_option(name : String, value : String | Array(String) | Bool | Nil) : Nil
+  abstract def has_option?(name : String) : Bool
   abstract def interactive? : Bool
   abstract def interactive=(interactive : Bool)
 end

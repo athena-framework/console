@@ -196,7 +196,9 @@ abstract class Athena::Console::Command
       self.interact input, output
     end
 
-    # TODO: Set `command` argument if ran directly
+    if input.has_argument?("command") && input.argument("command").nil?
+      input.set_argument "command", self.name
+    end
 
     input.validate
 
