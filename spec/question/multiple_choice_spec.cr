@@ -38,8 +38,8 @@ struct MultipleChoiceQuestionTest < ASPEC::TestCase
 
   def hash_choice_provider : Hash
     {
-      "'0' choice by key"            => {"0,Foo", ["First choice", "Foo"]},
-      "'0' choice by key"            => {"foo", ["Foo"]},
+      "'0' choice by key - multiple" => {"0,Foo", ["First choice", "Foo"]},
+      "'0' choice by key- single"    => {"foo", ["Foo"]},
       "select by value, numeric key" => {"N°99,foo,First choice", ["N°99", "Foo", "First choice"]},
     }
   end

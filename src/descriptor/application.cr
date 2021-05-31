@@ -91,7 +91,7 @@ record Athena::Console::Descriptor::Application, application : ACON::Application
 
   private def sort_hash(hash : Hash(String, ACON::Command)) : Hash(String, ACON::Command)
     sorted_hash = Hash(String, ACON::Command).new
-    hash.keys.sort.each do |k|
+    hash.keys.sort!.each do |k|
       sorted_hash[k] = hash[k]
     end
 

@@ -184,6 +184,7 @@ class Athena::Console::Input::Definition
     self.option self.shortcut_to_name shortcut.to_s
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   def synopsis(short : Bool = false) : String
     elements = [] of String
 

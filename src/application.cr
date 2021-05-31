@@ -105,6 +105,7 @@ class Athena::Console::Application
     self
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   def find(name : String) : ACON::Command
     self.init
 
@@ -140,8 +141,8 @@ class Athena::Console::Application
       message = "Command '#{name}' is not defined."
 
       if (alternatives = self.find_alternatives name, all_command_names) && (!alternatives.empty?)
-        alternatives.select! do |name|
-          !self.get(name).hidden?
+        alternatives.select! do |n|
+          !self.get(n).hidden?
         end
 
         case alternatives.size
@@ -160,11 +161,11 @@ class Athena::Console::Application
       command_list = @commands.dup
 
       commands.select! do |name_or_alias|
-        command = unless command_list.has_key? name_or_alias
-          command_list[name_or_alias] = @command_loader.not_nil!.get name_or_alias
-        else
-          command_list[name_or_alias]
-        end
+        command = if !command_list.has_key? name_or_alias
+                    command_list[name_or_alias]
+                  else
+                    command_list[name_or_alias] = @command_loader.not_nil!.get name_or_alias
+                  end
 
         command_name = command.name
 
@@ -175,9 +176,9 @@ class Athena::Console::Application
 
       usable_width = @terminal.width - 10
       max_len = commands.max_of &.size
-      abbreviations = commands.map do |name|
-        if command_list[name].hidden?
-          commands.delete name
+      abbreviations = commands.map do |n|
+        if command_list[n].hidden?
+          commands.delete n
 
           next nil
         end
@@ -318,6 +319,7 @@ class Athena::Console::Application
     exit_status
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   def do_run(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
     if input.has_parameter? "--version", "-V", only_params: true
       output.puts self.long_version
@@ -424,6 +426,7 @@ class Athena::Console::Application
     @single_command ? @default_command : input.first_argument
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   protected def configure_io(input : ACON::Input::Interface, output : ACON::Output::Interface) : Nil
     if input.has_parameter? "--ansi", only_params: true
       output.decorated = true
@@ -468,12 +471,12 @@ class Athena::Console::Application
   end
 
   protected def do_run_command(command : ACON::Command, input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
-    # TODO: Setup helpers
-    # TODO: Handle registering signable command listeners
+    # TODO: Support input aware helpers.
+    # TODO: Handle registering signable command listeners.
 
-    return command.run input, output
+    command.run input, output
 
-    # TODO: Handle eventing
+    # TODO: Handle eventing.
   end
 
   protected def default_input_definition : ACON::Input::Definition
@@ -502,6 +505,7 @@ class Athena::Console::Application
     )
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   protected def do_render_exception(ex : Exception, output : ACON::Output::Interface) : Nil
     loop do
       message = (ex.message || "").strip
@@ -550,8 +554,8 @@ class Athena::Console::Application
         messages << "<error>#{title}#{" "*(Math.max(0, len - title.size))}</error>"
       end
 
-      lines.each do |line|
-        messages << "<error>  #{ACON::Formatter::Output.escape line[0]}  #{" "*(len - line[1])}</error>"
+      lines.each do |l|
+        messages << "<error>  #{ACON::Formatter::Output.escape l[0]}  #{" "*(len - l[1])}</error>"
       end
 
       messages << empty_line
@@ -597,6 +601,7 @@ class Athena::Console::Application
     namespaces
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   private def find_alternatives(name : String, collection : Enumerable(String)) : Array(String)
     alternatives = Hash(String, Int32).new
     threshold = 1_000

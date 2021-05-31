@@ -15,7 +15,5 @@ class Foo3Command < ACON::Command
     rescue ex
       raise Exception.new "Third exception <fg=blue;bg=red>comment</>", ex
     end
-
-    ACON::Command::Status::SUCCESS
   end
 end

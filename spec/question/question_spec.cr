@@ -13,7 +13,7 @@ struct QuestionTest < ASPEC::TestCase
   end
 
   def test_hidden_autocompleter_callback : Nil
-    @question.autocompleter_callback do |string|
+    @question.autocompleter_callback do
       [] of String
     end
 

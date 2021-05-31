@@ -89,7 +89,7 @@ struct ApplicationTest < ASPEC::TestCase
     app.get("foo:bar").should be foo
 
     app = ACON::Application.new "foo"
-    app.add foo = FooCommand.new
+    app.add FooCommand.new
 
     pointerof(app.@wants_help).value = true
 

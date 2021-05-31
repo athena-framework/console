@@ -107,7 +107,7 @@ class Athena::Console::Formatter::Output
 
     style = ACON::Formatter::OutputStyle.new
     matches.each do |match|
-      case type = match[1].downcase
+      case match[1].downcase
       when "fg"   then style.foreground = match[2]
       when "bg"   then style.background = match[2]
       when "href" then style.href = match[2]
@@ -123,6 +123,7 @@ class Athena::Console::Formatter::Output
     style
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   private def apply_current_style(text : String, current : String, width : Int32)
     return "" if text.empty?
 

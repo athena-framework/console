@@ -57,12 +57,12 @@ abstract class Athena::Console::Output
 
     return if verbosity > self.verbosity
 
-    messages.each do |message|
+    messages.each do |m|
       self.do_write(
         case output_type
-        in .normal? then @formatter.format message
-        in .plain?  then @formatter.format(message).gsub(/(?:<\/?[^>]*>)|(?:<!--(.*?)-->[\n]?)/, "") # TODO: Use a more robust strip_tags implementation.
-        in .raw?    then message
+        in .normal? then @formatter.format m
+        in .plain?  then @formatter.format(m).gsub(/(?:<\/?[^>]*>)|(?:<!--(.*?)-->[\n]?)/, "") # TODO: Use a more robust strip_tags implementation.
+        in .raw?    then m
         end,
         new_line
       )

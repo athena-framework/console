@@ -61,7 +61,7 @@ abstract class Athena::Console::Question::AbstractChoice(T, ChoiceType)
       result = @choices.find { |(k, v)| v == value || k.to_s == value }.try &.first.to_s
 
       # If none of the keys are a string, assume the original choice values were an Indexable.
-      if @choices.keys.none?(&.is_a?(String)) && result
+      if @choices.keys.none?(String) && result
         result = @choices[result.to_i]
       elsif @choices.has_key? value
         result = @choices[value]

@@ -6,6 +6,7 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
     super definition
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   def first_argument : String?
     is_option = false
 
@@ -62,6 +63,7 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
     default
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   protected def parse : Nil
     parse_options = true
     @parsed = @tokens.dup
@@ -113,6 +115,7 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
     end
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   private def add_long_option(name : String, value : String?) : Nil
     unless @definition.has_option?(name)
       raise ACON::Exceptions::InvalidOption.new "The '--#{name}' option does not exist." unless @definition.has_negation? name

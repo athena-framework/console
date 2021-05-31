@@ -19,7 +19,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     end
 
     begin
-      unless validator = question.validator
+      if question.validator.nil?
         return self.do_ask output, question
       end
 
@@ -102,6 +102,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     default
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   private def do_ask(output : ACON::Output::Interface, question : ACON::Question::QuestionBase)
     self.write_prompt output, question
 
