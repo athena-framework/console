@@ -157,7 +157,9 @@ module Athena::Console::Spec
   end
 
   class MockCommand < Athena::Console::Command
-    def initialize(name : String, &@callback : Proc(ACON::Input::Interface, ACON::Output::Interface, ACON::Command::Status))
+    alias Proc = ::Proc(ACON::Input::Interface, ACON::Output::Interface, ACON::Command::Status)
+
+    def initialize(name : String, &@callback : ACON::Spec::MockCommand::Proc)
       super name
     end
 

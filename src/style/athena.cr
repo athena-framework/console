@@ -54,32 +54,32 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.new_line
   end
 
-  def caution(message : String) : Nil
-    self.block message, "CAUTION", "fg=white;bg=red", " ! ", true
+  def caution(messages : String | Enumerable(String)) : Nil
+    self.block messages, "CAUTION", "fg=white;bg=red", " ! ", true
   end
 
   def choice(question : String, choices : Indexable | Hash, default = nil)
     self.ask ACON::Question::Choice.new question, choices, default
   end
 
-  def comment(message : String) : Nil
-    self.block message, prefix: "<fg=default;bg=default> // </>", escape: false
+  def comment(messages : String | Enumerable(String)) : Nil
+    self.block messages, prefix: "<fg=default;bg=default> // </>", escape: false
   end
 
   def confirm(question : String, default : Bool = true) : Bool
     self.ask ACON::Question::Confirmation.new question, default
   end
 
-  def error(message : String) : Nil
-    self.block message, "ERROR", "fg=white;bg=red", padding: true
+  def error(messages : String | Enumerable(String)) : Nil
+    self.block messages, "ERROR", "fg=white;bg=red", padding: true
   end
 
   def error_style : self
     self.class.new @input, self.error_output
   end
 
-  def info(message : String) : Nil
-    self.block message, "INFO", "fg=green", padding: true
+  def info(messages : String | Enumerable(String)) : Nil
+    self.block messages, "INFO", "fg=green", padding: true
   end
 
   def listing(*elements : String) : Nil
@@ -99,8 +99,8 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     @buffered_output.print "\n" * count
   end
 
-  def note(message : String) : Nil
-    self.block message, "NOTE", "fg=yellow", " ! "
+  def note(messages : String | Enumerable(String)) : Nil
+    self.block messages, "NOTE", "fg=yellow", " ! "
   end
 
   def puts(messages : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
@@ -128,16 +128,21 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.new_line
   end
 
-  def success(message : String) : Nil
-    self.block message, "OK", "fg=black;bg=green", padding: true
+  def success(messages : String | Enumerable(String)) : Nil
+    self.block messages, "OK", "fg=black;bg=green", padding: true
   end
 
   # def table(headers : Enumerable, rows : Enumerable(Enumerable)) : Nil
   # end
 
-  def text(message : String) : Nil
+  def text(messages : String | Enumerable(String)) : Nil
     self.auto_prepend_text
-    self.puts " #{message}"
+
+    messages = messages.is_a?(Enumerable(String)) ? messages : {messages}
+
+    messages.each do |message|
+      self.puts " #{message}"
+    end
   end
 
   def title(message : String) : Nil
@@ -147,8 +152,8 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.new_line
   end
 
-  def warning(message : String) : Nil
-    self.block message, "WARNING", "fg=black;bg=yellow", padding: true
+  def warning(messages : String | Enumerable(String)) : Nil
+    self.block messages, "WARNING", "fg=black;bg=yellow", padding: true
   end
 
   # def progress_start(max : Int32 = 0) : Nil
