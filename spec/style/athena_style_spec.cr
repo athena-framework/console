@@ -176,6 +176,19 @@ struct AthenaStyleTest < ASPEC::TestCase
         end),
         "style/long_line_block.txt",
       },
+      "Long lines are wrapped within a block" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          ACON::Style::Athena.new(input, output).block(
+            "Lopadotemachoselachogaleokranioleipsanodrimhypotrimmatosilphioparaomelitokatakechymenokichlepikossyphophattoperisteralektryonoptekephalliokigklopeleiolagoiosiraiobaphetraganopterygon",
+            "CUSTOM",
+            style: "fg=white;bg=green",
+            prefix: " § ",
+          )
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/long_line_block_wrapping.txt",
+      },
     }
   end
 end

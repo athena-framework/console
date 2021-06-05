@@ -197,7 +197,7 @@ class Athena::Console::Style::Athena < Athena::Console::Style::Output
       decoration_length = message.size - ACON::Helper.remove_decoration(self.formatter, message).size
       message_line_length = Math.min(@line_length - prefix_length - indent_length + decoration_length, @line_length)
 
-      message.gsub(/(.{1,#{message_line_length}}|\S{#{message_line_length + 1},})(?:\s[^\S\r\n]*|\Z)/, "\\0\n").split "\n", remove_empty: true do |match|
+      message.gsub(/(.{1,#{message_line_length}})( +|$\n?)|(.{1,#{message_line_length}})/, "\\0\n").split "\n", remove_empty: true do |match|
         lines << match.strip
       end
 
