@@ -208,6 +208,21 @@ struct ARGVTest < ASPEC::TestCase
         [ACON::Input::Option.new("foo", value_mode: ACON::Input::Option::Value.flags NONE, NEGATABLE)],
         {"foo" => false},
       },
+      "missing negated option uses default - negatable" => {
+        [] of String,
+        [ACON::Input::Option.new("foo", value_mode: :negatable)],
+        {"foo" => nil},
+      },
+      "missing negated option uses default - no value negatable" => {
+        [] of String,
+        [ACON::Input::Option.new("foo", value_mode: ACON::Input::Option::Value.flags NONE, NEGATABLE)],
+        {"foo" => nil},
+      },
+      "missing negated option uses default - bool default" => {
+        [] of String,
+        [ACON::Input::Option.new("foo", value_mode: ACON::Input::Option::Value.flags(NONE, NEGATABLE), default: false)],
+        {"foo" => false},
+      },
     }
   end
 end

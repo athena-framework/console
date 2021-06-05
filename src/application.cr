@@ -486,7 +486,7 @@ class Athena::Console::Application
       ACON::Input::Option.new("quiet", "q", description: "Do not output any message"),
       ACON::Input::Option.new("verbose", "v|vv|vvv", description: "Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug"),
       ACON::Input::Option.new("version", "V", description: "Display this application version"),
-      ACON::Input::Option.new("ansi", value_mode: :negatable, description: "Force (or disable --no-ansi) ANSI output"),
+      ACON::Input::Option.new("ansi", value_mode: :negatable, description: "Force (or disable --no-ansi) ANSI output", default: false),
       ACON::Input::Option.new("no-interaction", "n", description: "Do not ask any interactive question"),
     )
   end
