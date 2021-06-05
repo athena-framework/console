@@ -1,15 +1,16 @@
 require "../spec_helper"
 
 struct AthenaStyleTest < ASPEC::TestCase
-  @col_size : Int32?
+  @col_size : String?
 
   def initialize
-    @col_size = ENV["COLUMNS"]?.try &.to_i
+    @col_size = ENV["COLUMNS"]?
+    ENV["COLUMNS"] = "121"
   end
 
   def tear_down : Nil
     if size = @col_size
-      ENV["COLUMNS"] = size.to_s
+      ENV["COLUMNS"] = size
     else
       ENV.delete "COLUMNS"
     end
@@ -128,6 +129,52 @@ struct AthenaStyleTest < ASPEC::TestCase
           ACON::Command::Status::SUCCESS
         end),
         "style/block_line_endings.txt",
+      },
+      "Proper blank line after text block with block" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          style = ACON::Style::Athena.new input, output
+          style.listing "Lorem ipsum dolor sit amet", "consectetur adipiscing elit"
+          style.success "Lorem ipsum dolor sit amet"
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/text_block_blank_line.txt",
+      },
+      "Questions do not output anything when input is non-interactive" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          style = ACON::Style::Athena.new input, output
+          style.title "Title"
+          style.ask_hidden "Hidden question"
+          style.choice "Choice question with default", {"choice1", "choice2"}, "choice1"
+          style.confirm "Confirmation with yes default", true
+          style.text "Duis aute irure dolor in reprehenderit in voluptate velit esse"
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/non_interactive_question.txt",
+      },
+      # TODO: Test table formatting with multiple headers + TableCell
+      "Lines are aligned to the beginning of the first line in a multi-line block" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          ACON::Style::Athena.new(input, output).block({"Custom block", "Second custom block line"}, "CUSTOM", style: "fg=white;bg=green", prefix: "X ", padding: true)
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/multi_line_block.txt",
+      },
+      "Lines are aligned to the beginning of the first line in a very long line block" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          ACON::Style::Athena.new(input, output).block(
+            "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+            "CUSTOM",
+            style: "fg=white;bg=green",
+            prefix: "X ",
+            padding: true
+          )
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/long_line_block.txt",
       },
     }
   end
