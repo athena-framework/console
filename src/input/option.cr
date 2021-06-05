@@ -65,7 +65,7 @@ class Athena::Console::Input::Option
       end
     end
 
-    @default = @value_mode.accepts_value? ? default : false
+    @default = (@value_mode.accepts_value? || @value_mode.negatable?) ? default : false
   end
 
   def accepts_value? : Bool

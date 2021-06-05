@@ -55,6 +55,14 @@ abstract class Athena::Console::Input
   end
 
   def option(name : String)
+    if @definition.has_negation?(name)
+      self.option(@definition.negation_to_name(name)).try do |v|
+        return !v
+      end
+
+      return
+    end
+
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' option does not exist." unless @definition.has_option? name
 
     if @options.has_key? name
@@ -69,6 +77,12 @@ abstract class Athena::Console::Input
   end
 
   def set_option(name : String, value : String | Array(String) | Bool | Nil) : Nil
+    if @definition.has_negation?(name)
+      @options[@definition.negation_to_name(name)] = !value
+
+      return
+    end
+
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' option does not exist." unless @definition.has_option? name
 
     @options[name] = value
@@ -79,7 +93,7 @@ abstract class Athena::Console::Input
   end
 
   def has_option?(name : String) : Bool
-    @definition.has_option? name
+    @definition.has_option?(name) || @definition.has_negation?(name)
   end
 
   def bind(definition : ACON::Input::Definition) : Nil
