@@ -91,7 +91,7 @@ describe ACON::Command do
 
   describe "#synopsis" do
     it "long" do
-      TestCommand.new.option("foo").argument("bar").synopsis.should eq "namespace:name [--foo] [--] [<bar>]"
+      TestCommand.new.option("foo").argument("bar").argument("info").synopsis.should eq "namespace:name [--foo] [--] [<bar> [<info>]]"
     end
 
     it "short" do

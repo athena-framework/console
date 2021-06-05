@@ -393,7 +393,7 @@ class Athena::Console::Application
     self.do_render_exception ex, output
 
     if running_command = @running_command
-      output.puts "<info>#{running_command.synopsis}</info>", :quiet
+      output.puts "<info>#{ACON::Formatter::Output.escape running_command.synopsis}</info>", :quiet
       output.puts "", :quiet
     end
   end

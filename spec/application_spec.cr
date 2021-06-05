@@ -642,6 +642,21 @@ struct ApplicationTest < ASPEC::TestCase
     self.assert_file_equals_string "text/application_renderexception_linebreaks.txt", tester.display
   end
 
+  def test_render_exception_escapes_lines_of_synopsis : Nil
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+
+    command = ACON::Spec::MockCommand.new "foo" do
+      raise "some exception"
+    end
+    command.argument "info"
+    app.add command
+
+    tester = ACON::Spec::ApplicationTester.new app
+    tester.run command: "foo", decorated: false
+    self.assert_file_equals_string "text/application_renderexception_synopsis_escapeslines.txt", tester.display
+  end
+
   def test_run_passes_io_thru : Nil
     app = ACON::Application.new "foo"
     app.auto_exit = false
