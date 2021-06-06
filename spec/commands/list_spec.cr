@@ -15,7 +15,7 @@ describe ACON::Commands::List do
       tester = ACON::Spec::CommandTester.new command = app.get("list")
       tester.execute command: "list", "--raw": true
 
-      tester.display.should eq "list   List commands\nhelp   Display help for a command\n"
+      tester.display.should eq "help   Display help for a command\nlist   List commands\n"
     end
 
     it "with namespace argument" do
@@ -64,7 +64,7 @@ describe ACON::Commands::List do
       tester = ACON::Spec::CommandTester.new command = app.get("list")
       tester.execute command: "list", "--raw": true
 
-      tester.display.should eq "list       List commands\nhelp       Display help for a command\n0foo:bar   0foo:bar command\n"
+      tester.display.should eq "help       Display help for a command\nlist       List commands\n0foo:bar   0foo:bar command\n"
     end
   end
 end

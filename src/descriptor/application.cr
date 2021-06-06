@@ -37,9 +37,9 @@ record Athena::Console::Descriptor::Application, application : ACON::Application
     namespaces = Hash(String, NamedTuple(id: String, commands: Array(String))).new
     aliases = Hash(String, ACON::Command).new
 
-    commands = @application.commands ((namespace = @namespace) ? @application.find_namespace(namespace) : nil)
+    all_commands = @application.commands ((namespace = @namespace) ? @application.find_namespace(namespace) : nil)
 
-    self.sort_commands(commands).each do |namespace, command_hash|
+    self.sort_commands(all_commands).each do |namespace, command_hash|
       names = Array(String).new
 
       command_hash.each do |name, command|
@@ -81,6 +81,7 @@ record Athena::Console::Descriptor::Application, application : ACON::Application
     end
 
     unless namespaced_commands.empty?
+      namespaced_commands = self.sort_hash namespaced_commands
       namespaced_commands.keys.sort!.each do |key|
         sorted_commands[key] = self.sort_hash namespaced_commands[key]
       end
@@ -89,8 +90,19 @@ record Athena::Console::Descriptor::Application, application : ACON::Application
     sorted_commands
   end
 
+  private def sort_hash(hash : Hash(String, Hash(String, Athena::Console::Command))) : Hash(String, Hash(String, Athena::Console::Command))
+    sorted_hash = Hash(String, Hash(String, Athena::Console::Command)).new
+
+    hash.keys.sort!.each do |k|
+      sorted_hash[k] = self.sort_hash hash[k]
+    end
+
+    sorted_hash
+  end
+
   private def sort_hash(hash : Hash(String, ACON::Command)) : Hash(String, ACON::Command)
     sorted_hash = Hash(String, ACON::Command).new
+
     hash.keys.sort!.each do |k|
       sorted_hash[k] = hash[k]
     end
