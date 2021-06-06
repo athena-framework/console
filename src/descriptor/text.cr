@@ -75,7 +75,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
 
   protected def describe(argument : ACON::Input::Argument, context : ACON::Descriptor::Context) : Nil
     default = if !argument.default.nil? && !argument.default.is_a?(Array)
-                "<comment> [default: #{argument.default}]</comment>"
+                %(<comment> [default: #{self.format_default_value argument.default}]</comment>)
               else
                 ""
               end
@@ -175,8 +175,8 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
   end
 
   protected def describe(option : ACON::Input::Option, context : ACON::Descriptor::Context) : Nil
-    if option.accepts_value? && !option.default.nil? && !option.default.is_a?(Array)
-      default = "<comment> [default: #{option.default}]</comment>"
+    if option.accepts_value? && !option.default.nil? && (!option.default.is_a?(Array) || !option.default.as(Array).empty?)
+      default = %(<comment> [default: #{self.format_default_value option.default}]</comment>)
     else
       default = ""
     end
@@ -207,7 +207,8 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
         option.description.gsub(/\s*[\r\n]\s*/, "\n#{" " * (total_width + 4)}"),
         default,
         option.is_array? ? "<comment> (multiple values allowed)</comment>" : ""
-      )
+      ),
+      context
     )
   end
 
@@ -248,6 +249,17 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     end
   end
 
+  private def format_default_value(default)
+    case default
+    when String
+      %("#{ACON::Formatter::Output.escape default}")
+    when Enumerable
+      %([#{default.map! { |item| %|"#{ACON::Formatter::Output.escape item}"| }.join ","}])
+    else
+      default
+    end
+  end
+
   private def write_text(content : String, context : ACON::Descriptor::Context? = nil) : Nil
     unless ctx = context
       return self.write content, true
@@ -256,7 +268,11 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     raw_output = true
 
     ctx.raw_output?.try do |ro|
-      raw_output = ro
+      raw_output = !ro
+    end
+
+    if ctx.raw_text?
+      content = content.gsub(/(?:<\/?[^>]*>)|(?:<!--(.*?)-->[\n]?)/, "") # TODO: Use a more robust strip_tags implementation.
     end
 
     self.write(

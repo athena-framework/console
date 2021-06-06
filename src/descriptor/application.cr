@@ -1,7 +1,7 @@
 abstract class Athena::Console::Descriptor; end
 
 # :nodoc:
-record Athena::Console::Descriptor::Application, application : ACON::Application, namespace : String?, show_hidden : Bool = false do
+record Athena::Console::Descriptor::Application, application : ACON::Application, namespace : String? = nil, show_hidden : Bool = false do
   GLOBAL_NAMESPACE = "_global"
 
   @commands : Hash(String, ACON::Command)? = nil

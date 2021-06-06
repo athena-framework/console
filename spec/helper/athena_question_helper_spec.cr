@@ -1,5 +1,5 @@
 require "../spec_helper"
-require "./abstract_question_helper_testcase"
+require "./abstract_question_helper_test_case"
 
 struct AthenaQuestionHelperTest < AbstractQuestionHelperTest
   @helper : ACON::Helper::Question

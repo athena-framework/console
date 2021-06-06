@@ -22,7 +22,7 @@ class Athena::Console::Input::Option
 
   def initialize(
     name : String,
-    shortcut : String | Array(String) | Nil = nil,
+    shortcut : String | Enumerable(String) | Nil = nil,
     @value_mode : ACON::Input::Option::Value = :none,
     @description : String = "",
     default : String | Array(String) | Bool | Nil = nil
@@ -32,7 +32,7 @@ class Athena::Console::Input::Option
     raise ACON::Exceptions::InvalidArgument.new "An option name cannot be blank." if name.blank?
 
     unless shortcut.nil?
-      if shortcut.is_a? Array
+      if shortcut.is_a? Enumerable
         shortcut = shortcut.join '|'
       end
 
