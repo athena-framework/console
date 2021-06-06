@@ -1,4 +1,4 @@
-class Athena::Console::Formatter::OutputStyleStack
+struct Athena::Console::Formatter::OutputStyleStack
   property empty_style : ACON::Formatter::OutputStyleInterface
 
   @styles = Array(ACON::Formatter::OutputStyleInterface).new
@@ -20,15 +20,15 @@ class Athena::Console::Formatter::OutputStyleStack
 
     return @styles.pop if style.nil?
 
-    @styles.reverse_each do |stacked_style|
+    @styles.reverse_each.each_with_index do |stacked_style, idx|
       if style.apply("") == stacked_style.apply("")
-        @styles.delete style
+        @styles = @styles[0...idx]
 
-        return style
+        return stacked_style
       end
     end
 
-    raise ArgumentError.new "Provided style is not present in the stack."
+    raise ACON::Exceptions::InvalidArgument.new "Provided style is not present in the stack."
   end
 
   def current : ACON::Formatter::OutputStyleInterface
