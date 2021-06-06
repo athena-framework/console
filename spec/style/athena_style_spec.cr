@@ -22,8 +22,8 @@ struct AthenaStyleTest < ASPEC::TestCase
   end
 
   @[DataProvider("output_provider")]
-  def test_outputs(command_proc : ACON::Spec::MockCommand::Proc, file_path : String) : Nil
-    command = ACON::Spec::MockCommand.new "foo", &command_proc
+  def test_outputs(command_proc : ACON::Commands::Generic::Proc, file_path : String) : Nil
+    command = ACON::Commands::Generic.new "foo", &command_proc
 
     tester = ACON::Spec::CommandTester.new command
 
@@ -34,7 +34,7 @@ struct AthenaStyleTest < ASPEC::TestCase
   def output_provider : Hash
     {
       "Single blank line at start with block element" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           ACON::Style::Athena.new(input, output).caution "Lorem ipsum dolor sit amet"
 
           ACON::Command::Status::SUCCESS
@@ -42,7 +42,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/block.txt",
       },
       "Single blank line between titles and blocks" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           style = ACON::Style::Athena.new input, output
           style.title "Title"
           style.warning "Lorem ipsum dolor sit amet"
@@ -53,7 +53,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/title_block.txt",
       },
       "Single blank line between blocks" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           style = ACON::Style::Athena.new input, output
           style.warning "Warning"
           style.caution "Caution"
@@ -68,7 +68,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/blocks.txt",
       },
       "Single blank line between titles" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           style = ACON::Style::Athena.new input, output
           style.title "First title"
           style.title "Second title"
@@ -78,7 +78,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/titles.txt",
       },
       "Single blank line after any text and a title" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           style = ACON::Style::Athena.new input, output
           style.print "Lorem ipsum dolor sit amet"
           style.title "First title"
@@ -109,7 +109,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/titles_text.txt",
       },
       "Proper line endings before outputting a text block" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           style = ACON::Style::Athena.new input, output
           style.puts "Lorem ipsum dolor sit amet"
           style.listing "Lorem ipsum dolor sit amet", "consectetur adipiscing elit"
@@ -131,7 +131,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/block_line_endings.txt",
       },
       "Proper blank line after text block with block" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           style = ACON::Style::Athena.new input, output
           style.listing "Lorem ipsum dolor sit amet", "consectetur adipiscing elit"
           style.success "Lorem ipsum dolor sit amet"
@@ -141,7 +141,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/text_block_blank_line.txt",
       },
       "Questions do not output anything when input is non-interactive" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           style = ACON::Style::Athena.new input, output
           style.title "Title"
           style.ask_hidden "Hidden question"
@@ -155,7 +155,7 @@ struct AthenaStyleTest < ASPEC::TestCase
       },
       # TODO: Test table formatting with multiple headers + TableCell
       "Lines are aligned to the beginning of the first line in a multi-line block" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           ACON::Style::Athena.new(input, output).block({"Custom block", "Second custom block line"}, "CUSTOM", style: "fg=white;bg=green", prefix: "X ", padding: true)
 
           ACON::Command::Status::SUCCESS
@@ -163,7 +163,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/multi_line_block.txt",
       },
       "Lines are aligned to the beginning of the first line in a very long line block" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           ACON::Style::Athena.new(input, output).block(
             "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
             "CUSTOM",
@@ -177,7 +177,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/long_line_block.txt",
       },
       "Long lines are wrapped within a block" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           ACON::Style::Athena.new(input, output).block(
             "Lopadotemachoselachogaleokranioleipsanodrimhypotrimmatosilphioparaomelitokatakechymenokichlepikossyphophattoperisteralektryonoptekephalliokigklopeleiolagoiosiraiobaphetraganopterygon",
             "CUSTOM",
@@ -190,7 +190,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/long_line_block_wrapping.txt",
       },
       "Lines are aligned to the first line and start with '//' in a very long line comment" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           ACON::Style::Athena.new(input, output).comment(
             "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
           )
@@ -200,7 +200,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/long_line_comment.txt",
       },
       "Nested tags have no effect on the color of the '//' prefix" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           output.decorated = true
           ACON::Style::Athena.new(input, output).comment(
             "Lorem ipsum dolor sit <comment>amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</comment> Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
@@ -211,7 +211,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/long_line_comment_decorated.txt",
       },
       "Block behaves properly with a prefix and without type" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           ACON::Style::Athena.new(input, output).block(
             "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
             prefix: "$ "
@@ -222,7 +222,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/block_prefix_no_type.txt",
       },
       "Block behaves properly with a type and without prefix" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           ACON::Style::Athena.new(input, output).block(
             "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
             type: "TEST"
@@ -233,7 +233,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/block_no_prefix_type.txt",
       },
       "Block output is properly formatted with even padding lines" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           output.decorated = true
           ACON::Style::Athena.new(input, output).success(
             "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
@@ -244,7 +244,7 @@ struct AthenaStyleTest < ASPEC::TestCase
         "style/block_padding.txt",
       },
       "Handles trailing backslashes" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           style = ACON::Style::Athena.new input, output
           style.title "Title ending with \\"
           style.section "Section ending with \\"
@@ -256,7 +256,7 @@ struct AthenaStyleTest < ASPEC::TestCase
       # TODO: Test horizontal table (definition list)
       # TODO: Test horizontal table
       "Closing tag is only applied once" => {
-        (ACON::Spec::MockCommand::Proc.new do |input, output|
+        (ACON::Commands::Generic::Proc.new do |input, output|
           output.decorated = true
           style = ACON::Style::Athena.new input, output
           style.print "<question>do you want <comment>something</>"
@@ -268,7 +268,7 @@ struct AthenaStyleTest < ASPEC::TestCase
       },
       # TODO: Enable this test case when multi width char support is added.
       #   "Emojis don't make the line longer than expected" => {
-      #     (ACON::Spec::MockCommand::Proc.new do |input, output|
+      #     (ACON::Commands::Generic::Proc.new do |input, output|
       #       style = ACON::Style::Athena.new input, output
       #       style.success "Lorem ipsum dolor sit amet"
       #       style.success "Lorem ipsum dolor sit amet with one emoji 🎉"

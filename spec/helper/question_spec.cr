@@ -383,7 +383,9 @@ struct QuestionHelperTest < AbstractQuestionHelperTest
   def test_question_validator_repeats_the_prompt : Nil
     tries = 0
 
-    command = ACON::Spec::MockCommand.new("question") do |input, output|
+    app = ACON::Application.new "foo"
+    app.auto_exit = false
+    app.register "question" do |input, output|
       question = ACON::Question(String?).new "This is a promptable question", nil
       question.set_validator do |answer|
         tries += 1
@@ -397,10 +399,6 @@ struct QuestionHelperTest < AbstractQuestionHelperTest
 
       ACON::Command::Status::SUCCESS
     end
-
-    app = ACON::Application.new "foo"
-    app.auto_exit = false
-    app.add command
 
     tester = ACON::Spec::ApplicationTester.new app
     tester.inputs = ["", "not-empty"]

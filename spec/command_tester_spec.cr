@@ -1,11 +1,11 @@
 require "./spec_helper"
 
-struct CommandTestTest < ASPEC::TestCase
+struct CommandTesterTest < ASPEC::TestCase
   @command : ACON::Command
   @tester : ACON::Spec::CommandTester
 
   def initialize
-    @command = ACON::Spec::MockCommand.new "foo" do |input, output|
+    @command = ACON::Commands::Generic.new "foo" do |_, output|
       output.puts "foo"
 
       ACON::Command::Status::SUCCESS
@@ -36,7 +36,7 @@ struct CommandTestTest < ASPEC::TestCase
   end
 
   def test_display_before_calling_execute : Nil
-    tester = ACON::Spec::CommandTester.new ACON::Spec::MockCommand.new "foo" { ACON::Command::Status::SUCCESS }
+    tester = ACON::Spec::CommandTester.new ACON::Commands::Generic.new "foo" { ACON::Command::Status::SUCCESS }
 
     expect_raises ACON::Exceptions::Logic, "Output not initialized.  Did you execute the command before requesting the display?" do
       tester.display
@@ -51,9 +51,7 @@ struct CommandTestTest < ASPEC::TestCase
     app = ACON::Application.new "foo"
     app.auto_exit = false
 
-    command = ACON::Spec::MockCommand.new "foo" { |_, output| output.puts "foo"; ACON::Command::Status::SUCCESS }
-
-    app.add command
+    app.register "foo" { |_, output| output.puts "foo"; ACON::Command::Status::SUCCESS }
 
     tester = ACON::Spec::CommandTester.new app.find "foo"
 
@@ -67,7 +65,7 @@ struct CommandTestTest < ASPEC::TestCase
       "Where do you come from?",
     }
 
-    command = ACON::Spec::MockCommand.new "foo" do |input, output, c|
+    command = ACON::Commands::Generic.new "foo" do |input, output, c|
       helper = c.helper ACON::Helper::Question
 
       helper.ask input, output, ACON::Question(String?).new questions[0], nil
@@ -93,7 +91,7 @@ struct CommandTestTest < ASPEC::TestCase
       "Where do you come from?",
     }
 
-    command = ACON::Spec::MockCommand.new "foo" do |input, output, c|
+    command = ACON::Commands::Generic.new "foo" do |input, output, c|
       helper = c.helper ACON::Helper::Question
 
       helper.ask input, output, ACON::Question(String).new questions[0], "Bobby"
@@ -119,7 +117,7 @@ struct CommandTestTest < ASPEC::TestCase
       "Where do you come from?",
     }
 
-    command = ACON::Spec::MockCommand.new "foo" do |input, output, c|
+    command = ACON::Commands::Generic.new "foo" do |input, output, c|
       helper = c.helper ACON::Helper::Question
 
       helper.ask input, output, ACON::Question::Choice.new "choice", {"a", "b"}
@@ -146,7 +144,7 @@ struct CommandTestTest < ASPEC::TestCase
       "Where do you come from?",
     }
 
-    command = ACON::Spec::MockCommand.new "foo" do |input, output, c|
+    command = ACON::Commands::Generic.new "foo" do |input, output, c|
       helper = c.helper ACON::Helper::Question
 
       helper.ask input, output, ACON::Question::Choice.new "choice", {"a", "b"}
@@ -172,7 +170,7 @@ struct CommandTestTest < ASPEC::TestCase
       "Where do you come from?",
     }
 
-    command = ACON::Spec::MockCommand.new "foo" do |input, output, c|
+    command = ACON::Commands::Generic.new "foo" do |input, output|
       style = ACON::Style::Athena.new input, output
 
       style.ask ACON::Question(String?).new questions[0], nil
@@ -188,7 +186,7 @@ struct CommandTestTest < ASPEC::TestCase
   end
 
   def test_error_output : Nil
-    command = ACON::Spec::MockCommand.new "foo" do |_, output, c|
+    command = ACON::Commands::Generic.new "foo" do |_, output|
       output.as(ACON::Output::ConsoleOutput).error_output.print "foo"
 
       ACON::Command::Status::SUCCESS

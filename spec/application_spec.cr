@@ -183,16 +183,8 @@ struct ApplicationTest < ASPEC::TestCase
   def test_find_namespace_does_not_fail_on_deep_similar_namespaces : Nil
     app = ACON::Application.new "foo"
 
-    command1 = ACON::Spec::MockCommand.new "foo:sublong:bar" do
-      ACON::Command::Status::SUCCESS
-    end
-
-    command2 = ACON::Spec::MockCommand.new "bar:sub:foo" do
-      ACON::Command::Status::SUCCESS
-    end
-
-    app.add command1
-    app.add command2
+    app.register "foo:sublong:bar" { ACON::Command::Status::SUCCESS }
+    app.register "bar:sub:foo" { ACON::Command::Status::SUCCESS }
 
     app.find_namespace("f:sub").should eq "foo:sublong"
   end
@@ -594,9 +586,9 @@ struct ApplicationTest < ASPEC::TestCase
     ENV["COLUMNS"] = "120"
     tester = ACON::Spec::ApplicationTester.new app
 
-    app.add(ACON::Spec::MockCommand.new "foo" do
+    app.register "foo" do
       raise "エラーメッセージ"
-    end)
+    end
 
     tester.run command: "foo", decorated: false, capture_stderr_separately: true
     tester.error_output.should eq RENDER_EXCEPTION_DOUBLE_WIDTH
@@ -606,9 +598,9 @@ struct ApplicationTest < ASPEC::TestCase
     app = ACON::Application.new "foo"
     app.auto_exit = false
     ENV["COLUMNS"] = "22"
-    app.add(ACON::Spec::MockCommand.new "foo" do
+    app.register "foo" do
       raise "dont break here <info>!</info>"
-    end)
+    end
     tester = ACON::Spec::ApplicationTester.new app
 
     tester.run command: "foo", decorated: false
@@ -621,9 +613,9 @@ struct ApplicationTest < ASPEC::TestCase
     app = ACON::Application.new "foo"
     app.auto_exit = false
     ENV["COLUMNS"] = "120"
-    app.add(ACON::Spec::MockCommand.new "foo" do
+    app.register "foo" do
       raise "\n\nline 1 with extra spaces        \nline 2\n\nline 4\n"
-    end)
+    end
     tester = ACON::Spec::ApplicationTester.new app
 
     tester.run command: "foo", decorated: false
@@ -634,11 +626,9 @@ struct ApplicationTest < ASPEC::TestCase
     app = ACON::Application.new "foo"
     app.auto_exit = false
 
-    command = ACON::Spec::MockCommand.new "foo" do
+    app.register "foo" do
       raise "some exception"
-    end
-    command.argument "info"
-    app.add command
+    end.argument "info"
 
     tester = ACON::Spec::ApplicationTester.new app
     tester.run command: "foo", decorated: false
@@ -837,9 +827,9 @@ struct ApplicationTest < ASPEC::TestCase
   def test_run_returns_status_with_custom_code_on_exception : Nil
     app = ACON::Application.new "foo"
     app.auto_exit = false
-    app.add(ACON::Spec::MockCommand.new "foo" do
+    app.register "foo" do
       raise ACON::Exceptions::Logic.new "", code: 5
-    end)
+    end
 
     input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
 
@@ -849,9 +839,9 @@ struct ApplicationTest < ASPEC::TestCase
   def test_run_returns_failure_status_on_exception : Nil
     app = ACON::Application.new "foo"
     app.auto_exit = false
-    app.add(ACON::Spec::MockCommand.new "foo" do
+    app.register "foo" do
       raise ""
-    end)
+    end
 
     input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
 
@@ -864,14 +854,13 @@ struct ApplicationTest < ASPEC::TestCase
     app.catch_exceptions = false
     app.definition << ACON::Input::Option.new "--env", "-e", :required, "Environment"
 
-    app.add(ACON::Spec::MockCommand.new "foo" do
+    app.register "foo" do
       ACON::Command::Status::SUCCESS
     end
       .aliases("f")
       .definition(
         ACON::Input::Option.new("survey", "e", :required, "Option with shortcut")
       )
-    )
 
     input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
 
@@ -886,10 +875,10 @@ struct ApplicationTest < ASPEC::TestCase
     app.auto_exit = false
     app.catch_exceptions = false
 
-    app.add(
-      ACON::Spec::MockCommand.new("foo") { ACON::Command::Status::SUCCESS }
-        .definition(element)
-    )
+    app.register "foo" do
+      ACON::Command::Status::SUCCESS
+    end
+      .definition(element)
 
     input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
 
@@ -1025,12 +1014,12 @@ struct ApplicationTest < ASPEC::TestCase
       "foo:bar" => ->do
         loaded["foo:bar"] = true
 
-        ACON::Spec::MockCommand.new("foo:bar") { ACON::Command::Status::SUCCESS }.as ACON::Command
+        ACON::Commands::Generic.new("foo:bar") { ACON::Command::Status::SUCCESS }.as ACON::Command
       end,
       "foo" => ->do
         loaded["foo"] = true
 
-        ACON::Spec::MockCommand.new("foo") { ACON::Command::Status::SUCCESS }.as ACON::Command
+        ACON::Commands::Generic.new("foo") { ACON::Command::Status::SUCCESS }.as ACON::Command
       end,
     })
 
@@ -1043,7 +1032,7 @@ struct ApplicationTest < ASPEC::TestCase
     app = ACON::Application.new "foo"
 
     app.command_loader = ACON::Loader::Factory.new({
-      "foo" => ->{ ACON::Spec::MockCommand.new("bar") { ACON::Command::Status::SUCCESS }.as ACON::Command },
+      "foo" => ->{ ACON::Commands::Generic.new("bar") { ACON::Command::Status::SUCCESS }.as ACON::Command },
     })
 
     expect_raises ACON::Exceptions::CommandNotFound, "The 'foo' command cannot be found because it is registered under multiple names.  Make sure you don't set a different name via constructor or 'name='." do

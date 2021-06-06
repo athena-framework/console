@@ -383,6 +383,10 @@ class Athena::Console::Application
     exit_status
   end
 
+  def register(name : String, &block : ACON::Input::Interface, ACON::Output::Interface, ACON::Command -> ACON::Command::Status) : ACON::Command
+    self.add(ACON::Commands::Generic.new(name, &block)).not_nil!
+  end
+
   def render_exception(ex : Exception, output : ACON::Output::ConsoleOutputInterface) : Nil
     self.render_exception ex, output.error_output
   end
