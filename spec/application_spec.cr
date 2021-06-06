@@ -347,19 +347,7 @@ struct ApplicationTest < ASPEC::TestCase
 
     tester = ACON::Spec::ApplicationTester.new app
     tester.run command: "foos:bar1", decorated: false
-    tester.display.should eq(
-      <<-OUTPUT
-
-                                                                
-        There are no commands defined in the 'foos' namespace.  
-                                                                
-        Did you mean this?                                      
-            foo                                                 
-                                                                
-
-
-      OUTPUT
-    )
+    self.assert_file_equals_string "text/application_alternative_namespace.txt", tester.display
   end
 
   def test_run_alternate_command_name : Nil
