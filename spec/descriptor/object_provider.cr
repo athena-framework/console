@@ -21,4 +21,30 @@ module ObjectProvider
       "input_option_with_style_array" => ACON::Input::Option.new("option_name", "o", ACON::Input::Option::Value.flags(IS_ARRAY, REQUIRED), "option description", ["<comment>Hello</comment>", "<info>world</info>"]),
     }
   end
+
+  def self.input_definitions : Hash(String, ACON::Input::Definition)
+    {
+      "input_definition_1" => ACON::Input::Definition.new,
+      "input_definition_2" => ACON::Input::Definition.new(ACON::Input::Argument.new("argument_name", :required)),
+      "input_definition_3" => ACON::Input::Definition.new(ACON::Input::Option.new("option_name", "o", :none)),
+      "input_definition_4" => ACON::Input::Definition.new(
+        ACON::Input::Argument.new("argument_name", :required),
+        ACON::Input::Option.new("option_name", "o", :none),
+      ),
+    }
+  end
+
+  def self.commands : Hash(String, ACON::Command)
+    {
+      "command_1" => DescriptorCommand1.new,
+      "command_2" => DescriptorCommand2.new,
+    }
+  end
+
+  def self.applications : Hash(String, ACON::Application)
+    {
+      "application_1" => DescriptorApplication1.new("foo"),
+      "application_2" => DescriptorApplication2.new,
+    }
+  end
 end

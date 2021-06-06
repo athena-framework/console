@@ -3,13 +3,28 @@ require "./object_provider"
 
 abstract struct AbstractDescriptorTestCase < ASPEC::TestCase
   @[DataProvider("input_argument_test_data")]
-  def test_describe_input_argument(argument : ACON::Input::Argument, expected : String) : Nil
-    self.assert_description expected, argument
+  def test_describe_input_argument(object : ACON::Input::Argument, expected : String) : Nil
+    self.assert_description expected, object
   end
 
   @[DataProvider("input_option_test_data")]
-  def test_describe_input_option(argument : ACON::Input::Option, expected : String) : Nil
-    self.assert_description expected, argument
+  def test_describe_input_option(object : ACON::Input::Option, expected : String) : Nil
+    self.assert_description expected, object
+  end
+
+  @[DataProvider("input_definition_test_data")]
+  def test_describe_input_definition(object : ACON::Input::Definition, expected : String) : Nil
+    self.assert_description expected, object
+  end
+
+  @[DataProvider("command_test_data")]
+  def test_describe_command(object : ACON::Command, expected : String) : Nil
+    self.assert_description expected, object
+  end
+
+  @[DataProvider("application_test_data")]
+  def test_describe_application(object : ACON::Application, expected : String) : Nil
+    self.assert_description expected, object
   end
 
   def input_argument_test_data : Array
@@ -18,6 +33,18 @@ abstract struct AbstractDescriptorTestCase < ASPEC::TestCase
 
   def input_option_test_data : Array
     self.description_test_data ObjectProvider.input_options
+  end
+
+  def input_definition_test_data : Array
+    self.description_test_data ObjectProvider.input_definitions
+  end
+
+  def command_test_data : Array
+    self.description_test_data ObjectProvider.commands
+  end
+
+  def application_test_data : Array
+    self.description_test_data ObjectProvider.applications
   end
 
   protected abstract def descriptor : ACON::Descriptor::Interface

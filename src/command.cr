@@ -131,7 +131,7 @@ abstract class Athena::Console::Command
     helper_set[helper_class].as T
   end
 
-  def hidden(@hidden : Bool) : self
+  def hidden(@hidden : Bool = true) : self
     self
   end
 

@@ -12,7 +12,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
       width = self.width commands
 
       commands.each do |command|
-        self.write_text sprintf("%-#{width}s %s", command.name, command.description)
+        self.write_text sprintf("%-#{width}s %s", command.name, command.description), context
         self.write_text "\n"
       end
 
@@ -40,14 +40,14 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
 
     width = self.width(
       namespaces.values.flat_map do |n|
-        n[:commands] | commands.keys
+        commands.keys & n[:commands]
       end.uniq!
     )
 
     if described_namespace
-      self.write_text "<comment>Available commands for the #{described_namespace} namespace:</comment>", context
+      self.write_text %(<comment>Available commands for the "#{described_namespace}" namespace:</comment>), context
     else
-      self.write_text "<comment>Available commands:</comment>"
+      self.write_text "<comment>Available commands:</comment>", context
     end
 
     namespaces.each_value do |namespace|
@@ -57,16 +57,16 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
 
       if !described_namespace && namespace[:id] != ACON::Descriptor::Application::GLOBAL_NAMESPACE
         self.write_text "\n"
-        self.write_text " <comment>#{namespace[:id]}</comment>"
+        self.write_text " <comment>#{namespace[:id]}</comment>", context
       end
 
       namespace[:commands].each do |name|
         self.write_text "\n"
         spacing_width = width - name.size
         command = commands[name]
-        command_aliases = name === command.name ? "" : ""
+        command_aliases = name === command.name ? self.command_aliases_text command : ""
 
-        self.write_text "  <info>#{name}</info>#{" " * spacing_width}#{command_aliases}#{command.description}"
+        self.write_text "  <info>#{name}</info>#{" " * spacing_width}#{command_aliases}#{command.description}", context
       end
     end
 
@@ -139,7 +139,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     end
 
     unless definition.arguments.empty?
-      self.write_text "<comment>Arguments:</comment>"
+      self.write_text "<comment>Arguments:</comment>", context
       self.write_text "\n"
 
       definition.arguments.each_value do |arg|
@@ -155,7 +155,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     unless definition.options.empty?
       later_options = [] of ACON::Input::Option
 
-      self.write_text "<comment>Options:</comment>"
+      self.write_text "<comment>Options:</comment>", context
 
       definition.options.each_value do |option|
         if (option.shortcut || "").size > 1
@@ -212,6 +212,47 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     )
   end
 
+  private def calculate_total_width_for_options(options : Hash(String, ACON::Input::Option)) : Int32
+    self.calculate_total_width_for_options options.values
+  end
+
+  private def calculate_total_width_for_options(options : Array(ACON::Input::Option)) : Int32
+    return 0 if options.empty?
+
+    options.max_of do |o|
+      name_length = 1 + Math.max((o.shortcut || "").size, 1) + 4 + o.name.size
+
+      if o.negatable?
+        name_length += 6 + o.name.size
+      elsif o.accepts_value?
+        name_length += 1 + o.name.size + (o.value_optional? ? 2 : 0)
+      end
+
+      name_length
+    end
+  end
+
+  private def command_aliases_text(command : ACON::Command) : String
+    String.build do |io|
+      unless (aliases = command.aliases).empty?
+        io << '['
+        aliases.join io, '|'
+        io << ']' << ' '
+      end
+    end
+  end
+
+  private def format_default_value(default)
+    case default
+    when String
+      %("#{ACON::Formatter::Output.escape default}")
+    when Enumerable
+      %([#{default.map! { |item| %|"#{ACON::Formatter::Output.escape item}"| }.join ","}])
+    else
+      default
+    end
+  end
+
   private def width(commands : Array(ACON::Command) | Array(String)) : Int32
     widths = Array(Int32).new
 
@@ -229,35 +270,6 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     end
 
     widths.empty? ? 0 : widths.max + 2
-  end
-
-  private def calculate_total_width_for_options(options : Hash(String, ACON::Input::Option)) : Int32
-    self.calculate_total_width_for_options options.values
-  end
-
-  private def calculate_total_width_for_options(options : Array(ACON::Input::Option)) : Int32
-    options.max_of do |o|
-      name_length = 1 + Math.max((o.shortcut || "").size, 1) + 4 + o.name.size
-
-      if o.negatable?
-        name_length += 6 + o.name.size
-      elsif o.accepts_value?
-        name_length += 1 + o.name.size + (o.value_optional? ? 2 : 0)
-      end
-
-      name_length
-    end
-  end
-
-  private def format_default_value(default)
-    case default
-    when String
-      %("#{ACON::Formatter::Output.escape default}")
-    when Enumerable
-      %([#{default.map! { |item| %|"#{ACON::Formatter::Output.escape item}"| }.join ","}])
-    else
-      default
-    end
   end
 
   private def write_text(content : String, context : ACON::Descriptor::Context? = nil) : Nil
