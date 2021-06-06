@@ -1,4 +1,8 @@
 class Athena::Console::Helper::Formatter < Athena::Console::Helper
+  def format_section(section : String, message : String, style : String = "info") : String
+    "<#{style}>[#{section}]</#{style}> #{message}"
+  end
+
   def format_block(messages : String | Enumerable(String), style : String, large : Bool = false)
     messages = messages.is_a?(String) ? {messages} : messages
 
@@ -26,5 +30,15 @@ class Athena::Console::Helper::Formatter < Athena::Console::Helper
     end
 
     messages.join '\n'
+  end
+
+  def truncate(message : String, length : Int, suffix : String = "...") : String
+    computed_length = length - suffix.size
+
+    if computed_length > message.size
+      return message
+    end
+
+    "#{message[0...length]}#{suffix}"
   end
 end
