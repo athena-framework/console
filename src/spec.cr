@@ -2,10 +2,11 @@ module Athena::Console::Spec
   module Tester
     @capture_stderr_separately : Bool = false
     getter! output : ACON::Output::Interface
-    setter inputs : Array(String)? = nil
+    setter inputs : Array(String) = [] of String
 
     def display : String
-      self.output.to_s
+      raise ACON::Exceptions::Logic.new "Output not initialized.  Did you execute the command before requesting the display?" unless (output = @output)
+      output.to_s
     end
 
     def error_output : String
@@ -45,6 +46,18 @@ module Athena::Console::Spec
         self.output.as(ACON::Output::IO).io = IO::Memory.new
       end
     end
+
+    private def create_input_stream(inputs : Array(String)) : IO
+      input_stream = IO::Memory.new
+
+      inputs.each do |input|
+        input_stream << "#{input}\n"
+      end
+
+      input_stream.rewind
+
+      input_stream
+    end
   end
 
   struct ApplicationTester
@@ -82,16 +95,8 @@ module Athena::Console::Spec
         self.input.interactive = i
       end
 
-      if inputs = @inputs
-        input_stream = IO::Memory.new
-
-        inputs.each do |input|
-          input_stream << "#{input}\n"
-        end
-
-        input_stream.rewind
-
-        self.input.stream = input_stream
+      unless (inputs = @inputs).empty?
+        self.input.stream = self.create_input_stream inputs
       end
 
       self.init_output(
@@ -138,8 +143,7 @@ module Athena::Console::Spec
       end
 
       @input = ACON::Input::Hash.new input
-
-      # TODO: Set the input stream?
+      self.input.stream = self.create_input_stream @inputs
 
       interactive.try do |i|
         self.input.interactive = i
@@ -157,14 +161,14 @@ module Athena::Console::Spec
   end
 
   class MockCommand < Athena::Console::Command
-    alias Proc = ::Proc(ACON::Input::Interface, ACON::Output::Interface, ACON::Command::Status)
+    alias Proc = ::Proc(ACON::Input::Interface, ACON::Output::Interface, ACON::Command, ACON::Command::Status)
 
     def initialize(name : String, &@callback : ACON::Spec::MockCommand::Proc)
       super name
     end
 
     protected def execute(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
-      @callback.call input, output
+      @callback.call input, output, self
     end
   end
 end

@@ -123,6 +123,14 @@ abstract class Athena::Console::Command
     self
   end
 
+  def helper(helper_class : T.class) : T forall T
+    unless helper_set = @helper_set
+      raise ACON::Exceptions::Logic.new "Cannot retrieve helper '#{helper_class}' because there is no HelperSet defined. Did you forget to add your command to the application or to set the application on the command using '#application='? You can also set the HelperSet directly using '#helper_set='."
+    end
+
+    helper_set[helper_class].as T
+  end
+
   def hidden(@hidden : Bool) : self
     self
   end
