@@ -189,6 +189,95 @@ struct AthenaStyleTest < ASPEC::TestCase
         end),
         "style/long_line_block_wrapping.txt",
       },
+      "Lines are aligned to the first line and start with '//' in a very long line comment" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          ACON::Style::Athena.new(input, output).comment(
+            "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+          )
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/long_line_comment.txt",
+      },
+      "Nested tags have no effect on the color of the '//' prefix" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          output.decorated = true
+          ACON::Style::Athena.new(input, output).comment(
+            "Lorem ipsum dolor sit <comment>amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</comment> Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
+          )
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/long_line_comment_decorated.txt",
+      },
+      "Block behaves properly with a prefix and without type" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          ACON::Style::Athena.new(input, output).block(
+            "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+            prefix: "$ "
+          )
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/block_prefix_no_type.txt",
+      },
+      "Block behaves properly with a type and without prefix" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          ACON::Style::Athena.new(input, output).block(
+            "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+            type: "TEST"
+          )
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/block_no_prefix_type.txt",
+      },
+      "Block output is properly formatted with even padding lines" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          output.decorated = true
+          ACON::Style::Athena.new(input, output).success(
+            "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+          )
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/block_padding.txt",
+      },
+      "Handles trailing backslashes" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          style = ACON::Style::Athena.new input, output
+          style.title "Title ending with \\"
+          style.section "Section ending with \\"
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/backslashes.txt",
+      },
+      # TODO: Test horizontal table (definition list)
+      # TODO: Test horizontal table
+      "Closing tag is only applied once" => {
+        (ACON::Spec::MockCommand::Proc.new do |input, output|
+          output.decorated = true
+          style = ACON::Style::Athena.new input, output
+          style.print "<question>do you want <comment>something</>"
+          style.puts "?</>"
+
+          ACON::Command::Status::SUCCESS
+        end),
+        "style/closing_tag.txt",
+      },
+      # TODO: Enable this test case when multi width char support is added.
+      #   "Emojis don't make the line longer than expected" => {
+      #     (ACON::Spec::MockCommand::Proc.new do |input, output|
+      #       style = ACON::Style::Athena.new input, output
+      #       style.success "Lorem ipsum dolor sit amet"
+      #       style.success "Lorem ipsum dolor sit amet with one emoji 🎉"
+      #       style.success "Lorem ipsum dolor sit amet with so many of them 👩‍🌾👩‍🌾👩‍🌾👩‍🌾👩‍🌾"
+
+      #       ACON::Command::Status::SUCCESS
+      #     end),
+      #     "style/emojis.txt",
+      #   },
     }
   end
 end
