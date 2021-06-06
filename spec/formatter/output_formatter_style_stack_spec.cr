@@ -3,7 +3,7 @@ require "../spec_helper"
 describe ACON::Formatter::OutputStyleStack do
   it "#<<" do
     stack = ACON::Formatter::OutputStyleStack.new
-    stack << (s1 = ACON::Formatter::OutputStyle.new :white, :black)
+    stack << ACON::Formatter::OutputStyle.new :white, :black
     stack << (s2 = ACON::Formatter::OutputStyle.new :yellow, :blue)
 
     stack.current.should eq s2
@@ -34,7 +34,7 @@ describe ACON::Formatter::OutputStyleStack do
       stack = ACON::Formatter::OutputStyleStack.new
       stack << (s1 = ACON::Formatter::OutputStyle.new :white, :black)
       stack << (s2 = ACON::Formatter::OutputStyle.new :yellow, :blue)
-      stack << (s3 = ACON::Formatter::OutputStyle.new :green, :red)
+      stack << ACON::Formatter::OutputStyle.new :green, :red
 
       stack.pop(s2).should eq s2
       stack.pop.should eq s1

@@ -28,9 +28,7 @@ class Athena::Console::Helper::HelperSet
     @helpers[helper_class]?.as? T
   end
 
-  def [](helper_class : ACON::Helper.class) : ACON::Helper::Interface
-    raise ACON::Exceptions::InvalidArgument.new "The helper '#{helper_class}' is not defined." unless self.has? helper_class
-
-    @helpers[helper_class]
+  def [](helper_class : T.class) : T forall T
+    self.[helper_class]? || raise ACON::Exceptions::InvalidArgument.new "The helper '#{helper_class}' is not defined."
   end
 end
