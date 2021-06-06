@@ -4,7 +4,7 @@ describe ACON::Commands::List do
   describe "#execute" do
     it "executes" do
       app = ACON::Application.new "foo"
-      tester = ACON::Spec::CommandTester.new command = app.get("list")
+      tester = ACON::Spec::CommandTester.new app.get("list")
       tester.execute command: "list", decorated: false
 
       tester.display.should match /help\s{2,}Display help for a command/
@@ -12,7 +12,7 @@ describe ACON::Commands::List do
 
     it "with raw option" do
       app = ACON::Application.new "foo"
-      tester = ACON::Spec::CommandTester.new command = app.get("list")
+      tester = ACON::Spec::CommandTester.new app.get("list")
       tester.execute command: "list", "--raw": true
 
       tester.display.should eq "help   Display help for a command\nlist   List commands\n"
@@ -22,7 +22,7 @@ describe ACON::Commands::List do
       app = ACON::Application.new "foo"
       app.add FooCommand.new
 
-      tester = ACON::Spec::CommandTester.new command = app.get("list")
+      tester = ACON::Spec::CommandTester.new app.get("list")
       tester.execute command: "list", namespace: "foo", "--raw": true
 
       tester.display.should eq "foo:bar   The foo:bar command\n"
@@ -32,7 +32,7 @@ describe ACON::Commands::List do
       app = ACON::Application.new "foo"
       app.add Foo6Command.new
 
-      tester = ACON::Spec::CommandTester.new command = app.get("list")
+      tester = ACON::Spec::CommandTester.new app.get("list")
       tester.execute command: "list", decorated: false
 
       tester.display.should eq <<-OUTPUT
@@ -61,7 +61,7 @@ describe ACON::Commands::List do
       app = ACON::Application.new "foo"
       app.add Foo6Command.new
 
-      tester = ACON::Spec::CommandTester.new command = app.get("list")
+      tester = ACON::Spec::CommandTester.new app.get("list")
       tester.execute command: "list", "--raw": true
 
       tester.display.should eq "help       Display help for a command\nlist       List commands\n0foo:bar   0foo:bar command\n"

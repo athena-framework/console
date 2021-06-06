@@ -174,6 +174,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     end
   end
 
+  # ameba:disable Metrics/CyclomaticComplexity
   protected def describe(option : ACON::Input::Option, context : ACON::Descriptor::Context) : Nil
     if option.accepts_value? && !option.default.nil? && (!option.default.is_a?(Array) || !option.default.as(Array).empty?)
       default = %(<comment> [default: #{self.format_default_value option.default}]</comment>)
