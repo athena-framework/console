@@ -5,25 +5,13 @@ abstract class Athena::Console::Command
     INVALID = 2
   end
 
-  enum Synopsis
+  private enum Synopsis
     SHORT
     LONG
   end
 
-  @@default_name : String? = nil
-  @@default_description : String? = nil
-
-  def self.default_name : String?
-    # TODO: Support reading name from annotation.
-
-    @@default_name
-  end
-
-  def self.default_description : String?
-    # TODO: Support reading description from annotation.
-
-    @@default_description
-  end
+  class_getter default_name : String? = nil
+  class_getter default_description : String? = nil
 
   getter! name : String
   getter description : String = ""
@@ -39,7 +27,7 @@ abstract class Athena::Console::Command
   @definition : ACON::Input::Definition = ACON::Input::Definition.new
   @full_definition : ACON::Input::Definition? = nil
   @ignore_validation_errors : Bool = false
-  @synopsis = Hash(ACON::Command::Synopsis, String).new
+  @synopsis = Hash(Synopsis, String).new
 
   def initialize(name : String? = nil)
     if n = (name || self.class.default_name)

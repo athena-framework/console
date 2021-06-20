@@ -8,7 +8,7 @@ license: MIT
 
 repository: https://github.com/athena-framework/console
 
-documentation: https://athena-framework.github.io/console/Athena/Console.html
+documentation: https://athenaframework.org/Console
 
 Allows the creation of CLI based commands.: |
   Allows the creation of CLI based commands.
