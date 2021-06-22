@@ -646,8 +646,8 @@ struct ApplicationTest < ASPEC::TestCase
 
     app.run input, output
 
-    command.input.should be input
-    command.output.should be output
+    command.input.should eq input
+    command.output.should eq output
   end
 
   def test_run_default_command : Nil

@@ -1,6 +1,6 @@
 require "./output"
 
-class Athena::Console::Style::Athena < Athena::Console::Style::Output
+struct Athena::Console::Style::Athena < Athena::Console::Style::Output
   private MAX_LINE_LENGTH = 120
 
   getter question_helper : ACON::Helper::Question { ACON::Helper::AthenaQuestionHelper.new }

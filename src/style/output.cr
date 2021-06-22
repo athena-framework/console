@@ -1,6 +1,6 @@
 require "./interface"
 
-abstract class Athena::Console::Style::Output
+abstract struct Athena::Console::Style::Output
   include Athena::Console::Style::Interface
   include Athena::Console::Output::Interface
 
