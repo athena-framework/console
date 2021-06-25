@@ -8,8 +8,30 @@ class Athena::Console::Application
   getter name : String
 
   @default_command : String = "list"
-  property? auto_exit : Bool = true
+
+  # By default the application will auto [exit](https://crystal-lang.org/api/toplevel.html#exit(status=0):NoReturn-class-method) after executing a command.
+  # This method can be used to disable that functionality.
+  # If set to `false`, the `ACON::Command::Status` of the executed command is returned from `#run`.
+  # Otherwise the `#run` method never returns.
+  #
+  # ```
+  # application = ACON::Application.new "My CLI"
+  # appplication.auto_exit = false
+  # exit_status = application.run
+  # exit_status # => ACON::Command::Status::SUCCESS
+  #
+  # appplication.auto_exit = true
+  # exit_status = application.run
+  #
+  # # This line is never reached.
+  # exit_status
+  # ```
+  setter auto_exit : Bool = true
   property? catch_exceptions : Bool = true
+
+  # Returns `true` if `self` only supports a single command.
+  #
+  # The main use case for this feature
   getter? single_command : Bool = false
   property helper_set : ACON::Helper::HelperSet { self.default_helper_set }
   setter command_loader : ACON::Loader::Interface? = nil
@@ -31,6 +53,7 @@ class Athena::Console::Application
     # This'll require the ability to optional set an event dispatcher on this type.
   end
 
+  # Adds the provided *command* instance to `self` allowing it be ran.
   def add(command : ACON::Command) : ACON::Command?
     self.init
 
@@ -53,10 +76,18 @@ class Athena::Console::Application
     command
   end
 
+  # Returns if application should exit automatically after executing a command.
+  # See `#auto_exit=`.
+  def auto_exit? : Bool
+    @auto_exit
+  end
+
+  # Yields each command within `self`, optionally only yields those within the provided *namespace*.
   def each_command(namespace : String? = nil, & : ACON::Command -> Nil) : Nil
     self.commands(namespace).each_value { |c| yield c }
   end
 
+  # Returns all commands within `self`, optionally only including the ones within the provided *namespace*.
   def commands(namespace : String? = nil) : Hash(String, ACON::Command)
     self.init
 
@@ -93,6 +124,49 @@ class Athena::Console::Application
     commands
   end
 
+  # Sets which command should be executed when no command name is provided in a multi command application.
+  # By default this is `ACON::Commands::List`.
+  #
+  # For example, executing the following console script via `crystal run ./console.cr`
+  # would result in `Hello world!` being printed instead of the default list output.
+  #
+  # ```
+  # application = ACON::Application.new "My CLI"
+  #
+  # application.register "foo" do |_, output|
+  #   output.puts "Hello world!"
+  #   ACON::Command::Status::SUCCESS
+  # end
+  #
+  # application.default_command "foo"
+  #
+  # application.run
+  # ```
+  #
+  # ### Single Command Applications
+  #
+  # In some cases a CLI may only have one supported command in which passing the command's name each time is tedious.
+  # In such a case an application may be declared as a single command application via the optional second argument *single_command*.
+  # Passing `true` makes it so that any supplied arguments or options are passed to the default command.
+  #
+  # For example, executing the following console script via `crystal run ./console.cr George`
+  # would result in `Hello George!` being printed.  If we tried this again without setting *single_command*
+  # to `true`, it would error saying `Command 'George' is not defined.`
+  #
+  # ```
+  # application = ACON::Application.new "My CLI"
+  #
+  # application.register "foo" do |input, output, command|
+  #   output.puts %(Hello #{input.argument "name"}!)
+  #   ACON::Command::Status::SUCCESS
+  # end.argument("name", :required)
+  #
+  # application.default_command "foo", true
+  #
+  # application.run
+  # ```
+  #
+  # WARNING: Arguments and options passed to the default command are ignored when `#single_command?` is `false`.
   def default_command(name : String, single_command : Bool = false) : self
     @default_command = name
 
@@ -292,7 +366,7 @@ class Athena::Console::Application
     namespaces.reject!(&.blank?).uniq!
   end
 
-  def run(input : ACON::Input::Interface = ACON::Input::ARGV.new, output : ACON::Output::Interface = ACON::Output::ConsoleOutput.new) : ACON::Command::Status
+  def run(input : ACON::Input::Interface = ACON::Input::ARGV.new, output : ACON::Output::Interface = ACON::Output::ConsoleOutput.new) : ACON::Command::Status | NoReturn
     ENV["LINES"] = @terminal.height.to_s
     ENV["COLUMNS"] = @terminal.width.to_s
 

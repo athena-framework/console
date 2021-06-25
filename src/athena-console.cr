@@ -17,6 +17,48 @@ require "./style/*"
 # Convenience alias to make referencing `Athena::Console` types easier.
 alias ACON = Athena::Console
 
+# Athena's Console component, `ACON` for short, allows for the creation of command-line based commands.
+# These commands could be used for any reoccurring task such as cron jobs, imports, etc.
+#
+# The console component best works in conjunction with a dedicated Crystal file that'll be used as the entry point.
+# Ideally this file is compiled into a dedicated binary for use in production, but is invoked directly while developing.
+# Otherwise any changes made to the files it requires would not be represented.
+# The most basic example would be:
+#
+# ```
+# #!/usr/bin/env crystal
+#
+# # Require the component and anything extra needed based on your business logic.
+# require "athena-console"
+#
+# # Create an ACON::Application, passing it the name of your CLI.
+# # Optionally accepts a second argument representing the version of the CLI.
+# application = ACON::Application.new "My CLI"
+#
+# # Add any commands defined externally,
+# # or configure/customize the application as needed.
+#
+# # Run the application.
+# # By default this uses STDIN and STDOUT for its input and output.
+# application.run
+# ```
+#
+# External commands can be registered via `ACON::Application#add`:
+#
+# ```
+# application.add MyCommand.new
+# ```
+#
+# The `ACON::Application#register` method may also be used to define simpler/generic commands:
+#
+# ```
+# application.register "foo" do |input, output|
+#   # Do stuff here.
+#
+#   # Denote that this command has finished successfully.
+#   ACON::Command::Status::SUCCESS
+# end
+# ```
 module Athena::Console
   VERSION = "0.1.0"
 end

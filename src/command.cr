@@ -22,6 +22,7 @@ abstract class Athena::Console::Command
   setter process_title : String? = nil
   property helper_set : ACON::Helper::HelperSet? = nil
   getter? hidden : Bool = false
+  getter? enabled : Bool = true
   getter usages : Array(String) = [] of String
 
   @definition : ACON::Input::Definition = ACON::Input::Definition.new
@@ -169,10 +170,6 @@ abstract class Athena::Console::Command
 
   def ignore_validation_errors : Nil
     @ignore_validation_errors = true
-  end
-
-  def enabled? : Bool
-    true
   end
 
   def run(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
