@@ -1,6 +1,65 @@
 require "semantic_version"
 require "levenshtein"
 
+# An `ACON::Application` is a container for a collection multiple `ACON::Command`, and serves as the entry point of a CLI application.
+#
+# This class is optimized for a standard CLI environment; but it may be subclassed to provide a more specialized/customized entry point.
+#
+# # Usage
+#
+# The console component best works in conjunction with a dedicated Crystal file that'll be used as the entry point.
+# Ideally this file is compiled into a dedicated binary for use in production, but is invoked directly while developing.
+# Otherwise any changes made to the files it requires would not be represented.
+# The most basic example would be:
+#
+# ```
+# #!/usr/bin/env crystal
+#
+# # Require the component and anything extra needed based on your business logic.
+# require "athena-console"
+#
+# # Create an ACON::Application, passing it the name of your CLI.
+# # Optionally accepts a second argument representing the version of the CLI.
+# application = ACON::Application.new "My CLI"
+#
+# # Add any commands defined externally,
+# # or configure/customize the application as needed.
+#
+# # Run the application.
+# # By default this uses STDIN and STDOUT for its input and output.
+# application.run
+# ```
+#
+# External commands can be registered via `#add`:
+#
+# ```
+# application.add MyCommand.new
+# ```
+#
+# The `#register` method may also be used to define simpler/generic commands:
+#
+# ```
+# application.register "foo" do |input, output|
+#   # Do stuff here.
+#
+#   # Denote that this command has finished successfully.
+#   ACON::Command::Status::SUCCESS
+# end
+# ```
+#
+# ## Default Command
+#
+# The default command represents which command should be executed when no command name is provided; by default this is `ACON::Commands::List`.
+# For example, running `crystal run ./console.cr` would result in all the available commands being listed.
+# The default command can be customized via `#default_command`.
+#
+# ### Single Command Applications
+#
+# In some cases a CLI may only have one supported command in which passing the command's name each time is tedious.
+# In such a case an application may be declared as a single command application via the optional second argument to `#default_command`.
+# Passing `true` makes it so that any supplied arguments or options are passed to the default command.
+#
+# WARNING: Arguments and options passed to the default command are ignored when `#single_command?` is `false`.
 class Athena::Console::Application
   @terminal : ACON::Terminal
 
@@ -9,32 +68,56 @@ class Athena::Console::Application
 
   @default_command : String = "list"
 
-  # By default the application will auto [exit](https://crystal-lang.org/api/toplevel.html#exit(status=0):NoReturn-class-method) after executing a command.
+  # By default, the application will auto [exit](https://crystal-lang.org/api/toplevel.html#exit(status=0):NoReturn-class-method) after executing a command.
   # This method can be used to disable that functionality.
+  #
   # If set to `false`, the `ACON::Command::Status` of the executed command is returned from `#run`.
   # Otherwise the `#run` method never returns.
   #
   # ```
   # application = ACON::Application.new "My CLI"
-  # appplication.auto_exit = false
+  # application.auto_exit = false
   # exit_status = application.run
   # exit_status # => ACON::Command::Status::SUCCESS
   #
-  # appplication.auto_exit = true
+  # application.auto_exit = true
   # exit_status = application.run
   #
   # # This line is never reached.
   # exit_status
   # ```
   setter auto_exit : Bool = true
-  property? catch_exceptions : Bool = true
+
+  # By default, the application will gracefully handle exceptions raised as part of the execution of a command
+  # by formatting and outputting it; including varying levels of information depending on the `ACON::Output::Verbosity` level used.
+  #
+  # If set to `false`, that logic is bypassed and the exception is bubbled up to where `#run` was invoked from.
+  #
+  # ```
+  # application = ACON::Application.new "My CLI"
+  #
+  # application.register "foo" do |input, output, command|
+  #   output.puts %(Hello #{input.argument "name"}!)
+  #
+  #   # Denote that this command has finished successfully.
+  #   ACON::Command::Status::SUCCESS
+  # end.argument("name", :required)
+  #
+  # application.default_command "foo", true
+  # application.catch_exceptions = false
+  #
+  # application.run # => Not enough arguments (missing: 'name'). (Athena::Console::Exceptions::ValidationFailed)
+  # ```
+  setter catch_exceptions : Bool = true
+
+  # Allows setting the `ACON::Loader::Interface` that should be used by `self.`
+  # See the related interface for more information.
+  setter command_loader : ACON::Loader::Interface? = nil
 
   # Returns `true` if `self` only supports a single command.
-  #
-  # The main use case for this feature
+  # See [Single Command Applications][Athena::Console::Application#default_command(name,single_command)--single-command-applications] for more information.
   getter? single_command : Bool = false
   property helper_set : ACON::Helper::HelperSet { self.default_helper_set }
-  setter command_loader : ACON::Loader::Interface? = nil
 
   @definition : ACON::Input::Definition? = nil
   @commands = Hash(String, ACON::Command).new
@@ -53,7 +136,7 @@ class Athena::Console::Application
     # This'll require the ability to optional set an event dispatcher on this type.
   end
 
-  # Adds the provided *command* instance to `self` allowing it be ran.
+  # Adds the provided *command* instance to `self`, allowing it be executed.
   def add(command : ACON::Command) : ACON::Command?
     self.init
 
@@ -82,12 +165,14 @@ class Athena::Console::Application
     @auto_exit
   end
 
-  # Yields each command within `self`, optionally only yields those within the provided *namespace*.
-  def each_command(namespace : String? = nil, & : ACON::Command -> Nil) : Nil
-    self.commands(namespace).each_value { |c| yield c }
+  # Returns if the application should handle exceptions raised within the execution of a command.
+  # See `#catch_exceptions=`.
+  def catch_exceptions? : Bool
+    @catch_exceptions
   end
 
   # Returns all commands within `self`, optionally only including the ones within the provided *namespace*.
+  # The keys of the returned hash represent the full command names, while the values are the command instances.
   def commands(namespace : String? = nil) : Hash(String, ACON::Command)
     self.init
 
@@ -124,8 +209,7 @@ class Athena::Console::Application
     commands
   end
 
-  # Sets which command should be executed when no command name is provided in a multi command application.
-  # By default this is `ACON::Commands::List`.
+  # Sets the [default command][Athena::Console::Application--default-command] to the command with the provided *name*.
   #
   # For example, executing the following console script via `crystal run ./console.cr`
   # would result in `Hello world!` being printed instead of the default list output.
@@ -141,13 +225,9 @@ class Athena::Console::Application
   # application.default_command "foo"
   #
   # application.run
+  #
+  # ./console # => Hello world!
   # ```
-  #
-  # ### Single Command Applications
-  #
-  # In some cases a CLI may only have one supported command in which passing the command's name each time is tedious.
-  # In such a case an application may be declared as a single command application via the optional second argument *single_command*.
-  # Passing `true` makes it so that any supplied arguments or options are passed to the default command.
   #
   # For example, executing the following console script via `crystal run ./console.cr George`
   # would result in `Hello George!` being printed.  If we tried this again without setting *single_command*
@@ -165,8 +245,6 @@ class Athena::Console::Application
   #
   # application.run
   # ```
-  #
-  # WARNING: Arguments and options passed to the default command are ignored when `#single_command?` is `false`.
   def default_command(name : String, single_command : Bool = false) : self
     @default_command = name
 
@@ -179,6 +257,36 @@ class Athena::Console::Application
     self
   end
 
+  # Returns the `ACON::Input::Definition` associated with `self`.
+  # See the related type for more information.
+  def definition : ACON::Input::Definition
+    @definition ||= self.default_input_definition
+
+    if self.single_command?
+      input_definition = @definition.not_nil!
+      input_definition.arguments = Array(ACON::Input::Argument).new
+
+      return input_definition
+    end
+
+    @definition.not_nil!
+  end
+
+  # Sets the *definition* that should be used by `self.`
+  # See the related type for more information.
+  def definition=(@definition : ACON::Input::Definition)
+  end
+
+  # Yields each command within `self`, optionally only yields those within the provided *namespace*.
+  def each_command(namespace : String? = nil, & : ACON::Command -> Nil) : Nil
+    self.commands(namespace).each_value { |c| yield c }
+  end
+
+  # Returns the `ACON::Command` with the provided *name*, which can either be the full name, an abbreviation, or an alias.
+  # This method will attempt to find the best match given an abbreviation of a name or alias.
+  #
+  # Raises an `ACON::Exceptions::CommandNotFound` exception when the provided *name* is incorrect or ambiguous.
+  #
   # ameba:disable Metrics/CyclomaticComplexity
   def find(name : String) : ACON::Command
     self.init
@@ -276,16 +384,19 @@ class Athena::Console::Application
     command
   end
 
-  def find_namespace(namespace : String) : String
+  # Returns the full name of a registered namespace with the provided *name*, which can either be the full name or an abbreviation.
+  #
+  # Raises an `ACON::Exceptions::NamespaceNotFound` exception when the provided *name* is incorrect or ambiguous.
+  def find_namespace(name : String) : String
     all_namespace_names = self.namespaces
 
-    expression = "#{namespace.split(':').join("[^:]*:", &->Regex.escape(String))}[^:]*"
+    expression = "#{name.split(':').join("[^:]*:", &->Regex.escape(String))}[^:]*"
     namespaces = all_namespace_names.select(/^#{expression}/)
 
     if namespaces.empty?
-      message = "There are no commands defined in the '#{namespace}' namespace."
+      message = "There are no commands defined in the '#{name}' namespace."
 
-      if (alternatives = self.find_alternatives namespace, all_namespace_names) && (!alternatives.empty?)
+      if (alternatives = self.find_alternatives name, all_namespace_names) && (!alternatives.empty?)
         case alternatives.size
         when 1 then message += "\n\nDid you mean this?\n    "
         else        message += "\n\nDid you mean one of these?\n    "
@@ -297,22 +408,18 @@ class Athena::Console::Application
       raise ACON::Exceptions::NamespaceNotFound.new message, alternatives
     end
 
-    exact = namespaces.includes? namespace
+    exact = namespaces.includes? name
 
     if namespaces.size > 1 && !exact
-      raise ACON::Exceptions::NamespaceNotFound.new "The namespace '#{namespace}' is ambiguous.\nDid you mean one of these?\n#{self.abbreviation_suggestions namespaces}", namespaces
+      raise ACON::Exceptions::NamespaceNotFound.new "The namespace '#{name}' is ambiguous.\nDid you mean one of these?\n#{self.abbreviation_suggestions namespaces}", namespaces
     end
 
-    exact ? namespace : namespaces.first
+    exact ? name : namespaces.first
   end
 
-  def extract_namespace(name : String, limit : Int32? = nil) : String
-    # Pop off the shortcut name of the command.
-    parts = name.split(':').tap &.pop
-
-    (limit.nil? ? parts : parts[0...limit]).join ':'
-  end
-
+  # Returns the `ACON::Command` with the provided *name*.
+  #
+  # Raises an `ACON::Exceptions::CommandNotFound` exception when a command with the provided *name* does not exist.
   def get(name : String) : ACON::Command
     self.init
 
@@ -336,6 +443,7 @@ class Athena::Console::Application
     command
   end
 
+  # Returns `true` if a command with the provided *name* exists, otherwise `false`.
   def has?(name : String) : Bool
     self.init
 
@@ -350,6 +458,8 @@ class Athena::Console::Application
     end
   end
 
+  # Returns all unique namespaces used by currently registered commands,
+  # excluding the global namespace.
   def namespaces : Array(String)
     namespaces = [] of String
 
@@ -366,6 +476,10 @@ class Athena::Console::Application
     namespaces.reject!(&.blank?).uniq!
   end
 
+  # Runs the current application, optionally with the provided *input* and *output*.
+  #
+  # Returns the `ACON::Command::Status` of the related command execution if `#auto_exit?` is `false`.
+  # Will gracefully handle exceptions raised within the command execution unless `#catch_exceptions?` is `false`.
   def run(input : ACON::Input::Interface = ACON::Input::ARGV.new, output : ACON::Output::Interface = ACON::Output::ConsoleOutput.new) : ACON::Command::Status | NoReturn
     ENV["LINES"] = @terminal.height.to_s
     ENV["COLUMNS"] = @terminal.width.to_s
@@ -374,13 +488,13 @@ class Athena::Console::Application
 
     begin
       exit_status = self.do_run input, output
-    rescue ex : Exception
+    rescue ex : ::Exception
       raise ex unless @catch_exceptions
 
       self.render_exception ex, output
 
       exit_status = if ex.is_a? ACON::Exceptions::ConsoleException
-                      ACON::Command::Status.new ex.code.zero? ? 1 : ex.code
+                      ACON::Command::Status.new ex.code
                     else
                       ACON::Command::Status::FAILURE
                     end
@@ -393,8 +507,69 @@ class Athena::Console::Application
     exit_status
   end
 
+  # Creates and `#add`s an `ACON::Command` with the provided *name*; executing the block when the command is invoked.
+  def register(name : String, &block : ACON::Input::Interface, ACON::Output::Interface, ACON::Command -> ACON::Command::Status) : ACON::Command
+    self.add(ACON::Commands::Generic.new(name, &block)).not_nil!
+  end
+
+  def long_version : String
+    "#{@name} <info>#{@version}</info>"
+  end
+
+  def help : String
+    self.long_version
+  end
+
+  protected def command_name(input : ACON::Input::Interface) : String?
+    @single_command ? @default_command : input.first_argument
+  end
+
   # ameba:disable Metrics/CyclomaticComplexity
-  def do_run(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
+  protected def configure_io(input : ACON::Input::Interface, output : ACON::Output::Interface) : Nil
+    if input.has_parameter? "--ansi", only_params: true
+      output.decorated = true
+    elsif input.has_parameter? "--no-ansi", only_params: true
+      output.decorated = false
+    end
+
+    if input.has_parameter? "--no-interaction", "-n", only_params: true
+      input.interactive = false
+    end
+
+    case shell_verbosity = ENV["SHELL_VERBOSITY"]?.try &.to_i
+    when -1 then output.verbosity = :quiet
+    when  1 then output.verbosity = :verbose
+    when  2 then output.verbosity = :very_verbose
+    when  3 then output.verbosity = :debug
+    else
+      shell_verbosity = 0
+    end
+
+    if input.has_parameter? "--quiet", "-q", only_params: true
+      output.verbosity = :quiet
+      shell_verbosity = -1
+    else
+      if input.has_parameter?("-vvv", "--verbose=3", only_params: true) || 3 == input.parameter("--verbose", false, true)
+        output.verbosity = :debug
+        shell_verbosity = 3
+      elsif input.has_parameter?("-vv", "--verbose=2", only_params: true) || 2 == input.parameter("--verbose", false, true)
+        output.verbosity = :very_verbose
+        shell_verbosity = 2
+      elsif input.has_parameter?("-v", "--verbose=1", only_params: true) || input.has_parameter?("--verbose") || input.parameter("--verbose", false, true)
+        output.verbosity = :verbose
+        shell_verbosity = 1
+      end
+    end
+
+    if -1 == shell_verbosity
+      input.interactive = false
+    end
+
+    ENV["SHELL_VERBOSITY"] = shell_verbosity.to_s
+  end
+
+  # ameba:disable Metrics/CyclomaticComplexity
+  protected def do_run(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
     if input.has_parameter? "--version", "-V", only_params: true
       output.puts self.long_version
 
@@ -455,97 +630,6 @@ class Athena::Console::Application
     @running_command = nil
 
     exit_status
-  end
-
-  def register(name : String, &block : ACON::Input::Interface, ACON::Output::Interface, ACON::Command -> ACON::Command::Status) : ACON::Command
-    self.add(ACON::Commands::Generic.new(name, &block)).not_nil!
-  end
-
-  def render_exception(ex : Exception, output : ACON::Output::ConsoleOutputInterface) : Nil
-    self.render_exception ex, output.error_output
-  end
-
-  def render_exception(ex : Exception, output : ACON::Output::Interface) : Nil
-    output.puts "", :quiet
-
-    self.do_render_exception ex, output
-
-    if running_command = @running_command
-      output.puts "<info>#{ACON::Formatter::Output.escape running_command.synopsis}</info>", :quiet
-      output.puts "", :quiet
-    end
-  end
-
-  def definition : ACON::Input::Definition
-    @definition ||= self.default_input_definition
-
-    if self.single_command?
-      input_definition = @definition.not_nil!
-      input_definition.arguments = Array(ACON::Input::Argument).new
-
-      return input_definition
-    end
-
-    @definition.not_nil!
-  end
-
-  def definition=(@definition : ACON::Input::Definition)
-  end
-
-  def long_version : String
-    "#{@name} <info>#{@version}</info>"
-  end
-
-  def help : String
-    self.long_version
-  end
-
-  protected def command_name(input : ACON::Input::Interface) : String?
-    @single_command ? @default_command : input.first_argument
-  end
-
-  # ameba:disable Metrics/CyclomaticComplexity
-  protected def configure_io(input : ACON::Input::Interface, output : ACON::Output::Interface) : Nil
-    if input.has_parameter? "--ansi", only_params: true
-      output.decorated = true
-    elsif input.has_parameter? "--no-ansi", only_params: true
-      output.decorated = false
-    end
-
-    if input.has_parameter? "--no-interaction", "-n", only_params: true
-      input.interactive = false
-    end
-
-    case shell_verbosity = ENV["SHELL_VERBOSITY"]?.try &.to_i
-    when -1 then output.verbosity = :quiet
-    when  1 then output.verbosity = :verbose
-    when  2 then output.verbosity = :very_verbose
-    when  3 then output.verbosity = :debug
-    else
-      shell_verbosity = 0
-    end
-
-    if input.has_parameter? "--quiet", "-q", only_params: true
-      output.verbosity = :quiet
-      shell_verbosity = -1
-    else
-      if input.has_parameter?("-vvv", "--verbose=3", only_params: true) || 3 == input.parameter("--verbose", false, true)
-        output.verbosity = :debug
-        shell_verbosity = 3
-      elsif input.has_parameter?("-vv", "--verbose=2", only_params: true) || 2 == input.parameter("--verbose", false, true)
-        output.verbosity = :very_verbose
-        shell_verbosity = 2
-      elsif input.has_parameter?("-v", "--verbose=1", only_params: true) || input.has_parameter?("--verbose") || input.parameter("--verbose", false, true)
-        output.verbosity = :verbose
-        shell_verbosity = 1
-      end
-    end
-
-    if -1 == shell_verbosity
-      input.interactive = false
-    end
-
-    ENV["SHELL_VERBOSITY"] = shell_verbosity.to_s
   end
 
   protected def do_run_command(command : ACON::Command, input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
@@ -655,6 +739,28 @@ class Athena::Console::Application
       end
 
       break unless (ex = ex.cause)
+    end
+  end
+
+  protected def extract_namespace(name : String, limit : Int32? = nil) : String
+    # Pop off the shortcut name of the command.
+    parts = name.split(':').tap &.pop
+
+    (limit.nil? ? parts : parts[0...limit]).join ':'
+  end
+
+  protected def render_exception(ex : Exception, output : ACON::Output::ConsoleOutputInterface) : Nil
+    self.render_exception ex, output.error_output
+  end
+
+  protected def render_exception(ex : Exception, output : ACON::Output::Interface) : Nil
+    output.puts "", :quiet
+
+    self.do_render_exception ex, output
+
+    if running_command = @running_command
+      output.puts "<info>#{ACON::Formatter::Output.escape running_command.synopsis}</info>", :quiet
+      output.puts "", :quiet
     end
   end
 
