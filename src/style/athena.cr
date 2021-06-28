@@ -124,7 +124,7 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
   def section(message : String) : Nil
     self.auto_prepend_block
     self.puts "<comment>#{ACON::Formatter::Output.escape_trailing_backslash message}</>"
-    self.puts %(<comment>#{"-" * ACON::Helper.remove_decoration(self.formatter, message).size}</>)
+    self.puts %(<comment>#{"-" * ACON::Helper.width(ACON::Helper.remove_decoration(self.formatter, message))}</>)
     self.new_line
   end
 
@@ -148,7 +148,7 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
   def title(message : String) : Nil
     self.auto_prepend_block
     self.puts "<comment>#{ACON::Formatter::Output.escape_trailing_backslash message}</>"
-    self.puts %(<comment>#{"=" * ACON::Helper.remove_decoration(self.formatter, message).size}</>)
+    self.puts %(<comment>#{"=" * ACON::Helper.width(ACON::Helper.remove_decoration(self.formatter, message))}</>)
     self.new_line
   end
 
@@ -182,7 +182,7 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
 
   private def create_block(messages : Enumerable(String), type : String? = nil, style : String? = nil, prefix : String = " ", padding : Bool = false, escape : Bool = true) : Array(String)
     indent_length = 0
-    prefix_length = ACON::Helper.remove_decoration(self.formatter, prefix).size
+    prefix_length = ACON::Helper.width ACON::Helper.remove_decoration self.formatter, prefix
     lines = [] of String
 
     unless type.nil?
@@ -194,7 +194,7 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     messages.each_with_index do |message, idx|
       message = ACON::Formatter::Output.escape message if escape
 
-      decoration_length = message.size - ACON::Helper.remove_decoration(self.formatter, message).size
+      decoration_length = ACON::Helper.width(message) - ACON::Helper.width(ACON::Helper.remove_decoration(self.formatter, message))
       message_line_length = Math.min(@line_length - prefix_length - indent_length + decoration_length, @line_length)
 
       message.gsub(/(.{1,#{message_line_length}})( +|$\n?)|(.{1,#{message_line_length}})/, "\\0\n").split "\n", remove_empty: true do |match|
@@ -217,7 +217,7 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
       end
 
       line = "#{prefix}#{line}"
-      line += " " * Math.max @line_length - ACON::Helper.remove_decoration(self.formatter, line).size, 0
+      line += " " * Math.max @line_length - ACON::Helper.width(ACON::Helper.remove_decoration(self.formatter, line)), 0
 
       if style
         line = "<#{style}>#{line}</>"

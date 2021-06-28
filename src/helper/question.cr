@@ -38,7 +38,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
 
     choices = question.choices
 
-    max_width = choices.keys.max_of { |k| k.is_a?(String) ? k.size : k.digits.size }
+    max_width = choices.keys.max_of { |k| k.is_a?(String) ? self.class.width(k) : k.digits.size }
 
     choices.each do |k, v|
       padding = " " * (max_width - (k.is_a?(String) ? k.size : k.digits.size))

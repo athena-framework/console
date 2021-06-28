@@ -64,7 +64,7 @@ class Athena::Console::Output::Section < Athena::Console::Output::IO
   end
 
   private def get_display_width(input : String) : Int32
-    ACON::Helper.remove_decoration(self.formatter, input.gsub("\t", "        ")).size
+    ACON::Helper.width ACON::Helper.remove_decoration(self.formatter, input.gsub("\t", "        "))
   end
 
   private def pop_stream_content_until_current_section(lines_to_clear_from_current_section : Int32 = 0) : String

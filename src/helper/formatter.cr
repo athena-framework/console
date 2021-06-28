@@ -33,9 +33,9 @@ class Athena::Console::Helper::Formatter < Athena::Console::Helper
   end
 
   def truncate(message : String, length : Int, suffix : String = "...") : String
-    computed_length = length - suffix.size
+    computed_length = length - self.class.width suffix
 
-    if computed_length > message.size
+    if computed_length > self.class.width message
       return message
     end
 

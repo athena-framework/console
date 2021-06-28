@@ -13,5 +13,12 @@ abstract class Athena::Console::Helper
     string
   end
 
+  # Returns the width of a string; where the width is how many character positions the string will use.
+  #
+  # TODO: Support double width chars.
+  def self.width(string : String) : Int32
+    string.size
+  end
+
   property helper_set : ACON::Helper::HelperSet? = nil
 end

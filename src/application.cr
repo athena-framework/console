@@ -358,7 +358,7 @@ class Athena::Console::Application
       end.uniq!
 
       usable_width = @terminal.width - 10
-      max_len = commands.max_of &.size
+      max_len = commands.max_of &->ACON::Helper.width(String)
       abbreviations = commands.map do |n|
         if command_list[n].hidden?
           commands.delete n
@@ -368,7 +368,7 @@ class Athena::Console::Application
 
         abbreviation = "#{n.rjust max_len, ' '} #{command_list[n].description}"
 
-        abbreviation.size > usable_width ? "#{abbreviation[0, usable_width - 3]}..." : abbreviation
+        ACON::Helper.width(abbreviation) > usable_width ? "#{abbreviation[0, usable_width - 3]}..." : abbreviation
       end
 
       if commands.size > 1
@@ -679,7 +679,7 @@ class Athena::Console::Application
 
       if message.empty? || ACON::Output::Verbosity::VERBOSE <= output.verbosity
         title = "  [#{ex.class}]  "
-        len = title.size
+        len = ACON::Helper.width title
       else
         len = 0
         title = ""
@@ -690,7 +690,7 @@ class Athena::Console::Application
 
       message.split(/(?:\r?\n)/) do |line|
         self.split_string_by_width(line, width - 4) do |l|
-          line_length = l.size + 4
+          line_length = ACON::Helper.width(l) + 4
           lines << {l, line_length}
 
           len = Math.max line_length, len
@@ -718,7 +718,7 @@ class Athena::Console::Application
       messages << (empty_line = "<error>#{" "*len}</error>")
 
       if messages.empty? || ACON::Output::Verbosity::VERBOSE <= output.verbosity
-        messages << "<error>#{title}#{" "*(Math.max(0, len - title.size))}</error>"
+        messages << "<error>#{title}#{" "*(Math.max(0, len - ACON::Helper.width(title)))}</error>"
       end
 
       lines.each do |l|

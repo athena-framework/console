@@ -62,7 +62,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
 
       namespace[:commands].each do |name|
         self.write_text "\n"
-        spacing_width = width - name.size
+        spacing_width = width - ACON::Helper.width name
         command = commands[name]
         command_aliases = name === command.name ? self.command_aliases_text command : ""
 
@@ -80,7 +80,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
                 ""
               end
 
-    total_width = context.total_width || argument.name.size
+    total_width = context.total_width || ACON::Helper.width argument.name
     spacing_width = total_width - argument.name.size
 
     self.write_text(
@@ -135,7 +135,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     total_width = self.calculate_total_width_for_options definition.options
 
     definition.arguments.each_value do |arg|
-      total_width = Math.max total_width, arg.name.size
+      total_width = Math.max total_width, ACON::Helper.width(arg.name)
     end
 
     unless definition.arguments.empty?
@@ -198,7 +198,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
       (option.negatable? ? "--%<name>s|--no-%<name>s" : "--%<name>s%<value>s") % {name: option.name, value: value}
     )
 
-    spacing_width = total_width - synopsis.size
+    spacing_width = total_width - ACON::Helper.width synopsis
 
     self.write_text(
       sprintf(
@@ -221,12 +221,12 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     return 0 if options.empty?
 
     options.max_of do |o|
-      name_length = 1 + Math.max((o.shortcut || "").size, 1) + 4 + o.name.size
+      name_length = 1 + Math.max(ACON::Helper.width(o.shortcut || ""), 1) + 4 + ACON::Helper.width(o.name)
 
       if o.negatable?
-        name_length += 6 + o.name.size
+        name_length += 6 + ACON::Helper.width(o.name)
       elsif o.accepts_value?
-        name_length += 1 + o.name.size + (o.value_optional? ? 2 : 0)
+        name_length += 1 + ACON::Helper.width(o.name) + (o.value_optional? ? 2 : 0)
       end
 
       name_length
@@ -260,13 +260,13 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     commands.each do |command|
       case command
       in ACON::Command
-        widths << command.name.not_nil!.size
+        widths << ACON::Helper.width command.name.not_nil!
 
         command.aliases.each do |a|
-          widths << a.size
+          widths << ACON::Helper.width a
         end
       in String
-        widths << command.size
+        widths << ACON::Helper.width command
       end
     end
 
