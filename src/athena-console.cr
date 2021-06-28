@@ -17,7 +17,7 @@ require "./style/*"
 # Convenience alias to make referencing `Athena::Console` types easier.
 alias ACON = Athena::Console
 
-# Athena's Console component, `ACON` for short, allows for the creation of command-line based commands.
+# Athena's Console component, `ACON` for short, allows for the creation of command-line based `ACON::Command`s.
 # These commands could be used for any reoccurring task such as cron jobs, imports, etc.
 #
 # The console component best works in conjunction with a dedicated Crystal file that'll be used as the entry point.

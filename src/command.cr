@@ -1,3 +1,22 @@
+# An `ACON::Command` represents a concrete command that can be invoked via the CLI.
+# All commands should inherit from this base type, but additional abstract subclasses can be used
+# to share common logic for related command classes.
+#
+# ## Creating a Command
+#
+# ### Command Lifecycle
+#
+# ## Configuring the Command
+#
+# ## Executing the Command
+#
+# ### Output
+#
+# #### Output Sections
+#
+# ### Input
+#
+# ## Testing the Command
 abstract class Athena::Console::Command
   enum Status
     SUCCESS = 0

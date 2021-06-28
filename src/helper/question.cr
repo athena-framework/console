@@ -132,7 +132,9 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
       response = question.trimmable? ? autocomplete.strip : autocomplete
     end
 
-    # TODO: Handle output sections
+    if output.is_a? ACON::Output::Section
+      output.add_content response
+    end
 
     question.process_response response
   end

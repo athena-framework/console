@@ -12,7 +12,8 @@ abstract class Athena::Console::Output
     formatter : ACON::Formatter::Interface? = nil
   )
     @verbosity = verbosity || ACON::Output::Verbosity::NORMAL
-    @formatter = formatter || ACON::Formatter::Output.new decorated
+    @formatter = formatter || ACON::Formatter::Output.new
+    @formatter.decorated = decorated
   end
 
   def decorated? : Bool

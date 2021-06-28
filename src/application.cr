@@ -1,11 +1,11 @@
 require "semantic_version"
 require "levenshtein"
 
-# An `ACON::Application` is a container for a collection multiple `ACON::Command`, and serves as the entry point of a CLI application.
+# An `ACON::Application` is a container for a collection of multiple `ACON::Command`, and serves as the entry point of a CLI application.
 #
 # This class is optimized for a standard CLI environment; but it may be subclassed to provide a more specialized/customized entry point.
 #
-# # Usage
+# ## Basic Usage
 #
 # The console component best works in conjunction with a dedicated Crystal file that'll be used as the entry point.
 # Ideally this file is compiled into a dedicated binary for use in production, but is invoked directly while developing.
@@ -53,7 +53,7 @@ require "levenshtein"
 # For example, running `crystal run ./console.cr` would result in all the available commands being listed.
 # The default command can be customized via `#default_command`.
 #
-# ### Single Command Applications
+# ## Single Command Applications
 #
 # In some cases a CLI may only have one supported command in which passing the command's name each time is tedious.
 # In such a case an application may be declared as a single command application via the optional second argument to `#default_command`.
@@ -61,12 +61,11 @@ require "levenshtein"
 #
 # WARNING: Arguments and options passed to the default command are ignored when `#single_command?` is `false`.
 class Athena::Console::Application
-  @terminal : ACON::Terminal
-
+  # Returns the version of this CLI application.
   getter version : SemanticVersion
-  getter name : String
 
-  @default_command : String = "list"
+  # Returns the name of this CLI application.
+  getter name : String
 
   # By default, the application will auto [exit](https://crystal-lang.org/api/toplevel.html#exit(status=0):NoReturn-class-method) after executing a command.
   # This method can be used to disable that functionality.
@@ -119,10 +118,12 @@ class Athena::Console::Application
   getter? single_command : Bool = false
   property helper_set : ACON::Helper::HelperSet { self.default_helper_set }
 
-  @definition : ACON::Input::Definition? = nil
   @commands = Hash(String, ACON::Command).new
+  @default_command : String = "list"
+  @definition : ACON::Input::Definition? = nil
   @initialized : Bool = false
   @running_command : ACON::Command? = nil
+  @terminal : ACON::Terminal
   @wants_help : Bool = false
 
   def self.new(name : String, version : String = "0.1.0") : self
@@ -272,7 +273,7 @@ class Athena::Console::Application
     @definition.not_nil!
   end
 
-  # Sets the *definition* that should be used by `self.`
+  # Sets the *definition* that should be used by `self`.
   # See the related type for more information.
   def definition=(@definition : ACON::Input::Definition)
   end
@@ -458,6 +459,12 @@ class Athena::Console::Application
     end
   end
 
+  # By default this is the same as `#long_version`, but can be overridden
+  # to provide more in-depth help/usage instructions for `self`.
+  def help : String
+    self.long_version
+  end
+
   # Returns all unique namespaces used by currently registered commands,
   # excluding the global namespace.
   def namespaces : Array(String)
@@ -512,12 +519,10 @@ class Athena::Console::Application
     self.add(ACON::Commands::Generic.new(name, &block)).not_nil!
   end
 
+  # Returns the `#name` and `#version` of the application.
+  # Used when the `-V` or `--version` option is passed.
   def long_version : String
     "#{@name} <info>#{@version}</info>"
-  end
-
-  def help : String
-    self.long_version
   end
 
   protected def command_name(input : ACON::Input::Interface) : String?

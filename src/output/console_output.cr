@@ -7,6 +7,7 @@ class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IO
   include Athena::Console::Output::ConsoleOutputInterface
 
   setter stderr : ACON::Output::Interface
+  @console_section_outputs = Array(ACON::Output::Section).new
 
   def initialize(
     verbosity : ACON::Output::Verbosity = :normal,
@@ -23,7 +24,15 @@ class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IO
     end
   end
 
-  # TODO: Support sections
+  def section : ACON::Output::Section
+    ACON::Output::Section.new(
+      self.io,
+      @console_section_outputs,
+      self.verbosity,
+      self.decorated?,
+      self.formatter
+    )
+  end
 
   def error_output : ACON::Output::Interface
     @stderr
