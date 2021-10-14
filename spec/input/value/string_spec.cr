@@ -24,13 +24,13 @@ describe ACON::Input::Value::String do
 
     describe String do
       it "non-nilable" do
-        val = ACON::Input::Value::String.new("foo").get(String)
+        val = ACON::Input::Value::String.new("foo").get String
         typeof(val).should eq String
         val.should eq "foo"
       end
 
       it "nilable" do
-        val = ACON::Input::Value::String.new("foo").get(String?)
+        val = ACON::Input::Value::String.new("foo").get String?
         typeof(val).should eq String?
         val.should eq "foo"
       end
@@ -38,9 +38,9 @@ describe ACON::Input::Value::String do
 
     describe Int do
       it "non-nilable" do
-        string = ACON::Input::Value::String.new("123")
+        string = ACON::Input::Value::String.new "123"
 
-        val = string.get(Int32)
+        val = string.get Int32
         typeof(val).should eq Int32
         val.should eq 123
 
@@ -50,13 +50,13 @@ describe ACON::Input::Value::String do
       end
 
       it "nilable" do
-        string = ACON::Input::Value::String.new("123")
+        string = ACON::Input::Value::String.new "123"
 
-        val = string.get(Int32?)
+        val = string.get Int32?
         typeof(val).should eq Int32?
         val.should eq 123
 
-        val = string.get(UInt8?)
+        val = string.get UInt8?
         typeof(val).should eq UInt8?
         val.should eq 123_u8
       end
@@ -74,25 +74,25 @@ describe ACON::Input::Value::String do
 
     describe Float do
       it "non-nilable" do
-        string = ACON::Input::Value::String.new("4.57")
+        string = ACON::Input::Value::String.new "4.57"
 
-        val = string.get(Float64)
+        val = string.get Float64
         typeof(val).should eq Float64
         val.should eq 4.57
 
-        val = string.get(Float32)
+        val = string.get Float32
         typeof(val).should eq Float32
         val.should eq 4.57_f32
       end
 
       it "nilable" do
-        string = ACON::Input::Value::String.new("4.57")
+        string = ACON::Input::Value::String.new "4.57"
 
-        val = string.get(Float64?)
+        val = string.get Float64?
         typeof(val).should eq Float64?
         val.should eq 4.57
 
-        val = string.get(Float32?)
+        val = string.get Float32?
         typeof(val).should eq Float32?
         val.should eq 4.57_f32
       end
@@ -104,6 +104,68 @@ describe ACON::Input::Value::String do
 
         expect_raises Exception, "'foo' is not a valid 'Float64'." do
           ACON::Input::Value::String.new("foo").get Float64?
+        end
+      end
+    end
+
+    describe Array do
+      describe String do
+        it "non-nilable" do
+          val = ACON::Input::Value::String.new("foo,bar,baz").get Array(String)
+          typeof(val).should eq Array(String)
+          val.should eq ["foo", "bar", "baz"]
+        end
+
+        it "nilable" do
+          val = ACON::Input::Value::String.new("foo,bar,baz").get Array(String)?
+          typeof(val).should eq Array(String)?
+          val.should eq ["foo", "bar", "baz"]
+        end
+
+        it "nilable generic value" do
+          val = ACON::Input::Value::String.new("foo,bar,baz").get Array(String?)?
+          typeof(val).should eq Array(String?)?
+          val.should eq ["foo", "bar", "baz"]
+        end
+      end
+
+      describe Int32 do
+        it "non-nilable" do
+          val = ACON::Input::Value::String.new("1,2,3").get Array(Int32)
+          typeof(val).should eq Array(Int32)
+          val.should eq [1, 2, 3]
+        end
+
+        it "nilable" do
+          val = ACON::Input::Value::String.new("1,2,3").get Array(Int32)?
+          typeof(val).should eq Array(Int32)?
+          val.should eq [1, 2, 3]
+        end
+
+        it "nilable generic value" do
+          val = ACON::Input::Value::String.new("1,2,3").get Array(Int32?)?
+          typeof(val).should eq Array(Int32?)?
+          val.should eq [1, 2, 3]
+        end
+      end
+
+      describe Bool do
+        it "non-nilable" do
+          val = ACON::Input::Value::String.new("false,true,true").get Array(Bool)
+          typeof(val).should eq Array(Bool)
+          val.should eq [false, true, true]
+        end
+
+        it "nilable" do
+          val = ACON::Input::Value::String.new("false,true,true").get Array(Bool)?
+          typeof(val).should eq Array(Bool)?
+          val.should eq [false, true, true]
+        end
+
+        it "nilable generic value" do
+          val = ACON::Input::Value::String.new("false,true,true").get Array(Bool?)?
+          typeof(val).should eq Array(Bool?)?
+          val.should eq [false, true, true]
         end
       end
     end

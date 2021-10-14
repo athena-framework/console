@@ -16,6 +16,14 @@ struct Athena::Console::Input::Value::String < Athena::Console::Input::Value
     nil
   end
 
+  def get(as : ::Array(T).class) : ::Array(T) forall T
+    Array.from_array(@value.split(',')).get ::Array(T)
+  end
+
+  def get(as : ::Array(T)?.class) : ::Array(T)? forall T
+    Array.from_array(@value.split(',')).get ::Array(T)?
+  end
+
   {% for type in ::Number::Primitive.union_types %}  
     def get(as : {{type.id}}.class) : {{type.id}}
       {{type.id}}.new @value

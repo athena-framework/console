@@ -21,12 +21,8 @@ abstract struct Athena::Console::Input::Value
     self.to_s.presence
   end
 
-  # def get(as : ::Array(T).class) forall T
-  #   ::Array(T).new
-  # end
-
-  def get(as : T.class) forall T
-    {% T.raise "BUG: Called default #get with #{T} for type #{@type}." %}
+  def get(as : T.class) : NoReturn forall T
+    raise "BUG: Called default #get with #{T} for type #{{{@type}}}."
   end
 
   def to_s(io : IO) : ::Nil

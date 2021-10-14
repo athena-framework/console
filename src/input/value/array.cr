@@ -24,6 +24,10 @@ struct Athena::Console::Input::Value::Array < Athena::Console::Input::Value
     @value.map &.get(T)
   end
 
+  def get(as : ::Array(T)?.class) : ::Array(T)? forall T
+    @value.map(&.get(T)) || nil
+  end
+
   def resolve
     self.value.map &.resolve
   end
