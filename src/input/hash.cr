@@ -69,7 +69,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
   private def add_argument(name : String, value : InputType) : Nil
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' argument does not exist." if !@definition.has_argument? name
 
-    @arguments[name] = AbstractValue.from_value value
+    @arguments[name] = ACON::Input::Value.from_value value
   end
 
   private def add_long_option(name : String, value : InputType) : Nil

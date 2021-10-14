@@ -89,12 +89,12 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
     # If expecting another argument, add it.
     if @definition.has_argument? count
       argument = @definition.argument count
-      @arguments[argument.name] = argument.is_array? ? ArrayValue.new(token) : AbstractValue.from_value token
+      @arguments[argument.name] = argument.is_array? ? ACON::Input::Value::Array.new(token) : ACON::Input::Value.from_value token
 
       # If the last argument IS_ARRAY, append token to last argument.
     elsif @definition.has_argument?(count - 1) && @definition.argument(count - 1).is_array?
       argument = @definition.argument(count - 1)
-      @arguments[argument.name].as(ArrayValue) << token
+      @arguments[argument.name].as(ACON::Input::Value::Array) << token
 
       # TODO: Handle unexpected argument.
     else

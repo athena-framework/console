@@ -161,6 +161,7 @@ describe ACON::Input do
       )
 
       input.argument("bar").should eq "default"
+      typeof(input.argument("bar")).should eq String?
       input.arguments.should eq({"name" => "foo", "bar" => "default"})
     end
 
@@ -189,6 +190,61 @@ describe ACON::Input do
 
       expect_raises ACON::Exceptions::InvalidArgument, "The 'foo' argument does not exist." do
         input.argument "foo"
+      end
+    end
+
+    describe "#argument(T)" do
+      it "optional arg without default raises when accessed via non nilable type" do
+        input = ACON::Input::Hash.new(
+          ACON::Input::HashType{"name" => "foo"},
+          ACON::Input::Definition.new(
+            ACON::Input::Argument.new("name"),
+          )
+        )
+
+        expect_raises ACON::Exceptions::Logic, "Cannot cast optional argument 'name' to non-nilable type 'String'." do
+          input.argument "name", String
+        end
+      end
+
+      it "optional arg with default raises when accessed via non nilable type" do
+        input = ACON::Input::Hash.new(
+          ACON::Input::HashType.new,
+          ACON::Input::Definition.new(
+            ACON::Input::Argument.new("name", default: "bar"),
+          )
+        )
+
+        arg = input.argument "name", String
+        typeof(arg).should eq String
+        arg.should eq "bar"
+      end
+
+      it "optional arg without default accessed via nilable type" do
+        input = ACON::Input::Hash.new(
+          ACON::Input::HashType{"name2" => "foo"},
+          ACON::Input::Definition.new(
+            ACON::Input::Argument.new("name"),
+            ACON::Input::Argument.new("name2"),
+          )
+        )
+
+        arg = input.argument "name2", String?
+        typeof(arg).should eq String?
+        arg.should eq "foo"
+      end
+
+      it "arg that doesnt exist" do
+        input = ACON::Input::Hash.new(
+          ACON::Input::HashType{"name" => "foo"},
+          ACON::Input::Definition.new(
+            ACON::Input::Argument.new("name"),
+          )
+        )
+
+        expect_raises ACON::Exceptions::InvalidArgument, "The 'foo' argument does not exist." do
+          input.argument "foo"
+        end
       end
     end
   end

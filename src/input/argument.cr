@@ -10,7 +10,7 @@ class Athena::Console::Input::Argument
 
   getter name : String
   getter mode : ACON::Input::Argument::Mode
-  @default : AbstractValue? = nil
+  @default : ACON::Input::Value? = nil
   getter description : String
 
   def initialize(
@@ -27,7 +27,7 @@ class Athena::Console::Input::Argument
   def default
     @default.try do |value|
       case value
-      when ArrayValue
+      when ACON::Input::Value::Array
         value.value.map &.value
       else
         value.value
@@ -44,13 +44,13 @@ class Athena::Console::Input::Argument
 
     if @mode.is_array?
       if default.nil?
-        return @default = ArrayValue.new
+        return @default = ACON::Input::Value::Array.new
       elsif !default.is_a? Array
         raise ACON::Exceptions::Logic.new "Default value for an array argument must be an array."
       end
     end
 
-    @default = AbstractValue.from_value default
+    @default = ACON::Input::Value.from_value default
   end
 
   def required? : Bool
