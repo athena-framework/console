@@ -1,6 +1,5 @@
 class Athena::Console::Helper::HelperSet
   @helpers = Hash(ACON::Helper.class, ACON::Helper::Interface).new
-  property command : ACON::Command? = nil
 
   def self.new(*helpers : ACON::Helper::Interface) : self
     helper_set = new

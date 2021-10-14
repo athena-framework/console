@@ -248,7 +248,7 @@ class Athena::Console::Descriptor::Text < Athena::Console::Descriptor
     when String
       %("#{ACON::Formatter::Output.escape default}")
     when Enumerable
-      %([#{default.map! { |item| %|"#{ACON::Formatter::Output.escape item}"| }.join ","}])
+      %([#{default.map { |item| %|"#{ACON::Formatter::Output.escape item.to_s}"| }.join ","}])
     else
       default
     end

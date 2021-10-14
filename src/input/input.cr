@@ -4,6 +4,103 @@ require "./streamable"
 abstract class Athena::Console::Input
   include Athena::Console::Input::Streamable
 
+  private abstract struct AbstractValue
+    def self.from_value(value : T) : self forall T
+      case value
+      when AbstractValue then value
+      when Nil           then NilValue.new
+      when String        then StringValue.new value
+      when Number        then NumberValue.new value
+      when Bool          then BoolValue.new value
+      when Array         then ArrayValue.from_array value
+      else
+        raise "Unsupported type: #{T}."
+      end
+    end
+
+    def get(as : Array(T).class) forall T
+      Array(T).new
+    end
+
+    def get(as : T.class) forall T
+      value = self.value
+
+      raise "'#{value}' is not a valid #{T}." unless value.is_a? T
+
+      value.as T
+    end
+
+    def to_s(io : IO) : Nil
+      self.value.to_s io
+    end
+
+    abstract def value
+  end
+
+  record BoolValue < AbstractValue, value : Bool do
+    def get(as : Bool.class) : Bool
+      @value
+    end
+  end
+
+  record NumberValue < AbstractValue, value : Number::Primitive do
+    {% for type in Number::Primitive.union_types %}
+      def get(as : {{type.id}}.class) : {{type.id}}
+        {{type.id}}.new @value
+      end
+    {% end %}
+  end
+
+  record StringValue < AbstractValue, value : String do
+    def get(as : Bool.class) : Bool
+      @value == "true"
+    end
+
+    {% for type in Number::Primitive.union_types %}
+      def get(as : {{type.id}}.class) : {{type.id}}
+        {{type.id}}.new @value
+      end
+
+      def get(as : {{type.id}}?.class) : {{type.id}}?
+        self.get {{type.id}}
+      end
+    {% end %}
+  end
+
+  record ArrayValue < AbstractValue, value : Array(AbstractValue) do
+    def self.from_array(array : Array) : self
+      new(array.map { |item| AbstractValue.from_value item })
+    end
+
+    def self.new(value)
+      new [AbstractValue.from_value value]
+    end
+
+    def self.new
+      new [] of AbstractValue
+    end
+
+    def <<(value)
+      @value << AbstractValue.from_value value
+    end
+
+    def get(as : Array(T).class) : Array(T) forall T
+      @value.map &.get(T)
+    end
+
+    def resolve
+      self.value.map &.resolve
+    end
+
+    def to_s(io : IO) : Nil
+      @value.join io, ','
+    end
+  end
+
+  record NilValue < AbstractValue do
+    def value : Nil; end
+  end
+
   alias InputTypes = String | Bool | Nil | Number::Primitive
   alias InputType = InputTypes | Array(InputTypes)
   alias HashType = ::Hash(String, InputType)
@@ -12,7 +109,7 @@ abstract class Athena::Console::Input
 
   property? interactive : Bool = true
 
-  @arguments = HashType.new
+  @arguments = ::Hash(String, AbstractValue).new
   @definition : ACON::Input::Definition
   @options = HashType.new
 
@@ -26,28 +123,46 @@ abstract class Athena::Console::Input
     end
   end
 
-  def argument(name : String)
+  def argument(name : String) : String?
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' argument does not exist." unless @definition.has_argument? name
 
-    if @arguments.has_key? name
-      return @arguments[name]
-    end
+    value = if @arguments.has_key? name
+              @arguments[name]
+            else
+              @definition.argument(name).default
+            end
 
-    @definition.argument(name).default
+    case value
+    when Nil then nil
+    else
+      value.to_s
+    end
   end
 
   def argument(name : String, type : T.class) : T forall T
-    self.argument(name).as T
+    raise ACON::Exceptions::InvalidArgument.new "The '#{name}' argument does not exist." unless @definition.has_argument? name
+
+    {% unless T.nilable? %}
+      if !@definition.argument(name).required? && @definition.argument(name).default.nil?
+        raise ACON::Exceptions::Logic.new "Cannot cast optional argument '#{name}' to non-nilable type #{T}."
+      end
+    {% end %}
+
+    if @arguments.has_key? name
+      return @arguments[name].get T
+    end
+
+    @definition.argument(name).default T
   end
 
   def set_argument(name : String, value : String | Array(String) | Nil) : Nil
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' argument does not exist." unless @definition.has_argument? name
 
-    @arguments[name] = value
+    @arguments[name] = AbstractValue.from_value value
   end
 
   def arguments : ::Hash
-    @definition.argument_defaults.merge @arguments
+    @definition.argument_defaults.merge(self.resolve @arguments)
   end
 
   def has_argument?(name : String) : Bool
@@ -112,5 +227,16 @@ abstract class Athena::Console::Input
     end
 
     raise ACON::Exceptions::ValidationFailed.new %(Not enough arguments (missing: '#{missing_args.join(", ")}').) unless missing_args.empty?
+  end
+
+  private def resolve(hash : ::Hash(String, AbstractValue)) : ::Hash
+    hash.transform_values do |value|
+      case value
+      when ArrayValue
+        value.value.map &.value
+      else
+        value.value
+      end
+    end
   end
 end
