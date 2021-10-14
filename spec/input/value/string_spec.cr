@@ -1,0 +1,111 @@
+require "../../spec_helper"
+
+describe ACON::Input::Value::String do
+  describe "#get" do
+    describe Bool do
+      it "non-nilable - true" do
+        val = ACON::Input::Value::String.new("true").get(Bool)
+        typeof(val).should eq Bool
+        val.should be_true
+      end
+
+      it "non-nilable - false" do
+        val = ACON::Input::Value::String.new("false").get(Bool)
+        typeof(val).should eq Bool
+        val.should be_false
+      end
+
+      it "nilable" do
+        val = ACON::Input::Value::String.new("true").get(Bool?)
+        typeof(val).should eq Bool?
+        val.should be_true
+      end
+    end
+
+    describe String do
+      it "non-nilable" do
+        val = ACON::Input::Value::String.new("foo").get(String)
+        typeof(val).should eq String
+        val.should eq "foo"
+      end
+
+      it "nilable" do
+        val = ACON::Input::Value::String.new("foo").get(String?)
+        typeof(val).should eq String?
+        val.should eq "foo"
+      end
+    end
+
+    describe Int do
+      it "non-nilable" do
+        string = ACON::Input::Value::String.new("123")
+
+        val = string.get(Int32)
+        typeof(val).should eq Int32
+        val.should eq 123
+
+        val = string.get(UInt8)
+        typeof(val).should eq UInt8
+        val.should eq 123_u8
+      end
+
+      it "nilable" do
+        string = ACON::Input::Value::String.new("123")
+
+        val = string.get(Int32?)
+        typeof(val).should eq Int32?
+        val.should eq 123
+
+        val = string.get(UInt8?)
+        typeof(val).should eq UInt8?
+        val.should eq 123_u8
+      end
+
+      it "non number" do
+        expect_raises Exception, "'foo' is not a valid 'Int32'." do
+          ACON::Input::Value::String.new("foo").get Int32
+        end
+
+        expect_raises Exception, "'foo' is not a valid 'Int32'." do
+          ACON::Input::Value::String.new("foo").get Int32?
+        end
+      end
+    end
+
+    describe Float do
+      it "non-nilable" do
+        string = ACON::Input::Value::String.new("4.57")
+
+        val = string.get(Float64)
+        typeof(val).should eq Float64
+        val.should eq 4.57
+
+        val = string.get(Float32)
+        typeof(val).should eq Float32
+        val.should eq 4.57_f32
+      end
+
+      it "nilable" do
+        string = ACON::Input::Value::String.new("4.57")
+
+        val = string.get(Float64?)
+        typeof(val).should eq Float64?
+        val.should eq 4.57
+
+        val = string.get(Float32?)
+        typeof(val).should eq Float32?
+        val.should eq 4.57_f32
+      end
+
+      it "non number" do
+        expect_raises Exception, "'foo' is not a valid 'Float64'." do
+          ACON::Input::Value::String.new("foo").get Float64
+        end
+
+        expect_raises Exception, "'foo' is not a valid 'Float64'." do
+          ACON::Input::Value::String.new("foo").get Float64?
+        end
+      end
+    end
+  end
+end

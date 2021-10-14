@@ -13,16 +13,20 @@ abstract struct Athena::Console::Input::Value
     end
   end
 
-  def get(as : ::Array(T).class) forall T
-    ::Array(T).new
+  def get(as : ::String.class) : ::String
+    self.to_s
   end
 
+  def get(as : ::String?.class) : ::String?
+    self.to_s.presence
+  end
+
+  # def get(as : ::Array(T).class) forall T
+  #   ::Array(T).new
+  # end
+
   def get(as : T.class) forall T
-    value = self.value
-
-    raise "'#{value}' is not a valid #{T}." unless value.is_a? T
-
-    value.as T
+    {% T.raise "BUG: Called default #get with #{T} for type #{@type}." %}
   end
 
   def to_s(io : IO) : ::Nil

@@ -1,5 +1,7 @@
 # :nodoc:
-record Athena::Console::Input::Value::Array < Athena::Console::Input::Value, value : ::Array(Athena::Console::Input::Value) do
+struct Athena::Console::Input::Value::Array < Athena::Console::Input::Value
+  getter value : ::Array(Athena::Console::Input::Value)
+
   def self.from_array(array : ::Array) : self
     new(array.map { |item| ACON::Input::Value.from_value item })
   end
@@ -11,6 +13,8 @@ record Athena::Console::Input::Value::Array < Athena::Console::Input::Value, val
   def self.new
     new [] of ACON::Input::Value
   end
+
+  def initialize(@value : ::Array(Athena::Console::Input::Value)); end
 
   def <<(value)
     @value << ACON::Input::Value.from_value value
