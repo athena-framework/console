@@ -77,7 +77,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
       raise ACON::Exceptions::InvalidOption.new "The '--#{name}' option does not exist." unless @definition.has_negation? name
 
       option_name = @definition.negation_to_name name
-      @options[option_name] = false
+      @options[option_name] = ACON::Input::Value.from_value false
 
       return
     end
@@ -89,7 +89,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
       value = true if !option.is_array? && !option.value_optional?
     end
 
-    @options[name] = value
+    @options[name] = ACON::Input::Value.from_value value
   end
 
   private def add_short_option(name : String, value : InputType) : Nil

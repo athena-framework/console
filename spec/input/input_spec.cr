@@ -78,8 +78,8 @@ describe ACON::Input do
 
         input.has_option?("name").should be_true
         input.has_option?("no-name").should be_true
-        input.option("name").should be_true
-        input.option("no-name").should be_false
+        input.option("name").should eq "true"
+        input.option("no-name").should eq "false"
       end
 
       it "negated" do
@@ -90,8 +90,8 @@ describe ACON::Input do
           )
         )
 
-        input.option("name").should be_false
-        input.option("no-name").should be_true
+        input.option("name").should eq "false"
+        input.option("no-name").should eq "true"
       end
 
       it "with default" do
@@ -132,6 +132,91 @@ describe ACON::Input do
 
       expect_raises ACON::Exceptions::InvalidArgument, "The 'foo' option does not exist." do
         input.option "foo"
+      end
+    end
+
+    describe "#option(T)" do
+      it "optional option with default accessed via non nilable type" do
+        input = ACON::Input::Hash.new(
+          ACON::Input::HashType.new,
+          ACON::Input::Definition.new(
+            ACON::Input::Option.new("name", nil, :optional, default: "bar"),
+          )
+        )
+
+        option = input.option "name", String
+        typeof(option).should eq String
+        option.should eq "bar"
+      end
+
+      it "optional option without default accessed via nilable type" do
+        input = ACON::Input::Hash.new(
+          ACON::Input::HashType{"--name2" => "foo"},
+          ACON::Input::Definition.new(
+            ACON::Input::Option.new("name"),
+            ACON::Input::Option.new("name2"),
+          )
+        )
+
+        option = input.option "name2", String?
+        typeof(option).should eq String?
+        option.should eq "foo"
+      end
+
+      it "required option with default accessed via non nilable type" do
+        input = ACON::Input::Hash.new(
+          ACON::Input::HashType{"--name" => "foo"},
+          ACON::Input::Definition.new(
+            ACON::Input::Option.new("name", nil, :required),
+          )
+        )
+
+        option = input.option "name", String
+        typeof(option).should eq String
+        option.should eq "foo"
+      end
+
+      it "negatable option accessed via non bool type" do
+        input = ACON::Input::Hash.new(
+          ACON::Input::HashType{"--name" => "true"},
+          ACON::Input::Definition.new(
+            ACON::Input::Option.new("name", nil, :negatable),
+          )
+        )
+
+        expect_raises ACON::Exceptions::Logic, "Cannot cast negatable option 'name' to non 'Bool?' type." do
+          input.option "name", Int32
+        end
+      end
+
+      it "negatable option with default accessed via non nilable type" do
+        input = ACON::Input::Hash.new(
+          ACON::Input::HashType{"--name" => "true"},
+          ACON::Input::Definition.new(
+            ACON::Input::Option.new("name", nil, :negatable),
+          )
+        )
+
+        option = input.option "name", Bool
+        typeof(option).should eq Bool
+        option.should be_true
+
+        option = input.option "no-name", Bool
+        typeof(option).should eq Bool
+        option.should be_false
+      end
+
+      it "option that doesnt exist" do
+        input = ACON::Input::Hash.new(
+          ACON::Input::HashType{"--name" => "foo"},
+          ACON::Input::Definition.new(
+            ACON::Input::Option.new("name"),
+          )
+        )
+
+        expect_raises ACON::Exceptions::InvalidArgument, "The 'foo' option does not exist." do
+          input.option "foo"
+        end
       end
     end
   end
@@ -207,7 +292,7 @@ describe ACON::Input do
         end
       end
 
-      it "optional arg with default raises when accessed via non nilable type" do
+      it "optional arg with default accessed via non nilable type" do
         input = ACON::Input::Hash.new(
           ACON::Input::HashType.new,
           ACON::Input::Definition.new(

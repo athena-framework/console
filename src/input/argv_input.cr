@@ -18,7 +18,7 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
 
         if !@options.has_key?(name) && !@definition.has_shortcut?(name)
           # noop
-        elsif (@options.has_key?(name) || @options.has_key?(name = @definition.shortcut_to_name(name))) && @tokens[idx + 1]? == @options[name]
+        elsif (@options.has_key?(name) || @options.has_key?(name = @definition.shortcut_to_name(name))) && @tokens[idx + 1]? == @options[name].value
           is_option = true
         end
 
@@ -123,9 +123,7 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
       option_name = @definition.negation_to_name name
       raise ACON::Exceptions::InvalidOption.new "The '--#{name}' option does not accept a value." unless value.nil?
 
-      @options[option_name] = false
-
-      return
+      return @options[option_name] = ACON::Input::Value.from_value false
     end
 
     option = @definition.option name
@@ -150,9 +148,9 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
     end
 
     if option.is_array?
-      (@options[name] ||= Array(InputTypes).new).as(Array(InputTypes)) << value
+      (@options[name] ||= ACON::Input::Value::Array.new).as(ACON::Input::Value::Array) << value
     else
-      @options[name] = value.as InputType
+      @options[name] = ACON::Input::Value.from_value value
     end
   end
 

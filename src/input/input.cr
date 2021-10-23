@@ -16,7 +16,7 @@ abstract class Athena::Console::Input
 
   @arguments = ::Hash(String, ACON::Input::Value).new
   @definition : ACON::Input::Definition
-  @options = HashType.new
+  @options = ::Hash(String, ACON::Input::Value).new
 
   def initialize(definition : ACON::Input::Definition? = nil)
     if definition.nil?
@@ -38,7 +38,7 @@ abstract class Athena::Console::Input
             end
 
     case value
-    when Nil then nil
+    when Nil, ACON::Input::Value::Nil then nil
     else
       value.to_s
     end
@@ -49,7 +49,7 @@ abstract class Athena::Console::Input
 
     {% unless T.nilable? %}
       if !@definition.argument(name).required? && @definition.argument(name).default.nil?
-        raise ACON::Exceptions::Logic.new "Cannot cast optional argument '#{name}' to non-nilable type '#{T}'."
+        raise ACON::Exceptions::Logic.new "Cannot cast optional argument '#{name}' to non-nilable type '#{T}' without a default."
       end
     {% end %}
 
@@ -60,7 +60,7 @@ abstract class Athena::Console::Input
     @definition.argument(name).default T
   end
 
-  def set_argument(name : String, value : String | Array(String) | Nil) : Nil
+  def set_argument(name : String, value : _) : Nil
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' argument does not exist." unless @definition.has_argument? name
 
     @arguments[name] = ACON::Input::Value.from_value value
@@ -74,10 +74,10 @@ abstract class Athena::Console::Input
     @definition.has_argument? name
   end
 
-  def option(name : String)
+  def option(name : String) : String?
     if @definition.has_negation?(name)
-      self.option(@definition.negation_to_name(name)).try do |v|
-        return !v
+      self.option(@definition.negation_to_name(name), Bool?).try do |v|
+        return (!v).to_s
       end
 
       return
@@ -85,31 +85,63 @@ abstract class Athena::Console::Input
 
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' option does not exist." unless @definition.has_option? name
 
-    if @options.has_key? name
-      return @options[name]
-    end
+    value = if @options.has_key? name
+              @options[name]
+            else
+              @definition.option(name).default
+            end
 
-    @definition.option(name).default
+    case value
+    when Nil, ACON::Input::Value::Nil then nil
+    else
+      value.to_s
+    end
   end
 
   def option(name : String, type : T.class) : T forall T
-    self.option(name).as T
+    {% if T <= Bool? %}
+      if @definition.has_negation?(name)
+        negated_name = @definition.negation_to_name(name)
+
+        if @options.has_key? negated_name
+          return !@options[negated_name].get T
+        end
+
+        raise "BUG: Didn't return negated value."
+      end
+    {% end %}
+
+    raise ACON::Exceptions::InvalidArgument.new "The '#{name}' option does not exist." unless @definition.has_option? name
+
+    {% unless T <= Bool? %}
+      raise ACON::Exceptions::Logic.new "Cannot cast negatable option '#{name}' to non 'Bool?' type." if @definition.option(name).negatable?
+    {% end %}
+
+    {% unless T.nilable? %}
+      if !@definition.option(name).value_required? && !@definition.option(name).negatable? && @definition.option(name).default.nil?
+        raise ACON::Exceptions::Logic.new "Cannot cast optional option '#{name}' to non-nilable type '#{T}' without a default."
+      end
+    {% end %}
+
+    if @options.has_key? name
+      return @options[name].get T
+    end
+
+    @definition.option(name).default T
   end
 
-  def set_option(name : String, value : String | Array(String) | Bool | Nil) : Nil
+  def set_option(name : String, value : _) : Nil
     if @definition.has_negation?(name)
-      @options[@definition.negation_to_name(name)] = !value
-
-      return
+      return @options[@definition.negation_to_name(name)] = ACON::Input::Value.from_value !value
     end
 
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' option does not exist." unless @definition.has_option? name
 
-    @options[name] = value
+    @options[name] = ACON::Input::Value.from_value value
   end
 
   def options : ::Hash
-    @definition.option_defaults.merge @options
+    @definition.option_defaults.merge(self.resolve @options)
   end
 
   def has_option?(name : String) : Bool

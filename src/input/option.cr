@@ -15,7 +15,7 @@ class Athena::Console::Input::Option
   getter name : String
   getter shortcut : String?
   getter value_mode : ACON::Input::Option::Value
-  getter default : String | Array(String) | Bool | Nil
+  @default : ACON::Input::Value? = nil
   getter description : String
 
   def_equals @name, @shortcut, @default, @value_mode
@@ -25,7 +25,7 @@ class Athena::Console::Input::Option
     shortcut : String | Enumerable(String) | Nil = nil,
     @value_mode : ACON::Input::Option::Value = :none,
     @description : String = "",
-    default : String | Array(String) | Bool | Nil = nil
+    default = nil
   )
     @name = name.lchop "--"
 
@@ -54,18 +54,37 @@ class Athena::Console::Input::Option
     self.default = default
   end
 
-  def default=(default : String | Array(String) | Bool | Nil) : Nil
+  def default
+    @default.try do |value|
+      case value
+      when ACON::Input::Value::Array
+        value.value.map &.value
+      else
+        value.value
+      end
+    end
+  end
+
+  def default(as : T.class) : T forall T
+    {% if T.nilable? %}
+      self.default.as T
+    {% else %}
+      @default.not_nil!.get T
+    {% end %}
+  end
+
+  def default=(default = nil) : Nil
     raise ACON::Exceptions::Logic.new "Cannot set a default value when using Value::NONE mode." if @value_mode.none? && !default.nil?
 
     if @value_mode.is_array?
       if default.nil?
-        default = [] of String
+        return @default = ACON::Input::Value::Array.new
       else
         raise ACON::Exceptions::Logic.new "Default value for an array option must be an array." unless default.is_a? Array
       end
     end
 
-    @default = (@value_mode.accepts_value? || @value_mode.negatable?) ? default : false
+    @default = ACON::Input::Value.from_value (@value_mode.accepts_value? || @value_mode.negatable?) ? default : false
   end
 
   def accepts_value? : Bool

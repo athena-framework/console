@@ -8,7 +8,7 @@ struct Athena::Console::Input::Value::Number < Athena::Console::Input::Value
     def get(as : {{type.id}}.class) : {{type.id}}
       {{type.id}}.new @value
     end
-    
+
     def get(as : {{type.id}}?.class) : {{type.id}}?
       {{type.id}}.new(@value) || nil
     end

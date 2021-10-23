@@ -24,13 +24,13 @@ struct Athena::Console::Input::Value::String < Athena::Console::Input::Value
     Array.from_array(@value.split(',')).get ::Array(T)?
   end
 
-  {% for type in ::Number::Primitive.union_types %}  
+  {% for type in ::Number::Primitive.union_types %}
     def get(as : {{type.id}}.class) : {{type.id}}
       {{type.id}}.new @value
     rescue ArgumentError
       raise ACON::Exceptions::Logic.new "'#{@value}' is not a valid '#{{{type.id}}}'."
     end
-    
+
     def get(as : {{type.id}}?.class) : {{type.id}}?
       {{type.id}}.new(@value) || nil
     rescue ArgumentError
