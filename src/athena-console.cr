@@ -61,4 +61,10 @@ alias ACON = Athena::Console
 # ```
 module Athena::Console
   VERSION = "0.1.0"
+
+  # Includes the commands that come bundled with `Athena::Console`.
+  module Commands; end
+
+  # Contains all custom exceptions defined within `Athena::Console`.
+  module Exceptions; end
 end

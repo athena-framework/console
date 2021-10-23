@@ -1,29 +1,43 @@
 require "colorize"
 require "./output_style_interface"
 
+# Default implementation of `ACON::Formatter::Interface`.
 struct Athena::Console::Formatter::OutputStyle
   include Athena::Console::Formatter::OutputStyleInterface
 
-  setter foreground : Colorize::Color
-  setter background : Colorize::Color
+  # :inherit:
+  setter foreground : Colorize::Color = :default
+
+  # :inherit:
+  setter background : Colorize::Color = :default
+
+  # :inherit:
   setter options : ACON::Formatter::Mode = :none
+
+  # Sets the `href` that `self` should link to.
   setter href : String? = nil
 
+  # :nodoc:
   getter? handles_href_gracefully : Bool do
     "JetBrains-JediTerm" != ENV["TERMINAL_EMULATOR"]? && (!ENV.has_key?("KONSOLE_VERSION") || ENV["KONSOLE_VERSION"].to_i > 201100)
   end
 
-  def initialize(@foreground : Colorize::Color = :default, @background : Colorize::Color = :default, @options : ACON::Formatter::Mode = :none)
+  def initialize(foreground : Colorize::Color | String = :default, background : Colorize::Color | String = :default, @options : ACON::Formatter::Mode = :none)
+    self.foreground = foreground
+    self.background = background
   end
 
-  def add_option(option : String) : Nil
-    self.add_option ACON::Formatter::Mode.parse option
-  end
-
+  # :inherit:
   def add_option(option : ACON::Formatter::Mode) : Nil
     @options |= option
   end
 
+  # :ditto:
+  def add_option(option : String) : Nil
+    self.add_option ACON::Formatter::Mode.parse option
+  end
+
+  # :inherit:
   def background=(color : String)
     if hex_value = color.lchop? '#'
       r, g, b = hex_value.hexbytes
@@ -33,6 +47,7 @@ struct Athena::Console::Formatter::OutputStyle
     @background = Colorize::ColorANSI.parse color
   end
 
+  # :inherit:
   def foreground=(color : String)
     if hex_value = color.lchop? '#'
       r, g, b = hex_value.hexbytes
@@ -42,14 +57,17 @@ struct Athena::Console::Formatter::OutputStyle
     @foreground = Colorize::ColorANSI.parse color
   end
 
-  def remove_option(option : String) : Nil
-    self.remove_option ACON::Formatter::Mode.parse option
-  end
-
+  # :inherit:
   def remove_option(option : ACON::Formatter::Mode) : Nil
     @options ^= option
   end
 
+  # :ditto:
+  def remove_option(option : String) : Nil
+    self.remove_option ACON::Formatter::Mode.parse option
+  end
+
+  # :inherit:
   def apply(text : String) : String
     if (href = @href) && self.handles_href_gracefully?
       text = "\e]8;;#{href}\e\\#{text}\e]8;;\e\\"

@@ -1,5 +1,6 @@
 require "./interface"
 
+# :nodoc:
 class Athena::Console::Formatter::Null
   include Athena::Console::Formatter::Interface
 

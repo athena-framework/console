@@ -10,6 +10,9 @@ describe ACON::Formatter::OutputStyle do
 
     ACON::Formatter::OutputStyle.new(background: :white)
       .apply("foo").should eq "\e[107mfoo\e[0m"
+
+    ACON::Formatter::OutputStyle.new("red", "#000000", ACON::Formatter::Mode.flags Bold, Underline)
+      .apply("foo").should eq "\e[31;48;2;0;0;0;1;4mfoo\e[0m"
   end
 
   describe "foreground=" do

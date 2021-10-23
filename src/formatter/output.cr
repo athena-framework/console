@@ -1,14 +1,17 @@
 require "./wrappable_interface"
 
+# Default implementation of `ACON::Formatter::WrappableInterface`.
 class Athena::Console::Formatter::Output
   include Athena::Console::Formatter::WrappableInterface
 
-  def self.escape(string : String) : String
-    text = string.gsub /([^\\\\]?)</, "\\1\\<"
+  # Returns a new string where the special `<` characters in the provided *text* are escaped.
+  def self.escape(text : String) : String
+    text = text.gsub /([^\\\\]?)</, "\\1\\<"
 
     self.escape_trailing_backslash text
   end
 
+  # Returns a new string where trailing `\` in the provided *text* is escaped.
   def self.escape_trailing_backslash(text : String) : String
     if text.ends_with? '\\'
       len = text.size
@@ -20,6 +23,7 @@ class Athena::Console::Formatter::Output
     text
   end
 
+  # :nodoc:
   getter style_stack : ACON::Formatter::OutputStyleStack = ACON::Formatter::OutputStyleStack.new
 
   # :inherit:
@@ -35,22 +39,27 @@ class Athena::Console::Formatter::Output
     self.set_style "question", ACON::Formatter::OutputStyle.new(:black, :cyan)
   end
 
+  # :inherit:
   def set_style(name : String, style : ACON::Formatter::OutputStyleInterface) : Nil
     @styles[name.downcase] = style
   end
 
+  # :inherit:
   def has_style?(name : String) : Bool
     @styles.has_key? name.downcase
   end
 
+  # :inherit:
   def style(name : String) : ACON::Formatter::OutputStyleInterface
     @styles[name.downcase]
   end
 
+  # :inherit:
   def format(message : String?) : String
     self.format_and_wrap message, 0
   end
 
+  # :inherit:
   def format_and_wrap(message : String?, width : Int32) : String
     offset = 0
     output = ""

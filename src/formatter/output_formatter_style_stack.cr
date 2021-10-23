@@ -1,3 +1,4 @@
+# :nodoc:
 struct Athena::Console::Formatter::OutputStyleStack
   property empty_style : ACON::Formatter::OutputStyleInterface
 
