@@ -33,7 +33,7 @@ struct HashTest < ASPEC::TestCase
 
   def test_parse_arguments : Nil
     input = ACON::Input::Hash.new(
-      ACON::Input::HashType{"name" => "foo"},
+      {"name" => "foo"},
       ACON::Input::Definition.new ACON::Input::Argument.new "name"
     )
 
@@ -41,7 +41,7 @@ struct HashTest < ASPEC::TestCase
   end
 
   @[DataProvider("option_provider")]
-  def test_parse_options(args : ACON::Input::HashType, options : Array(ACON::Input::Option), expected_options : ::Hash) : Nil
+  def test_parse_options(args : Hash(String, _), options : Array(ACON::Input::Option), expected_options : ::Hash) : Nil
     input = ACON::Input::Hash.new args, ACON::Input::Definition.new options
 
     input.options.should eq expected_options
@@ -50,49 +50,49 @@ struct HashTest < ASPEC::TestCase
   def option_provider : Hash
     {
       "long option" => {
-        ACON::Input::HashType{
+        {
           "--foo" => "bar",
         },
         [ACON::Input::Option.new("foo")],
         {"foo" => "bar"},
       },
       "long option with default" => {
-        ACON::Input::HashType{
+        {
           "--foo" => "bar",
         },
         [ACON::Input::Option.new("foo", "f", :optional, "", "default")],
         {"foo" => "bar"},
       },
       "uses default value if not passed" => {
-        ACON::Input::HashType.new,
+        Hash(String, String).new,
         [ACON::Input::Option.new("foo", "f", :optional, "", "default")],
         {"foo" => "default"},
       },
       "uses passed value even with default" => {
-        ACON::Input::HashType{"--foo" => nil},
+        {"--foo" => nil},
         [ACON::Input::Option.new("foo", "f", :optional, "", "default")],
         {"foo" => nil},
       },
       "short option" => {
-        ACON::Input::HashType{"-f" => "bar"},
+        {"-f" => "bar"},
         [ACON::Input::Option.new("foo", "f", :optional, "", "default")],
         {"foo" => "bar"},
       },
       "does not parse args after --" => {
-        ACON::Input::HashType{"--" => nil, "-f" => "bar"},
+        {"--" => nil, "-f" => "bar"},
         [ACON::Input::Option.new("foo", "f", :optional, "", "default")],
         {"foo" => "default"},
       },
       "handles only --" => {
-        ACON::Input::HashType{"--" => nil},
+        {"--" => nil},
         Array(ACON::Input::Option).new,
-        ACON::Input::HashType.new,
+        Hash(String, String).new,
       },
     }
   end
 
   @[DataProvider("invalid_input_provider")]
-  def test_parse_invalid_input(args : ACON::Input::HashType, definition : ACON::Input::Definition, error_class : Exception.class, error_message : String) : Nil
+  def test_parse_invalid_input(args : Hash(String, _), definition : ACON::Input::Definition, error_class : Exception.class, error_message : String) : Nil
     expect_raises error_class, error_message do
       ACON::Input::Hash.new args, definition
     end
@@ -101,25 +101,25 @@ struct HashTest < ASPEC::TestCase
   def invalid_input_provider : Tuple
     {
       {
-        ACON::Input::HashType{"foo" => "foo"},
+        {"foo" => "foo"},
         ACON::Input::Definition.new(ACON::Input::Argument.new("name")),
         ACON::Exceptions::InvalidArgument,
         "The 'foo' argument does not exist.",
       },
       {
-        ACON::Input::HashType{"--foo" => nil},
+        {"--foo" => nil},
         ACON::Input::Definition.new(ACON::Input::Option.new("foo", "f", :required)),
         ACON::Exceptions::InvalidOption,
         "The '--foo' option requires a value.",
       },
       {
-        ACON::Input::HashType{"--foo" => "foo"},
+        {"--foo" => "foo"},
         ACON::Input::Definition.new,
         ACON::Exceptions::InvalidOption,
         "The '--foo' option does not exist.",
       },
       {
-        ACON::Input::HashType{"-o" => "foo"},
+        {"-o" => "foo"},
         ACON::Input::Definition.new,
         ACON::Exceptions::InvalidOption,
         "The '-o' option does not exist.",

@@ -74,15 +74,13 @@ module Athena::Console::Spec
       interactive : Bool? = nil,
       capture_stderr_separately : Bool = false,
       verbosity : ACON::Output::Verbosity? = nil,
-      **args : ACON::Input::InputType
+      **args : _
     )
-      input = args.to_h.transform_keys(&.to_s).transform_values(&.as(ACON::Input::InputType))
-
-      self.run input, decorated: decorated, interactive: interactive, capture_stderr_separately: capture_stderr_separately, verbosity: verbosity
+      self.run args.to_h.transform_keys(&.to_s), decorated: decorated, interactive: interactive, capture_stderr_separately: capture_stderr_separately, verbosity: verbosity
     end
 
     def run(
-      input : ACON::Input::HashType = ACON::Input::HashType.new,
+      input : Hash(String, _) = Hash(String, String).new,
       *,
       decorated : Bool? = nil,
       interactive : Bool? = nil,
@@ -123,15 +121,13 @@ module Athena::Console::Spec
       interactive : Bool? = nil,
       capture_stderr_separately : Bool = false,
       verbosity : ACON::Output::Verbosity? = nil,
-      **args : ACON::Input::InputType
+      **args : _
     )
-      input = args.to_h.transform_keys(&.to_s).transform_values(&.as(ACON::Input::InputType))
-
-      self.execute input, decorated: decorated, interactive: interactive, capture_stderr_separately: capture_stderr_separately, verbosity: verbosity
+      self.execute args.to_h.transform_keys(&.to_s), decorated: decorated, interactive: interactive, capture_stderr_separately: capture_stderr_separately, verbosity: verbosity
     end
 
     def execute(
-      input : ACON::Input::HashType = ACON::Input::HashType.new,
+      input : Hash(String, _) = Hash(String, String).new,
       *,
       decorated : Bool = false,
       interactive : Bool? = nil,
@@ -139,7 +135,7 @@ module Athena::Console::Spec
       verbosity : ACON::Output::Verbosity? = nil
     ) : ACON::Command::Status
       if !input.has_key?("command") && (application = @command.application?) && application.definition.has_argument?("command")
-        input["command"] = @command.name
+        input.merge({"command" => @command.name})
       end
 
       @input = ACON::Input::Hash.new input

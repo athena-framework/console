@@ -1,3 +1,5 @@
+abstract struct Athena::Console::Input::Value; end
+
 # :nodoc:
 struct Athena::Console::Input::Value::Array < Athena::Console::Input::Value
   getter value : ::Array(Athena::Console::Input::Value)

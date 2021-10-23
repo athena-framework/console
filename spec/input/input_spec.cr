@@ -4,7 +4,7 @@ describe ACON::Input do
   describe "options" do
     it "parses long option" do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"--name" => "foo"},
+        {"--name" => "foo"},
         ACON::Input::Definition.new(ACON::Input::Option.new("name"))
       )
 
@@ -17,7 +17,7 @@ describe ACON::Input do
 
     it "parses short option" do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"-n" => "foo"},
+        {"-n" => "foo"},
         ACON::Input::Definition.new(ACON::Input::Option.new("name", shortcut: "n"))
       )
 
@@ -30,7 +30,7 @@ describe ACON::Input do
 
     it "uses default when not provided" do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"--name" => "foo"},
+        {"--name" => "foo"},
         ACON::Input::Definition.new(
           ACON::Input::Option.new("name"),
           ACON::Input::Option.new("bar", nil, :optional, "", "default")
@@ -43,7 +43,7 @@ describe ACON::Input do
 
     it "should parse explicit empty string value" do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"--name" => "foo", "--bar" => ""},
+        {"--name" => "foo", "--bar" => ""},
         ACON::Input::Definition.new(
           ACON::Input::Option.new("name"),
           ACON::Input::Option.new("bar", nil, :optional, "", "default")
@@ -56,7 +56,7 @@ describe ACON::Input do
 
     it "should parse explicit nil value" do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"--name" => "foo", "--bar" => nil},
+        {"--name" => "foo", "--bar" => nil},
         ACON::Input::Definition.new(
           ACON::Input::Option.new("name"),
           ACON::Input::Option.new("bar", nil, :optional, "", "default")
@@ -70,7 +70,7 @@ describe ACON::Input do
     describe "negatable option" do
       it "non negated" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType{"--name" => nil},
+          {"--name" => nil},
           ACON::Input::Definition.new(
             ACON::Input::Option.new("name", value_mode: :negatable)
           )
@@ -84,7 +84,7 @@ describe ACON::Input do
 
       it "negated" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType{"--no-name" => nil},
+          {"--no-name" => nil},
           ACON::Input::Definition.new(
             ACON::Input::Option.new("name", value_mode: :negatable)
           )
@@ -96,7 +96,7 @@ describe ACON::Input do
 
       it "with default" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType.new,
+          Hash(String, String).new,
           ACON::Input::Definition.new(
             ACON::Input::Option.new("name", value_mode: :negatable, default: nil)
           )
@@ -109,7 +109,7 @@ describe ACON::Input do
 
     it "set invalid option" do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"--name" => "foo"},
+        {"--name" => "foo"},
         ACON::Input::Definition.new(
           ACON::Input::Option.new("name"),
           ACON::Input::Option.new("bar", nil, :optional, "", "default")
@@ -123,7 +123,7 @@ describe ACON::Input do
 
     it "get invalid option" do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"--name" => "foo"},
+        {"--name" => "foo"},
         ACON::Input::Definition.new(
           ACON::Input::Option.new("name"),
           ACON::Input::Option.new("bar", nil, :optional, "", "default")
@@ -138,7 +138,7 @@ describe ACON::Input do
     describe "#option(T)" do
       it "optional option with default accessed via non nilable type" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType.new,
+          Hash(String, String).new,
           ACON::Input::Definition.new(
             ACON::Input::Option.new("name", nil, :optional, default: "bar"),
           )
@@ -151,7 +151,7 @@ describe ACON::Input do
 
       it "optional option without default accessed via nilable type" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType{"--name2" => "foo"},
+          {"--name2" => "foo"},
           ACON::Input::Definition.new(
             ACON::Input::Option.new("name"),
             ACON::Input::Option.new("name2"),
@@ -165,7 +165,7 @@ describe ACON::Input do
 
       it "required option with default accessed via non nilable type" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType{"--name" => "foo"},
+          {"--name" => "foo"},
           ACON::Input::Definition.new(
             ACON::Input::Option.new("name", nil, :required),
           )
@@ -178,7 +178,7 @@ describe ACON::Input do
 
       it "negatable option accessed via non bool type" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType{"--name" => "true"},
+          {"--name" => "true"},
           ACON::Input::Definition.new(
             ACON::Input::Option.new("name", nil, :negatable),
           )
@@ -191,7 +191,7 @@ describe ACON::Input do
 
       it "negatable option with default accessed via non nilable type" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType{"--name" => "true"},
+          {"--name" => "true"},
           ACON::Input::Definition.new(
             ACON::Input::Option.new("name", nil, :negatable),
           )
@@ -208,7 +208,7 @@ describe ACON::Input do
 
       it "option that doesnt exist" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType{"--name" => "foo"},
+          {"--name" => "foo"},
           ACON::Input::Definition.new(
             ACON::Input::Option.new("name"),
           )
@@ -224,7 +224,7 @@ describe ACON::Input do
   describe "arguments" do
     it do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"name" => "foo"},
+        {"name" => "foo"},
         ACON::Input::Definition.new(
           ACON::Input::Argument.new("name"),
         )
@@ -238,7 +238,7 @@ describe ACON::Input do
 
     it do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"name" => "foo"},
+        {"name" => "foo"},
         ACON::Input::Definition.new(
           ACON::Input::Argument.new("name"),
           ACON::Input::Argument.new("bar", :optional, "", "default")
@@ -252,7 +252,7 @@ describe ACON::Input do
 
     it "set invalid option" do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"name" => "foo"},
+        {"name" => "foo"},
         ACON::Input::Definition.new(
           ACON::Input::Argument.new("name"),
           ACON::Input::Argument.new("bar", :optional, "", "default")
@@ -266,7 +266,7 @@ describe ACON::Input do
 
     it "get invalid option" do
       input = ACON::Input::Hash.new(
-        ACON::Input::HashType{"name" => "foo"},
+        {"name" => "foo"},
         ACON::Input::Definition.new(
           ACON::Input::Argument.new("name"),
           ACON::Input::Argument.new("bar", :optional, "", "default")
@@ -281,7 +281,7 @@ describe ACON::Input do
     describe "#argument(T)" do
       it "optional arg without default raises when accessed via non nilable type" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType{"name" => "foo"},
+          {"name" => "foo"},
           ACON::Input::Definition.new(
             ACON::Input::Argument.new("name"),
           )
@@ -294,7 +294,7 @@ describe ACON::Input do
 
       it "optional arg with default accessed via non nilable type" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType.new,
+          Hash(String, String).new,
           ACON::Input::Definition.new(
             ACON::Input::Argument.new("name", default: "bar"),
           )
@@ -307,7 +307,7 @@ describe ACON::Input do
 
       it "optional arg without default accessed via nilable type" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType{"name2" => "foo"},
+          {"name2" => "foo"},
           ACON::Input::Definition.new(
             ACON::Input::Argument.new("name"),
             ACON::Input::Argument.new("name2"),
@@ -321,7 +321,7 @@ describe ACON::Input do
 
       it "arg that doesnt exist" do
         input = ACON::Input::Hash.new(
-          ACON::Input::HashType{"name" => "foo"},
+          {"name" => "foo"},
           ACON::Input::Definition.new(
             ACON::Input::Argument.new("name"),
           )

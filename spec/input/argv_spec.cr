@@ -15,7 +15,7 @@ struct ARGVTest < ASPEC::TestCase
     input = ACON::Input::ARGV.new ["foo", "bar", "baz", "bat"]
     input.bind ACON::Input::Definition.new ACON::Input::Argument.new "name", :is_array
 
-    input.arguments.should eq(ACON::Input::HashType{"name" => ["foo", "bar", "baz", "bat"] of ACON::Input::InputTypes})
+    input.arguments.should eq({"name" => ["foo", "bar", "baz", "bat"]})
   end
 
   def test_array_option : Nil

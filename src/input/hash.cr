@@ -1,25 +1,35 @@
 class Athena::Console::Input::Hash < Athena::Console::Input
-  @parameters : HashType
+  @parameters : ::Hash(String, ACON::Input::Value)
 
-  def self.new(*args : InputType) : self
+  def self.new(*args : _) : self
     new args
   end
 
-  def self.new(args : Enumerable(InputType)) : self
-    hash = HashType.new
+  def self.new(**args : _) : self
+    new args.to_h
+  end
 
-    args.each do |arg|
-      hash[arg] = nil
+  def initialize(args : ::Hash = ::Hash(String, String).new, definition : ACON::Input::Definition? = nil)
+    hash = ::Hash(String, ACON::Input::Value).new
+
+    args.each do |key, value|
+      hash[key.to_s] = ACON::Input::Value.from_value value
     end
 
-    new hash
+    @parameters = hash
+
+    super definition
   end
 
-  def self.new(**args : InputType) : self
-    new args.to_h.transform_keys(&.to_s).transform_values(&.as(InputType))
-  end
+  def initialize(args : Enumerable, definition : ACON::Input::Definition? = nil)
+    hash = ::Hash(String, ACON::Input::Value).new
 
-  def initialize(@parameters : HashType = HashType.new, definition : ACON::Input::Definition? = nil)
+    args.each do |arg|
+      hash[arg.to_s] = ACON::Input::Value::Nil.new
+    end
+
+    @parameters = hash
+
     super definition
   end
 
@@ -27,7 +37,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
     @parameters.each do |name, value|
       next if name.starts_with? '-'
 
-      return value.as(String)
+      return value.value.as(String)
     end
 
     nil
@@ -35,6 +45,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
 
   def has_parameter?(*values : String, only_params : Bool = false) : Bool
     @parameters.each do |name, value|
+      value = value.value
       value = name unless value.is_a? Number
       return false if only_params && "--" == value
       return true if values.includes? value
@@ -46,7 +57,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
   def parameter(value : String, default : _ = false, only_params : Bool = false)
     @parameters.each do |name, v|
       return default if only_params && ("--" == name || "--" == value)
-      return v if value == name
+      return v.value if value == name
     end
 
     default
@@ -66,33 +77,31 @@ class Athena::Console::Input::Hash < Athena::Console::Input
     end
   end
 
-  private def add_argument(name : String, value : InputType) : Nil
+  private def add_argument(name : String, value : ACON::Input::Value) : Nil
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' argument does not exist." if !@definition.has_argument? name
 
-    @arguments[name] = ACON::Input::Value.from_value value
+    @arguments[name] = value
   end
 
-  private def add_long_option(name : String, value : InputType) : Nil
+  private def add_long_option(name : String, value : ACON::Input::Value) : Nil
     unless @definition.has_option?(name)
       raise ACON::Exceptions::InvalidOption.new "The '--#{name}' option does not exist." unless @definition.has_negation? name
 
       option_name = @definition.negation_to_name name
-      @options[option_name] = ACON::Input::Value.from_value false
-
-      return
+      return @options[option_name] = ACON::Input::Value::Bool.new false
     end
 
     option = @definition.option name
 
-    if value.nil?
+    if value.is_a? ACON::Input::Value::Nil
       raise ACON::Exceptions::InvalidOption.new "The '--#{option.name}' option requires a value." if option.value_required?
-      value = true if !option.is_array? && !option.value_optional?
+      value = ACON::Input::Value::Bool.new(true) if !option.is_array? && !option.value_optional?
     end
 
-    @options[name] = ACON::Input::Value.from_value value
+    @options[name] = value
   end
 
-  private def add_short_option(name : String, value : InputType) : Nil
+  private def add_short_option(name : String, value : ACON::Input::Value) : Nil
     name = name.to_s
 
     raise ACON::Exceptions::InvalidOption.new "The '-#{name}' option does not exist." if !@definition.has_shortcut? name

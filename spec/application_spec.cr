@@ -558,7 +558,7 @@ struct ApplicationTest < ASPEC::TestCase
     tester.run command: "foo3:bar", decorated: false, capture_stderr_separately: true
     self.assert_file_equals_string "text/application_renderexception3.txt", tester.error_output
 
-    tester.run(ACON::Input::HashType{"command" => "foo3:bar"}, decorated: false, verbosity: :verbose)
+    tester.run({"command" => "foo3:bar"}, decorated: false, verbosity: :verbose)
     tester.display.should match /\[Exception\]\s*First exception/
     tester.display.should match /\[Exception\]\s*Second exception/
     tester.display.should match /\[Exception\]\s*Third exception/
@@ -641,7 +641,7 @@ struct ApplicationTest < ASPEC::TestCase
     app.catch_exceptions = false
     app.add command = Foo1Command.new
 
-    input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo:bar1"}
+    input = ACON::Input::Hash.new({"command" => "foo:bar1"})
     output = ACON::Output::IO.new IO::Memory.new
 
     app.run input, output
@@ -831,7 +831,7 @@ struct ApplicationTest < ASPEC::TestCase
       raise ACON::Exceptions::Logic.new "", code: 5
     end
 
-    input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
+    input = ACON::Input::Hash.new({"command" => "foo"})
 
     app.run(input, ACON::Output::Null.new).value.should eq 5
   end
@@ -843,7 +843,7 @@ struct ApplicationTest < ASPEC::TestCase
       raise ""
     end
 
-    input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
+    input = ACON::Input::Hash.new({"command" => "foo"})
 
     app.run(input, ACON::Output::Null.new).value.should eq 1
   end
@@ -862,7 +862,7 @@ struct ApplicationTest < ASPEC::TestCase
         ACON::Input::Option.new("survey", "e", :required, "Option with shortcut")
       )
 
-    input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
+    input = ACON::Input::Hash.new({"command" => "foo"})
 
     expect_raises ACON::Exceptions::Logic, "An option with shortcut 'e' already exists." do
       app.run input, ACON::Output::Null.new
@@ -880,7 +880,7 @@ struct ApplicationTest < ASPEC::TestCase
     end
       .definition(element)
 
-    input = ACON::Input::Hash.new ACON::Input::HashType{"command" => "foo"}
+    input = ACON::Input::Hash.new({"command" => "foo"})
 
     expect_raises ACON::Exceptions::Logic do
       app.run input, ACON::Output::Null.new
@@ -1023,7 +1023,7 @@ struct ApplicationTest < ASPEC::TestCase
       end,
     })
 
-    app.run ACON::Input::Hash.new(ACON::Input::HashType{"command" => "foo"}), ACON::Output::Null.new
+    app.run ACON::Input::Hash.new({"command" => "foo"}), ACON::Output::Null.new
 
     loaded.should eq({"foo" => true})
   end
