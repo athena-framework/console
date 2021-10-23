@@ -202,7 +202,7 @@ describe ACON::Input do
           )
         )
 
-        expect_raises ACON::Exceptions::Logic, "Cannot cast optional argument 'name' to non-nilable type 'String'." do
+        expect_raises ACON::Exceptions::Logic, "Cannot cast optional argument 'name' to non-nilable type 'String' without a default." do
           input.argument "name", String
         end
       end

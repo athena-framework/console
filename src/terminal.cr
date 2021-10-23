@@ -24,8 +24,8 @@ struct Athena::Console::Terminal
   end
 
   def height : Int32
-    if env_heigh = ENV["LINES"]?
-      return env_heigh.to_i
+    if env_height = ENV["LINES"]?
+      return env_height.to_i
     end
 
     if @@height.nil?

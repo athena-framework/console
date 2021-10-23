@@ -28,13 +28,13 @@ struct Athena::Console::Input::Value::String < Athena::Console::Input::Value
     def get(as : {{type.id}}.class) : {{type.id}}
       {{type.id}}.new @value
     rescue ArgumentError
-      raise "'#{@value}' is not a valid '#{{{type.id}}}'."
+      raise ACON::Exceptions::Logic.new "'#{@value}' is not a valid '#{{{type.id}}}'."
     end
     
     def get(as : {{type.id}}?.class) : {{type.id}}?
       {{type.id}}.new(@value) || nil
     rescue ArgumentError
-      raise "'#{@value}' is not a valid '#{{{type.id}}}'."
+      raise ACON::Exceptions::Logic.new "'#{@value}' is not a valid '#{{{type.id}}}'."
     end
   {% end %}
 end

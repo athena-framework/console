@@ -36,7 +36,11 @@ class Athena::Console::Input::Argument
   end
 
   def default(as : T.class) : T forall T
-    @default.not_nil!.get T
+    {% if T.nilable? %}
+      self.default.as T
+    {% else %}
+      @default.not_nil!.get T
+    {% end %}
   end
 
   def default=(default = nil)

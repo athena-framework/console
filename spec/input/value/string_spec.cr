@@ -4,19 +4,19 @@ describe ACON::Input::Value::String do
   describe "#get" do
     describe Bool do
       it "non-nilable - true" do
-        val = ACON::Input::Value::String.new("true").get(Bool)
+        val = ACON::Input::Value::String.new("true").get Bool
         typeof(val).should eq Bool
         val.should be_true
       end
 
       it "non-nilable - false" do
-        val = ACON::Input::Value::String.new("false").get(Bool)
+        val = ACON::Input::Value::String.new("false").get Bool
         typeof(val).should eq Bool
         val.should be_false
       end
 
       it "nilable" do
-        val = ACON::Input::Value::String.new("true").get(Bool?)
+        val = ACON::Input::Value::String.new("true").get Bool?
         typeof(val).should eq Bool?
         val.should be_true
       end
@@ -62,11 +62,11 @@ describe ACON::Input::Value::String do
       end
 
       it "non number" do
-        expect_raises Exception, "'foo' is not a valid 'Int32'." do
+        expect_raises ACON::Exceptions::Logic, "'foo' is not a valid 'Int32'." do
           ACON::Input::Value::String.new("foo").get Int32
         end
 
-        expect_raises Exception, "'foo' is not a valid 'Int32'." do
+        expect_raises ACON::Exceptions::Logic, "'foo' is not a valid 'Int32'." do
           ACON::Input::Value::String.new("foo").get Int32?
         end
       end
@@ -98,11 +98,11 @@ describe ACON::Input::Value::String do
       end
 
       it "non number" do
-        expect_raises Exception, "'foo' is not a valid 'Float64'." do
+        expect_raises ACON::Exceptions::Logic, "'foo' is not a valid 'Float64'." do
           ACON::Input::Value::String.new("foo").get Float64
         end
 
-        expect_raises Exception, "'foo' is not a valid 'Float64'." do
+        expect_raises ACON::Exceptions::Logic, "'foo' is not a valid 'Float64'." do
           ACON::Input::Value::String.new("foo").get Float64?
         end
       end
