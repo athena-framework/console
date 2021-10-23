@@ -1,8 +1,13 @@
 require "./interface"
 
+# Contains `ACON::Helper::Interface` implementations that can be used to help with various tasks.
+# Such as asking questions, or customizing the output format.
+#
+# This class also acts as a base type that implements common functionality between each helper.
 abstract class Athena::Console::Helper
   include Athena::Console::Helper::Interface
 
+  # Returns a new string with all of its ANSI formatting removed.
   def self.remove_decoration(formatter : ACON::Formatter::Interface, string : String) : String
     is_decorated = formatter.decorated?
     formatter.decorated = false

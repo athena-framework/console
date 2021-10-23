@@ -147,9 +147,17 @@
 #
 # See `ACON::Spec` for more information.
 abstract class Athena::Console::Command
+  # Represents the execution status of an `ACON::Command`.
+  #
+  # The value of each member is used as the exit code of the invocation.
   enum Status
+    # Represents a successful invocation with no errors.
     SUCCESS = 0
+
+    # Represents that some error happened during invocation.
     FAILURE = 1
+
+    # Represents the command was not used correctly, such as invalid options or missing arguments.
     INVALID = 2
   end
 
@@ -336,7 +344,7 @@ abstract class Athena::Console::Command
 
     processed_help = self.help.presence || self.description
 
-    { {"%command.name%", @name} }.each do |(placeholder, replacement)|
+    { {"%command.name%", @name}, {"%command.full_name%", full_name} }.each do |(placeholder, replacement)|
       processed_help = processed_help.gsub placeholder, replacement
     end
 

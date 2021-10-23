@@ -1,3 +1,4 @@
+# Lists the available commands, optionally only including those in a specific namespace.
 class Athena::Console::Commands::List < Athena::Console::Command
   protected def configure : Nil
     self

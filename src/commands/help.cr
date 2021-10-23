@@ -1,4 +1,6 @@
+# Displays information for a given command.
 class Athena::Console::Commands::Help < Athena::Console::Command
+  # :nodoc:
   setter command : ACON::Command? = nil
 
   protected def configure : Nil

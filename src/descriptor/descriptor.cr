@@ -1,5 +1,6 @@
 require "./interface"
 
+# :nodoc:
 abstract class Athena::Console::Descriptor
   include Athena::Console::Descriptor::Interface
 
