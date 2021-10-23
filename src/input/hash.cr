@@ -9,7 +9,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
     new args.to_h
   end
 
-  def initialize(args : ::Hash = ::Hash(String, String).new, definition : ACON::Input::Definition? = nil)
+  def initialize(args : ::Hash = ::Hash(NoReturn, NoReturn).new, definition : ACON::Input::Definition? = nil)
     hash = ::Hash(String, ACON::Input::Value).new
 
     args.each do |key, value|
