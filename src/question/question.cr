@@ -94,8 +94,11 @@ require "./base"
 class Athena::Console::Question(T)
   include Athena::Console::Question::Base(T)
 
+  # See [Validating the Answer][Athena::Console::Question--validating-the-answer].
   property validator : Proc(T, T)? = nil
 
+  # Sets the valdiator callback to this block.
+  # See [Validating the Answer][Athena::Console::Question--validating-the-answer].
   def validator(&@validator : T -> T) : Nil
   end
 end

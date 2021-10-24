@@ -2,13 +2,22 @@ class Athena::Console::Question(T); end
 
 require "./base"
 
+# Base type of choice based questions.
+# See each subclass for more information.
 abstract class Athena::Console::Question::AbstractChoice(T, ChoiceType)
   include Athena::Console::Question::Base(T?)
 
+  # Returns the possible choices.
   getter choices : Hash(String | Int32, T)
+
+  # Returns the message to dispaly if the provided answer is not a valid choice.
   getter error_message : String = "Value '%s' is invalid."
 
+  # Returns/sets the prompt to use for the question.
+  # The prompt being the character(s) before the user input.
   property prompt : String = " > "
+
+  # See [Validating the Answer][Athena::Console::Question--validating-the-answer].
   property validator : Proc(T?, ChoiceType)? = nil
 
   def self.new(question : String, choices : Indexable(T), default : Int | T | Nil = nil)
@@ -38,6 +47,8 @@ abstract class Athena::Console::Question::AbstractChoice(T, ChoiceType)
     self
   end
 
+  # Sets the valdiator callback to this block.
+  # See [Validating the Answer][Athena::Console::Question--validating-the-answer].
   def validator(&@validator : T? -> ChoiceType) : Nil
   end
 
