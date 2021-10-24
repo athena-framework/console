@@ -11,7 +11,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
 
   @stream : IO? = nil
 
-  def ask(input : ACON::Input::Interface, output : ACON::Output::Interface, question : ACON::Question::QuestionBase)
+  def ask(input : ACON::Input::Interface, output : ACON::Output::Interface, question : ACON::Question::Base)
     if output.is_a? ACON::Output::ConsoleOutputInterface
       output = output.error_output
     end
@@ -63,7 +63,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     output.puts message
   end
 
-  protected def write_prompt(output : ACON::Output::Interface, question : ACON::Question::QuestionBase) : Nil
+  protected def write_prompt(output : ACON::Output::Interface, question : ACON::Question::Base) : Nil
     message = question.question
 
     if question.is_a? ACON::Question::AbstractChoice
@@ -76,7 +76,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     output.print message
   end
 
-  private def default_answer(question : ACON::Question::QuestionBase)
+  private def default_answer(question : ACON::Question::Base)
     default = question.default
 
     return default if default.nil?
@@ -107,7 +107,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
   end
 
   # ameba:disable Metrics/CyclomaticComplexity
-  private def do_ask(output : ACON::Output::Interface, question : ACON::Question::QuestionBase)
+  private def do_ask(output : ACON::Output::Interface, question : ACON::Question::Base)
     self.write_prompt output, question
 
     input_stream = @stream || STDIN
@@ -143,7 +143,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     question.process_response response
   end
 
-  private def autocomplete(output : ACON::Output::Interface, question : ACON::Question::QuestionBase, input_stream : IO, autocompleter) : String
+  private def autocomplete(output : ACON::Output::Interface, question : ACON::Question::Base, input_stream : IO, autocompleter) : String
     # TODO: Support autocompletion.
     self.read_input(input_stream, question) || ""
   end
@@ -170,7 +170,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     response
   end
 
-  private def read_input(input_stream : IO, question : ACON::Question::QuestionBase) : String?
+  private def read_input(input_stream : IO, question : ACON::Question::Base) : String?
     unless question.multi_line?
       return input_stream.gets 4096
     end
@@ -185,7 +185,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
     end
   end
 
-  private def validate_attempts(output : ACON::Output::Interface, question : ACON::Question::QuestionBase)
+  private def validate_attempts(output : ACON::Output::Interface, question : ACON::Question::Base)
     error = nil
     attempts = question.max_attempts
 

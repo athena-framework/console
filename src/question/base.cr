@@ -1,6 +1,6 @@
 # Common logic shared between all question types.
 # See each type for more information.
-module Athena::Console::Question::QuestionBase(T)
+module Athena::Console::Question::Base(T)
   # Returns the question that should be asked.
   getter question : String
 
@@ -98,6 +98,11 @@ module Athena::Console::Question::QuestionBase(T)
 
     @max_attempts = attempts
     self
+  end
+
+  # Sets the normalizer callback to this block.
+  # See [Normalizing the Answer][Athena::Console::Question--normalizing-the-answer].
+  def normalizer(&@normalizer : T | String -> T) : Nil
   end
 
   protected def process_response(response : String)

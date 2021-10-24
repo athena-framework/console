@@ -1,9 +1,9 @@
 class Athena::Console::Question(T); end
 
-require "./question_base"
+require "./base"
 
 abstract class Athena::Console::Question::AbstractChoice(T, ChoiceType)
-  include Athena::Console::Question::QuestionBase(T?)
+  include Athena::Console::Question::Base(T?)
 
   getter choices : Hash(String | Int32, T)
   getter error_message : String = "Value '%s' is invalid."
@@ -38,7 +38,7 @@ abstract class Athena::Console::Question::AbstractChoice(T, ChoiceType)
     self
   end
 
-  def set_validator(&@validator : T? -> ChoiceType) : Nil
+  def validator(&@validator : T? -> ChoiceType) : Nil
   end
 
   private def selected_choices(answer : String?) : Array(T)

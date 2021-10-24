@@ -1,4 +1,4 @@
-require "./question_base"
+require "./base"
 
 # This namespaces contains various questions that can be asked via the `ACON::Helper::Question` helper or `ART::Style::Athena` style.
 #
@@ -17,7 +17,7 @@ require "./question_base"
 # ### Trimming the Answer
 #
 # By default the answer is [trimmed](https://crystal-lang.org/api/String.html#strip%3AString-instance-method) in order to remove leading and trailing whitespace.
-# The `ACON::Question::QuestionBase#trimmable=` method can be used to disable this if you need the input as is.
+# The `ACON::Question::Base#trimmable=` method can be used to disable this if you need the input as is.
 #
 # ```
 # question = ACON::Question(String?).new "What is your name?", nil
@@ -29,7 +29,7 @@ require "./question_base"
 #
 # The question helper will stop reading input when it receives a newline character. I.e. the user presses the `ENTER` key.
 # However in some cases you may want to allow for an answer that spans multiple lines.
-# The `ACON::Question::QuestionBase#multi_line=` method can be used to enable multi line mode.
+# The `ACON::Question::Base#multi_line=` method can be used to enable multi line mode.
 #
 # ```
 # question = ACON::Question(String?).new "Tell me a story.", nil
@@ -49,25 +49,53 @@ require "./question_base"
 # ```
 #
 # WARNING: If no method to hide the response is available on the underlying system/input, it will fallback and allow the response to be seen.
-# If having the hidden response hidden is vital, you _MUST_ set `ACON::Question::QuestionBase#hidden_fallback=` to `false`; which will
+# If having the hidden response hidden is vital, you _MUST_ set `ACON::Question::Base#hidden_fallback=` to `false`; which will
 # raise an exception instead of allowing the input to be visible.
 #
 # ### Normalizing the Answer
 #
+# The answer can be "normalized" before being validated to fix any small errors or tweak it as needed.
+# For example, you could normalize the casing of the input:
+#
+# ```
+# question = ACON::Question(String?).new "Enter your name.", nil
+# question.normalizer do |input|
+#   input.try &.downcase
+# end
+# ```
+#
+# It is possible for *input* to be `nil` in this case, so that need to also be handled in the block.
+# The block should return a value of the same type of the generic, in this case `String?`.
+#
+# NOTE: The normalizer is called first and its return value is used as the input of the validator.
+# If the answer is invalid do not raise an exception in the normalizer and let the validator handle it.
+#
 # ### Validating the Answer
 #
-# #### Hidden Response
+# If the answer to a question needs to match some specific requirements, you can register a question validator to check the validity of the answer.
+# This callback should raise an exception if the input is not valid, such as `ArgumentError`. Otherwise, it must return the input value.
 #
-# ### Testing a Command that Expects Input
+# ```
+# question = ACON::Question(String?).new "Enter your name.", nil
+# question.validator do |input|
+#   next input if input.nil? || !input.starts_with? /^\d+/
+#
+#   raise ArgumentError.new "Invalid name. Cannot start with numeric digits."
+# end
+# ```
+#
+# In this example, we are asserting that the user's name does not start with numeric digits.
+# If the user entered `123Jim`, they would be told it is an invalid answer and prompted to answer the question again.
+# By default the user would have an unlimited amount of retries to get it right, but this can be customized via `ACON::Question::Base#max_attempts=`.
 #
 # ### Autocompletion
 #
 # TODO: Implement this.
 class Athena::Console::Question(T)
-  include Athena::Console::Question::QuestionBase(T)
+  include Athena::Console::Question::Base(T)
 
   property validator : Proc(T, T)? = nil
 
-  def set_validator(&@validator : T -> T) : Nil
+  def validator(&@validator : T -> T) : Nil
   end
 end

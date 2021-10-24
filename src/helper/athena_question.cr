@@ -16,7 +16,7 @@ class Athena::Console::Helper::AthenaQuestion < Athena::Console::Helper::Questio
   end
 
   # ameba:disable Metrics/CyclomaticComplexity
-  protected def write_prompt(output : ACON::Output::Interface, question : ACON::Question::QuestionBase) : Nil
+  protected def write_prompt(output : ACON::Output::Interface, question : ACON::Question::Base) : Nil
     text = ACON::Formatter::Output.escape_trailing_backslash question.question
     default = question.default
 

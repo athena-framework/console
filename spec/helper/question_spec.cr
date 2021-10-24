@@ -251,7 +251,7 @@ struct QuestionHelperTest < AbstractQuestionHelperTest
 
     question = ACON::Question.new " What is your favorite color?", "white"
     question.max_attempts = 2
-    question.set_validator do |answer|
+    question.validator do |answer|
       raise ACON::Exceptions::ValidationFailed.new error unless answer.in? "white", "black"
 
       answer
@@ -387,7 +387,7 @@ struct QuestionHelperTest < AbstractQuestionHelperTest
     app.auto_exit = false
     app.register "question" do |input, output|
       question = ACON::Question(String?).new "This is a promptable question", nil
-      question.set_validator do |answer|
+      question.validator do |answer|
         tries += 1
 
         raise "" unless answer.presence

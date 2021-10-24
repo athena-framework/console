@@ -81,7 +81,7 @@ struct AthenaQuestionTest < AbstractQuestionHelperTest
 
   def test_ask_returns_nil_if_validator_allows_it : Nil
     question = ACON::Question(String?).new "Who is your favorite superhero?", nil
-    question.set_validator do |value|
+    question.validator do |value|
       value
     end
 
