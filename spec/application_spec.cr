@@ -1035,7 +1035,7 @@ struct ApplicationTest < ASPEC::TestCase
       "foo" => ->{ ACON::Commands::Generic.new("bar") { ACON::Command::Status::SUCCESS }.as ACON::Command },
     })
 
-    expect_raises ACON::Exceptions::CommandNotFound, "The 'foo' command cannot be found because it is registered under multiple names.  Make sure you don't set a different name via constructor or 'name='." do
+    expect_raises ACON::Exceptions::CommandNotFound, "The 'foo' command cannot be found because it is registered under multiple names. Make sure you don't set a different name via constructor or 'name='." do
       app.get "foo"
     end
   end

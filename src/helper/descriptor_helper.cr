@@ -1,3 +1,4 @@
+# :nodoc:
 class Athena::Console::Helper::Descriptor < Athena::Console::Helper
   @descriptors = Hash(String, ACON::Descriptor::Interface).new
 

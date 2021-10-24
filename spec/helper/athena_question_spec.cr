@@ -1,11 +1,11 @@
 require "../spec_helper"
 require "./abstract_question_helper_test_case"
 
-struct AthenaQuestionHelperTest < AbstractQuestionHelperTest
+struct AthenaQuestionTest < AbstractQuestionHelperTest
   @helper : ACON::Helper::Question
 
   def initialize
-    @helper = ACON::Helper::AthenaQuestionHelper.new
+    @helper = ACON::Helper::AthenaQuestion.new
 
     super
   end

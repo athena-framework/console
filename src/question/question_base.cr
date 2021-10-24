@@ -13,7 +13,7 @@ module Athena::Console::Question::QuestionBase(T)
   property? trimmable : Bool = true
 
   def initialize(@question : String, @default : T)
-    {% T.raise "An ACON::Question generic argument cannot be 'Nil'.  Use 'String?' instead." if T == Nil %}
+    {% T.raise "An ACON::Question generic argument cannot be 'Nil'. Use 'String?' instead." if T == Nil %}
   end
 
   def autocompleter_values : Array(String)?
@@ -76,6 +76,6 @@ module Athena::Console::Question::QuestionBase(T)
       return normalizer.call response
     end
 
-    response.as T
+    ACON::Input::Value.from_value(response).get T
   end
 end

@@ -5,7 +5,7 @@ module Athena::Console::Spec
     setter inputs : Array(String) = [] of String
 
     def display : String
-      raise ACON::Exceptions::Logic.new "Output not initialized.  Did you execute the command before requesting the display?" unless (output = @output)
+      raise ACON::Exceptions::Logic.new "Output not initialized. Did you execute the command before requesting the display?" unless (output = @output)
       output.to_s
     end
 

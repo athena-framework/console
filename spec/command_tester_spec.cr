@@ -38,7 +38,7 @@ struct CommandTesterTest < ASPEC::TestCase
   def test_display_before_calling_execute : Nil
     tester = ACON::Spec::CommandTester.new ACON::Commands::Generic.new "foo" { ACON::Command::Status::SUCCESS }
 
-    expect_raises ACON::Exceptions::Logic, "Output not initialized.  Did you execute the command before requesting the display?" do
+    expect_raises ACON::Exceptions::Logic, "Output not initialized. Did you execute the command before requesting the display?" do
       tester.display
     end
   end

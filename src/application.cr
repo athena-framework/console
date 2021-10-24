@@ -116,6 +116,13 @@ class Athena::Console::Application
   # Returns `true` if `self` only supports a single command.
   # See [Single Command Applications][Athena::Console::Application#default_command(name,single_command)--single-command-applications] for more information.
   getter? single_command : Bool = false
+
+  # Returns/sets the `ACON::Helper::HelperSet` associated with `self`.
+  #
+  # The default helper set includes:
+  #
+  # * `ACON::Helper::Formatter`
+  # * `ACON::Helper::Question`
   property helper_set : ACON::Helper::HelperSet { self.default_helper_set }
 
   @commands = Hash(String, ACON::Command).new
@@ -231,7 +238,7 @@ class Athena::Console::Application
   # ```
   #
   # For example, executing the following console script via `crystal run ./console.cr George`
-  # would result in `Hello George!` being printed.  If we tried this again without setting *single_command*
+  # would result in `Hello George!` being printed. If we tried this again without setting *single_command*
   # to `true`, it would error saying `Command 'George' is not defined.`
   #
   # ```
@@ -427,7 +434,7 @@ class Athena::Console::Application
     raise ACON::Exceptions::CommandNotFound.new "The command '#{name}' does not exist." unless self.has? name
 
     if !@commands.has_key? name
-      raise ACON::Exceptions::CommandNotFound.new "The '#{name}' command cannot be found because it is registered under multiple names.  Make sure you don't set a different name via constructor or 'name='."
+      raise ACON::Exceptions::CommandNotFound.new "The '#{name}' command cannot be found because it is registered under multiple names. Make sure you don't set a different name via constructor or 'name='."
     end
 
     command = @commands[name]

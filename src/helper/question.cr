@@ -1,3 +1,7 @@
+# Provides a method to ask the user for more information,
+# such as to confirm an action, or to provide additional values.
+#
+# See `ACON::Question` namespace for more information.
 class Athena::Console::Helper::Question < Athena::Console::Helper
   @@stty : Bool = true
 

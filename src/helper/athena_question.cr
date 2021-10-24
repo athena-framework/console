@@ -2,7 +2,8 @@ abstract class Athena::Console::Helper; end
 
 require "./question"
 
-class Athena::Console::Helper::AthenaQuestionHelper < Athena::Console::Helper::Question
+# Extension of `ACON::Helper::Question` that provides more structured output.
+class Athena::Console::Helper::AthenaQuestion < Athena::Console::Helper::Question
   protected def write_error(output : ACON::Output::Interface, error : Exception) : Nil
     if output.is_a? ACON::Style::Athena
       output.new_line

@@ -9,7 +9,9 @@ struct QuestionTest < ASPEC::TestCase
 
   def test_default : Nil
     @question.default.should be_nil
-    ACON::Question(String).new("Test Question", "FOO").default.should eq "FOO"
+    default = ACON::Question(String).new("Test Question", "FOO").default
+    default.should eq "FOO"
+    typeof(default).should eq String
   end
 
   def test_hidden_autocompleter_callback : Nil

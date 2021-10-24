@@ -56,7 +56,7 @@ abstract class Athena::Console::Question::AbstractChoice(T, ChoiceType)
         results << key.to_s if choice == value
       end
 
-      raise ACON::Exceptions::InvalidArgument.new %(The provided answer is ambiguous.  Value should be one of #{results.join(" or ") { |i| "'#{i}'" }}.) if results.size > 1
+      raise ACON::Exceptions::InvalidArgument.new %(The provided answer is ambiguous. Value should be one of #{results.join(" or ") { |i| "'#{i}'" }}.) if results.size > 1
 
       result = @choices.find { |(k, v)| v == value || k.to_s == value }.try &.first.to_s
 

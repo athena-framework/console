@@ -3,7 +3,7 @@ require "./output"
 struct Athena::Console::Style::Athena < Athena::Console::Style::Output
   private MAX_LINE_LENGTH = 120
 
-  getter question_helper : ACON::Helper::Question { ACON::Helper::AthenaQuestionHelper.new }
+  getter question_helper : ACON::Helper::Question { ACON::Helper::AthenaQuestion.new }
 
   @input : ACON::Input::Interface
   @buffered_output : ACON::Output::SizedBuffer

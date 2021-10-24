@@ -354,7 +354,7 @@ struct QuestionHelperTest < AbstractQuestionHelperTest
     question.max_attempts = 1
 
     self.with_input "My environment\n" do |input|
-      expect_raises ACON::Exceptions::InvalidArgument, "The provided answer is ambiguous.  Value should be one of 'env_2' or 'env_3'." do
+      expect_raises ACON::Exceptions::InvalidArgument, "The provided answer is ambiguous. Value should be one of 'env_2' or 'env_3'." do
         @helper.ask input, @output, question
       end
     end
