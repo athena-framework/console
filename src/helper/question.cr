@@ -1,4 +1,4 @@
-# Provides a method to ask the user for more information,
+# Provides a method to ask the user for more information;
 # such as to confirm an action, or to provide additional values.
 #
 # See `ACON::Question` namespace for more information.
@@ -160,7 +160,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
 
                  input_stream.gets(4096).tap { system "stty #{stty_mode}" }
                elsif input_stream.tty?
-                 raise ACON::Exceptions::MissingInput.new "Aborted."
+                 raise ACON::Exceptions::MissingInput.new "Unable to hide the response."
                end
 
     raise ACON::Exceptions::MissingInput.new "Aborted." if response.nil?
