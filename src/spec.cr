@@ -79,6 +79,8 @@ module Athena::Console::Spec
   # Functionally similar to `ACON::Spec::CommandTester`, but used for testing entire `ACON::Application`s.
   #
   # Can be useful if your project extends the base application in order to customize it in some way.
+  #
+  # NOTE: Be sure to set `ACON::Application#auto_exit=` to `false`, when testing an entire application.
   struct ApplicationTester
     include Tester
 

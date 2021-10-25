@@ -1,3 +1,4 @@
+# :nodoc:
 struct Athena::Console::Terminal
   @@width : Int32? = nil
   @@height : Int32? = nil

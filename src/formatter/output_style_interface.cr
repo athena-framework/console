@@ -12,16 +12,16 @@ require "./mode"
 # Whenever you output text via an `ACON::Output::Interface`, you can surround the text with tags to color its output. For example:
 #
 # ```
-# # green text
+# # Green text
 # output.puts "<info>foo</info>"
 #
-# # yellow text
+# # Yellow text
 # output.puts "<comment>foo</comment>"
 #
-# # black text on a cyan background
+# # Black text on a cyan background
 # output.puts "<question>foo</question>"
 #
-# # white text on a red background
+# # White text on a red background
 # output.puts "<error>foo</error>"
 # ```
 #
@@ -49,6 +49,27 @@ require "./mode"
 #     output.formatter.set_style "fire", my_style
 #   end
 # end
+# ```
+#
+# ## Inline Styles
+#
+# Styles can also be defined inline when printing a message:
+#
+# ```
+# # Using named colors
+# output.puts "<fg=green>foo</>"
+#
+# # Using hexadecimal colors
+# output.puts "<fg=#c0392b>foo</>"
+#
+# # Black text on a cyan background
+# output.puts "<fg=black;bg=cyan>foo</>"
+#
+# # Bold text on a yellow background
+# output.puts "<bg=yellow;options=bold>foo</>"
+#
+# # Bold text with underline.
+# output.puts "<options=bold,underline>foo</>"
 # ```
 #
 # ## Clickable Links

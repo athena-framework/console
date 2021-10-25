@@ -1,9 +1,24 @@
 require "./output"
 
+# Default implementation of `ACON::Style::Interface` that provides a slew of helpful methods for formatting output.
+#
+# Uses `ACON::Helper::AthenaQuestion` to improve the appearance of questions.
+#
+# ```
+# protected def execute(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
+#   style = ACON::Style::Athena.new input, output
+#
+#   style.title "Some Fancy Title"
+#
+#   # ...
+#
+#   ACON::Command::Status::SUCCESS
+# end
+# ```
 struct Athena::Console::Style::Athena < Athena::Console::Style::Output
   private MAX_LINE_LENGTH = 120
 
-  getter question_helper : ACON::Helper::Question { ACON::Helper::AthenaQuestion.new }
+  protected getter question_helper : ACON::Helper::Question { ACON::Helper::AthenaQuestion.new }
 
   @input : ACON::Input::Interface
   @buffered_output : ACON::Output::SizedBuffer
@@ -19,10 +34,12 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     super output
   end
 
+  # :inherit:
   def ask(question : String, default : _)
     self.ask ACON::Question.new question, default
   end
 
+  # :ditto:
   def ask(question : ACON::Question::Base)
     if @input.interactive?
       self.auto_prepend_block
@@ -38,6 +55,7 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     answer
   end
 
+  # :inherit:
   def ask_hidden(question : String)
     question = ACON::Question(String?).new question, nil
 
@@ -46,6 +64,18 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.ask question
   end
 
+  # Helper method for outputting blocks of *messages* that powers the `#caution`, `#success`, `#note`, etc. methods.
+  # It includes various optional parameters that can be used to print customized blocks.
+  #
+  # If *type* is provided, its value will be printed within `[]`. E.g. `[TYPE]`.
+  #
+  # If *style* is provided, each of the *messages* will be printed in that style.
+  #
+  # *prefix* represents what each of the *messages* should be prefixed with.
+  #
+  # If *padding* is `true`, empty lines will be added before/after the block.
+  #
+  # If *escape* is `true`, each of the *messages* will be escaped via `ACON::Formatter::Output.escape`.
   def block(messages : String | Enumerable(String), type : String? = nil, style : String? = nil, prefix : String = " ", padding : Bool = false, escape : Bool = true) : Nil
     messages = messages.is_a?(Enumerable(String)) ? messages : {messages}
 
@@ -54,38 +84,76 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.new_line
   end
 
+  # :inherit:
+  #
+  # ```
+  # !
+  # ! [CAUTION] Some Message
+  # !
+  # ```
+  #
+  # White text on a 3 line red background block with an empty line above/below the block.
   def caution(messages : String | Enumerable(String)) : Nil
     self.block messages, "CAUTION", "fg=white;bg=red", " ! ", true
   end
 
+  # :inherit:
   def choice(question : String, choices : Indexable | Hash, default = nil)
     self.ask ACON::Question::Choice.new question, choices, default
   end
 
+  # :inherit:
+  #
+  # ```
+  # // Some Message
+  # ```
+  #
+  # White text with one empty line above/below the message(s).
   def comment(messages : String | Enumerable(String)) : Nil
     self.block messages, prefix: "<fg=default;bg=default> // </>", escape: false
   end
 
+  # :inherit:
   def confirm(question : String, default : Bool = true) : Bool
     self.ask ACON::Question::Confirmation.new question, default
   end
 
+  # :inherit:
+  #
+  # ```
+  # [ERROR] Some Message
+  # ```
+  #
+  # White text on a 3 line red background block with an empty line above/below the block.
   def error(messages : String | Enumerable(String)) : Nil
     self.block messages, "ERROR", "fg=white;bg=red", padding: true
   end
 
+  # Returns a new instance of `self` that outputs to the error output.
   def error_style : self
     self.class.new @input, self.error_output
   end
 
+  # :inherit:
+  #
+  # ```
+  # [INFO] Some Message
+  # ```
+  #
+  # Green text with two empty lines above/below the message(s).
   def info(messages : String | Enumerable(String)) : Nil
     self.block messages, "INFO", "fg=green", padding: true
   end
 
-  def listing(*elements : String) : Nil
-    self.listing elements
-  end
-
+  # :inherit:
+  #
+  # ```
+  # * Item 1
+  # * Item 2
+  # * Item 3
+  # ```
+  #
+  # White text with one empty line above/below the list.
   def listing(elements : Enumerable) : Nil
     self.auto_prepend_text
     elements.each do |element|
@@ -94,15 +162,29 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.new_line
   end
 
+  # :ditto:
+  def listing(*elements : String) : Nil
+    self.listing elements
+  end
+
+  # :inherit:
   def new_line(count : Int32 = 1) : Nil
     super
     @buffered_output.print "\n" * count
   end
 
+  # :inherit:
+  #
+  # ```
+  # ! [NOTE] Some Message
+  # ```
+  #
+  # Green text with one empty line above/below the message(s).
   def note(messages : String | Enumerable(String)) : Nil
     self.block messages, "NOTE", "fg=yellow", " ! "
   end
 
+  # :inherit:
   def puts(messages : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
     messages = messages.is_a?(String) ? {messages} : messages
 
@@ -112,6 +194,7 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     end
   end
 
+  # :inherit:
   def print(messages : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
     messages = messages.is_a?(String) ? {messages} : messages
 
@@ -121,6 +204,14 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     end
   end
 
+  # :inherit:
+  #
+  # ```
+  # Some Message
+  # ------------
+  # ```
+  #
+  # Orange text with one empty line above/below the section.
   def section(message : String) : Nil
     self.auto_prepend_block
     self.puts "<comment>#{ACON::Formatter::Output.escape_trailing_backslash message}</>"
@@ -128,6 +219,13 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.new_line
   end
 
+  # :inherit:
+  #
+  # ```
+  #  [OK] Some Message
+  # ```
+  #
+  # Black text on a 3 line green background block with an empty line above/below the block.
   def success(messages : String | Enumerable(String)) : Nil
     self.block messages, "OK", "fg=black;bg=green", padding: true
   end
@@ -135,6 +233,9 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
   # def table(headers : Enumerable, rows : Enumerable(Enumerable)) : Nil
   # end
 
+  # :inherit:
+  #
+  # Same as `#puts` but indented one space and an empty line above the message(s).
   def text(messages : String | Enumerable(String)) : Nil
     self.auto_prepend_text
 
@@ -145,6 +246,14 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     end
   end
 
+  # :inherit:
+  #
+  # ```
+  # Some Message
+  # ============
+  # ```
+  #
+  # Orange text with one empty line above/below the title.
   def title(message : String) : Nil
     self.auto_prepend_block
     self.puts "<comment>#{ACON::Formatter::Output.escape_trailing_backslash message}</>"
@@ -152,6 +261,13 @@ struct Athena::Console::Style::Athena < Athena::Console::Style::Output
     self.new_line
   end
 
+  # :inherit:
+  #
+  # ```
+  #  [WARNING] Some Message
+  # ```
+  #
+  # Black text on a 3 line orange background block with an empty line above/below the block.
   def warning(messages : String | Enumerable(String)) : Nil
     self.block messages, "WARNING", "fg=black;bg=yellow", padding: true
   end
