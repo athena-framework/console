@@ -1,7 +1,7 @@
 require "colorize"
 require "./output_style_interface"
 
-# Default implementation of `ACON::Formatter::Interface`.
+# Default implementation of `ACON::Formatter::OutputStyleInterface`.
 struct Athena::Console::Formatter::OutputStyle
   include Athena::Console::Formatter::OutputStyleInterface
 

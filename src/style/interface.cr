@@ -2,6 +2,13 @@
 # such that you can reduce the amount of code needed, and to standardize the appearance.
 #
 # See `ACON::Style::Athena`.
+#
+# ## Custom Styles
+#
+# Custom styles can also be created by implementing this interface, and optionally extending from `ACON::Style::Output`
+# which makes the style an `ACON::Output::Interface` as well as defining part of this interface.
+#
+# Then you could simply instantiate your custom style within a command as you would `ACON::Style::Athena`.
 module Athena::Console::Style::Interface
   # Helper method for asking `ACON::Question` questions.
   abstract def ask(question : String, default : _)

@@ -2,6 +2,8 @@
 #
 # Each application includes a default helper set, but additional ones may be added.
 # See `ACON::Application#helper_set`.
+#
+# These helpers can be accessed from within a command via the `ACON::Command#helper` method.
 class Athena::Console::Helper::HelperSet
   @helpers = Hash(ACON::Helper.class, ACON::Helper::Interface).new
 
