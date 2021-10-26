@@ -19,6 +19,14 @@ alias ACON = Athena::Console
 
 # Athena's Console component, `ACON` for short, allows for the creation of command-line based `ACON::Command`s.
 # These commands could be used for any reoccurring task such as cron jobs, imports, etc.
+# All commands belong to an `ACON::Application`, that can be extended to better fit a specific project's needs.
+#
+# `Athena::Console` also provides various utility/helper features, including:
+#
+# * Asking `ACON::Question`s
+# * Reusable output [styles][Athena::Console::Formatter::OutputStyleInterface]
+# * High level reusable formatting [styles][Athena::Console::Style::Interface]
+# * [Testing abstractions][Athena::Console::Spec]
 #
 # The console component best works in conjunction with a dedicated Crystal file that'll be used as the entry point.
 # Ideally this file is compiled into a dedicated binary for use in production, but is invoked directly while developing.

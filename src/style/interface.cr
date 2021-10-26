@@ -7,7 +7,6 @@
 #
 # Custom styles can also be created by implementing this interface, and optionally extending from `ACON::Style::Output`
 # which makes the style an `ACON::Output::Interface` as well as defining part of this interface.
-#
 # Then you could simply instantiate your custom style within a command as you would `ACON::Style::Athena`.
 module Athena::Console::Style::Interface
   # Helper method for asking `ACON::Question` questions.
@@ -54,6 +53,7 @@ module Athena::Console::Style::Interface
 
   # Formats and prints *message* as a title.
   abstract def title(message : String) : Nil
+
   # abstract def table(headers : Enumerable, rows : Enumerable(Enumerable)) : Nil
   # abstract def progress_start(max : Int32 = 0) : Nil
   # abstract def progress_advance(step : Int32 = 1) : Nil

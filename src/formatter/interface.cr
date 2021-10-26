@@ -1,5 +1,7 @@
 require "./output_style_interface"
 
+# A container that stores and applies `ACON::Formatter::OutputStyleInterface`.
+# Is responsible for formatting outputted messages as per their styles.
 module Athena::Console::Formatter::Interface
   # Sets if output messages should be decorated.
   abstract def decorated=(@decorated : Bool)

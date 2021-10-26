@@ -60,6 +60,12 @@ require "levenshtein"
 # Passing `true` makes it so that any supplied arguments or options are passed to the default command.
 #
 # WARNING: Arguments and options passed to the default command are ignored when `#single_command?` is `false`.
+#
+# ## Custom Applications
+#
+# `ACON::Application` may also be extended in order to better fit a given application.
+# For example, it could define some [global custom styles][Athena::Console::Formatter::OutputStyleInterface--global-custom-styles],
+# override the array of default commands, or customize the default input options, etc.
 class Athena::Console::Application
   # Returns the version of this CLI application.
   getter version : SemanticVersion
@@ -109,7 +115,7 @@ class Athena::Console::Application
   # ```
   setter catch_exceptions : Bool = true
 
-  # Allows setting the `ACON::Loader::Interface` that should be used by `self.`
+  # Allows setting the `ACON::Loader::Interface` that should be used by `self`.
   # See the related interface for more information.
   setter command_loader : ACON::Loader::Interface? = nil
 
@@ -239,7 +245,7 @@ class Athena::Console::Application
   #
   # For example, executing the following console script via `crystal run ./console.cr George`
   # would result in `Hello George!` being printed. If we tried this again without setting *single_command*
-  # to `true`, it would error saying `Command 'George' is not defined.`
+  # to `true`, it would error saying `Command 'George' is not defined.
   #
   # ```
   # application = ACON::Application.new "My CLI"

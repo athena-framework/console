@@ -175,7 +175,7 @@ abstract class Athena::Console::Command
   # Returns the name of `self`.
   getter! name : String
 
-  # Returns the `description of `self.`
+  # Returns the `description of `self`.
   getter description : String = ""
 
   # Returns/sets the help template for `self`.
@@ -205,7 +205,7 @@ abstract class Athena::Console::Command
   # Can be overridden to return `false` if it cannot run under the current conditions.
   getter? enabled : Bool = true
 
-  # Returns the list of usages for `self.`
+  # Returns the list of usages for `self`.
   #
   # See `#usage`.
   getter usages : Array(String) = [] of String

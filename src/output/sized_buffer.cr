@@ -1,3 +1,4 @@
+# :nodoc:
 class Athena::Console::Output::SizedBuffer < Athena::Console::Output
   @buffer : String = ""
   @max_length : Int32

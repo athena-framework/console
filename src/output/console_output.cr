@@ -3,9 +3,11 @@ abstract class Athena::Console::Output; end
 require "./console_output_interface"
 require "./io"
 
+# An `ACON::Output::ConsoleOutputInterface` that wraps `STDOUT` and `STDERR`.
 class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IO
   include Athena::Console::Output::ConsoleOutputInterface
 
+  # Sets the `ACON::Output::Interface` that represents `STDERR`.
   setter stderr : ACON::Output::Interface
   @console_section_outputs = Array(ACON::Output::Section).new
 
@@ -24,6 +26,7 @@ class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IO
     end
   end
 
+  # :inherit:
   def section : ACON::Output::Section
     ACON::Output::Section.new(
       self.io,
@@ -34,25 +37,29 @@ class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IO
     )
   end
 
+  # :inherit:
   def error_output : ACON::Output::Interface
     @stderr
   end
 
-  def error_output=(error_output : ACON::Output::Interface)
-    @stderr = error_output
+  # :inherit:
+  def error_output=(@stderr : ACON::Output::Interface) # : Nil
   end
 
-  def decorated=(decorated : Bool)
+  # :inherit:
+  def decorated=(decorated : Bool) # : Nil
     super
     @stderr.decorated = decorated
   end
 
-  def formatter=(formatter : Bool)
+  # :inherit:
+  def formatter=(formatter : Bool) # : Nil
     super
     @stderr.formatter = formatter
   end
 
-  def verbosity=(verbosity : ACON::Output::Verbosity)
+  # :inherit:
+  def verbosity=(verbosity : ACON::Output::Verbosity) # : Nil
     super
     @stderr.verbosity = verbosity
   end

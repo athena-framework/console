@@ -1,5 +1,14 @@
 require "./io"
 
+# A `ACON::Output::ConsoleOutput` can be divided into multiple sections that can be written to and cleared independently of one another.
+#
+# Output sections can be used for advanced console outputs, such as displaying multiple process bars which are updated independently,
+# or appending additional rows to tables.
+#
+# TODO: Implement process bars and tables.
+#
+# ```
+# ```
 class Athena::Console::Output::Section < Athena::Console::Output::IO
   protected getter lines = 0
 
@@ -20,10 +29,13 @@ class Athena::Console::Output::Section < Athena::Console::Output::IO
     @sections.unshift self
   end
 
+  # Returns the full content string contained within `self`.
   def content : String
     @content.join
   end
 
+  # Clears at most *lines* from `self`.
+  # If *lines* is `nil`, all of `self` is cleared.
   def clear(lines : Int32? = nil) : Nil
     return if @content.empty? || !self.decorated?
 
@@ -40,6 +52,7 @@ class Athena::Console::Output::Section < Athena::Console::Output::IO
     @io.print self.pop_stream_content_until_current_section(lines)
   end
 
+  # Overrides the current content of `self` with the provided *message*.
   def overwrite(message : String) : Nil
     self.clear
     self.puts message

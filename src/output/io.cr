@@ -1,3 +1,4 @@
+# An `ACON::Output::Interface` implementation that wraps an [IO](https://crystal-lang.org/api/IO.html).
 class Athena::Console::Output::IO < Athena::Console::Output
   property io : ::IO
 
