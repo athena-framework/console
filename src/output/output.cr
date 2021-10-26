@@ -4,6 +4,9 @@ require "./interface"
 abstract class Athena::Console::Output
   include Athena::Console::Output::Interface
 
+  @formatter : ACON::Formatter::Interface
+  @verbosity : ACON::Output::Verbosity
+
   def initialize(
     verbosity : ACON::Output::Verbosity? = :normal,
     decorated : Bool = false,
@@ -20,16 +23,16 @@ abstract class Athena::Console::Output
   end
 
   # :inherit:
-  def verbosity=(@verbosity : ACON::Output::Verbosity) # : Nil
+  def verbosity=(@verbosity : ACON::Output::Verbosity) : Nil
   end
 
   # :inherit:
   def formatter : ACON::Formatter::Interface
-    @verbosity
+    @formatter
   end
 
   # :inherit:
-  def formatter=(@formatter : ACON::Formatter::Interface) # : Nil
+  def formatter=(@formatter : ACON::Formatter::Interface) : Nil
   end
 
   # :inherit:
@@ -38,7 +41,7 @@ abstract class Athena::Console::Output
   end
 
   # :inherit:
-  def decorated=(decorated : Bool) # : Nil
+  def decorated=(decorated : Bool) : Nil
     @formatter.decorated = decorated
   end
 

@@ -14,17 +14,23 @@ class Athena::Console::Output::Null
   def print(message : String | Enumerable(String), verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
   end
 
+  def puts(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+  end
+
+  def print(message, verbosity : ACON::Output::Verbosity = :normal, output_type : ACON::Output::Type = :normal) : Nil
+  end
+
   # :inherit:
   def verbosity : ACON::Output::Verbosity
     ACON::Output::Verbosity::QUIET
   end
 
   # :inherit:
-  def verbosity=(verbosity : ACON::Output::Verbosity) # : Nil
+  def verbosity=(verbosity : ACON::Output::Verbosity) : Nil
   end
 
   # :inherit:
-  def decorated=(decorated : Bool) # : Nil
+  def decorated=(decorated : Bool) : Nil
   end
 
   # :inherit:
@@ -38,6 +44,6 @@ class Athena::Console::Output::Null
   end
 
   # :inherit:
-  def formatter=(formatter : ACON::Formatter::Interface) # : Nil
+  def formatter=(formatter : ACON::Formatter::Interface) : Nil
   end
 end

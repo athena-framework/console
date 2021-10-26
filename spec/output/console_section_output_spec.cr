@@ -27,6 +27,16 @@ struct ConsoleSectionOutputTest < ASPEC::TestCase
     output.io.to_s.should eq "Foo\nBar\nBaz\nFooBar\n\e[2A\e[0J"
   end
 
+  def test_clear_number_more_than_current_size : Nil
+    sections = Array(ACON::Output::Section).new
+    output = ACON::Output::Section.new @io, sections, :normal, true, ACON::Formatter::Output.new
+
+    output.puts "Foo"
+    output.clear 2
+
+    output.io.to_s.should eq "Foo\n\e[1A\e[0J"
+  end
+
   def test_clear_number_of_lines_multiple_sections : Nil
     output = ACON::Output::IO.new @io
 

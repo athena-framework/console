@@ -2,12 +2,42 @@ require "./io"
 
 # A `ACON::Output::ConsoleOutput` can be divided into multiple sections that can be written to and cleared independently of one another.
 #
-# Output sections can be used for advanced console outputs, such as displaying multiple process bars which are updated independently,
+# Output sections can be used for advanced console outputs, such as displaying multiple progress bars which are updated independently,
 # or appending additional rows to tables.
 #
-# TODO: Implement process bars and tables.
+# TODO: Implement progress bars and tables.
 #
 # ```
+# protected def execute(input : ACON::Input::Interface, output : ACON::Output::Interface) : ACON::Command::Status
+#   raise ArgumentError.new "This command may only be used with `ACON::Output::ConsoleOutputInterface`." unless output.is_a? ACON::Output::ConsoleOutputInterface
+#
+#   section1 = output.section
+#   section2 = output.section
+#
+#   section1.puts "Hello"
+#   section2.puts "World!"
+#   # Output contains "Hello\nWorld!\n"
+#
+#   sleep 1
+#
+#   # Replace "Hello" with "Goodbye!"
+#   section1.overwrite "Goodbye!"
+#   # Output now contains "Goodbye\nWorld!\n"
+#
+#   sleep 1
+#
+#   # Clear "World!"
+#   section2.clear
+#   # Output now contains "Goodbye!\n"
+#
+#   sleep 1
+#
+#   # Delete the last 2 lines of the first section
+#   section1.clear 2
+#   # Output is now empty
+#
+#   ACON::Command::Status::SUCCESS
+# end
 # ```
 class Athena::Console::Output::Section < Athena::Console::Output::IO
   protected getter lines = 0
@@ -39,7 +69,7 @@ class Athena::Console::Output::Section < Athena::Console::Output::IO
   def clear(lines : Int32? = nil) : Nil
     return if @content.empty? || !self.decorated?
 
-    if lines
+    if lines && @lines >= lines
       # Double the lines to account for each new line added between content
       @content.delete_at (-lines * 2)..-1
     else

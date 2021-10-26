@@ -43,23 +43,23 @@ class Athena::Console::Output::ConsoleOutput < Athena::Console::Output::IO
   end
 
   # :inherit:
-  def error_output=(@stderr : ACON::Output::Interface) # : Nil
+  def error_output=(@stderr : ACON::Output::Interface) : Nil
   end
 
   # :inherit:
-  def decorated=(decorated : Bool) # : Nil
+  def decorated=(decorated : Bool) : Nil
     super
     @stderr.decorated = decorated
   end
 
   # :inherit:
-  def formatter=(formatter : Bool) # : Nil
+  def formatter=(formatter : Bool) : Nil
     super
     @stderr.formatter = formatter
   end
 
   # :inherit:
-  def verbosity=(verbosity : ACON::Output::Verbosity) # : Nil
+  def verbosity=(verbosity : ACON::Output::Verbosity) : Nil
     super
     @stderr.verbosity = verbosity
   end

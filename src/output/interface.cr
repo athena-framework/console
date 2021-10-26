@@ -20,18 +20,18 @@ module Athena::Console::Output::Interface
   abstract def verbosity : ACON::Output::Verbosity
 
   # Set the minimum `ACON::Output::Verbosity` required for a message to be printed.
-  abstract def verbosity=(verbosity : ACON::Output::Verbosity) # : Nil
+  abstract def verbosity=(verbosity : ACON::Output::Verbosity) : Nil
 
   # Returns `true` if printed messages should have their decorations applied.
   # I.e. `ACON::Formatter::OutputStyleInterface`.
   abstract def decorated? : Bool
 
   # Sets if printed messages should be *decorated*.
-  abstract def decorated=(decorated : Bool) # : Nil
+  abstract def decorated=(decorated : Bool) : Nil
 
   # Returns the `ACON::Formatter::Interface` used by `self`.
   abstract def formatter : ACON::Formatter::Interface
 
   # Sets the `ACON::Formatter::Interface` used by `self`.
-  abstract def formatter=(formatter : ACON::Formatter::Interface) # : Nil
+  abstract def formatter=(formatter : ACON::Formatter::Interface) : Nil
 end

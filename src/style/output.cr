@@ -15,7 +15,7 @@ abstract struct Athena::Console::Style::Output
   end
 
   # See `ACON::Output::Interface#decorated=`.
-  def decorated=(decorated : Bool) # : Nil
+  def decorated=(decorated : Bool) : Nil
     @output.decorated = decorated
   end
 
@@ -25,7 +25,7 @@ abstract struct Athena::Console::Style::Output
   end
 
   # See `ACON::Output::Interface#formatter=`.
-  def formatter=(formatter : ACON::Formatter::Interface) # : Nil
+  def formatter=(formatter : ACON::Formatter::Interface) : Nil
     @output.formatter = formatter
   end
 
@@ -50,7 +50,7 @@ abstract struct Athena::Console::Style::Output
   end
 
   # See `ACON::Output::Interface#verbosity=`.
-  def verbosity=(verbosity : ACON::Output::Verbosity) # : Nil
+  def verbosity=(verbosity : ACON::Output::Verbosity) : Nil
     @output.verbosity = verbosity
   end
 end
