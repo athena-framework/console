@@ -1,3 +1,4 @@
+# An `ACON::Input::Interface` based on `ARGV`.
 class Athena::Console::Input::ARGV < Athena::Console::Input
   @tokens : Array(String)
   @parsed : Array(String) = [] of String
@@ -6,6 +7,7 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
     super definition
   end
 
+  # :inherit:
   # ameba:disable Metrics/CyclomaticComplexity
   def first_argument : String?
     is_option = false
@@ -36,6 +38,7 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
     nil
   end
 
+  # :inherit:
   def has_parameter?(*values : String, only_params : Bool = false) : Bool
     @tokens.each do |token|
       return false if only_params && "--" == token
@@ -49,6 +52,7 @@ class Athena::Console::Input::ARGV < Athena::Console::Input
     false
   end
 
+  # :inherit:
   def parameter(value : String, default : _ = false, only_params : Bool = false)
     tokens = @tokens.dup
 

@@ -1,4 +1,4 @@
-# `Athena::Console` uses a dedicated interface for representing an output.
+# `Athena::Console` uses a dedicated interface for representing an output destination.
 # This allows it to have multiple more specialized implementations as opposed to
 # being tightly coupled to `STDOUT` or a raw [IO](https://crystal-lang.org/api/IO.html).
 # This interface represents the methods that _must_ be implemented, however implementations can add additional functionality.

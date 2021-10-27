@@ -3,22 +3,38 @@ require "../../spec_helper"
 describe ACON::Input::Value::String do
   describe "#get" do
     describe Bool do
-      it "non-nilable - true" do
-        val = ACON::Input::Value::String.new("true").get Bool
-        typeof(val).should eq Bool
-        val.should be_true
+      describe "non-nilable" do
+        it "true" do
+          val = ACON::Input::Value::String.new("true").get Bool
+          typeof(val).should eq Bool
+          val.should be_true
+        end
+
+        it "false" do
+          val = ACON::Input::Value::String.new("false").get Bool
+          typeof(val).should eq Bool
+          val.should be_false
+        end
+
+        it "invalid" do
+          expect_raises ACON::Exceptions::Logic, "'123' is not a valid 'Bool'." do
+            ACON::Input::Value::String.new("123").get Bool
+          end
+        end
       end
 
-      it "non-nilable - false" do
-        val = ACON::Input::Value::String.new("false").get Bool
-        typeof(val).should eq Bool
-        val.should be_false
-      end
+      describe "nilable" do
+        it "valid" do
+          val = ACON::Input::Value::String.new("true").get Bool?
+          typeof(val).should eq Bool?
+          val.should be_true
+        end
 
-      it "nilable" do
-        val = ACON::Input::Value::String.new("true").get Bool?
-        typeof(val).should eq Bool?
-        val.should be_true
+        it "invalid" do
+          expect_raises ACON::Exceptions::Logic, "'123' is not a valid 'Bool?'." do
+            ACON::Input::Value::String.new("123").get Bool?
+          end
+        end
       end
     end
 

@@ -1,3 +1,13 @@
+# An `ACON::Input::Interface` based on a [Hash](https://crystal-lang.org/api/Hash.html).
+#
+# Primarily useful for manually invocking commands, or as part of tests.
+#
+# ```
+# ACON::Input::Hash.new(name: "George", "--foo": "bar")
+# ```
+#
+# The keys of the input should be the name of the argument.
+# Options should have `--` prefixed to their name.
 class Athena::Console::Input::Hash < Athena::Console::Input
   @parameters : ::Hash(String, ACON::Input::Value)
 
@@ -33,6 +43,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
     super definition
   end
 
+  # :inherit:
   def first_argument : String?
     @parameters.each do |name, value|
       next if name.starts_with? '-'
@@ -43,6 +54,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
     nil
   end
 
+  # :inherit:
   def has_parameter?(*values : String, only_params : Bool = false) : Bool
     @parameters.each do |name, value|
       value = value.value
@@ -54,6 +66,7 @@ class Athena::Console::Input::Hash < Athena::Console::Input
     false
   end
 
+  # :inherit:
   def parameter(value : String, default : _ = false, only_params : Bool = false)
     @parameters.each do |name, v|
       return default if only_params && ("--" == name || "--" == value)

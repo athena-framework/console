@@ -3,10 +3,14 @@ require "./streamable"
 
 require "./value/*"
 
+# Common base implementation of `ACON::Input::Interface`.
 abstract class Athena::Console::Input
   include Athena::Console::Input::Streamable
 
+  # :inherit:
   property stream : IO? = nil
+
+  # :inherit:
   property? interactive : Bool = true
 
   @arguments = ::Hash(String, ACON::Input::Value).new
@@ -23,6 +27,7 @@ abstract class Athena::Console::Input
     end
   end
 
+  # :inherit:
   def argument(name : String) : String?
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' argument does not exist." unless @definition.has_argument? name
 
@@ -39,6 +44,7 @@ abstract class Athena::Console::Input
     end
   end
 
+  # :inherit:
   def argument(name : String, type : T.class) : T forall T
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' argument does not exist." unless @definition.has_argument? name
 
@@ -55,20 +61,24 @@ abstract class Athena::Console::Input
     @definition.argument(name).default T
   end
 
+  # :inherit:
   def set_argument(name : String, value : _) : Nil
     raise ACON::Exceptions::InvalidArgument.new "The '#{name}' argument does not exist." unless @definition.has_argument? name
 
     @arguments[name] = ACON::Input::Value.from_value value
   end
 
+  # :inherit:
   def arguments : ::Hash
     @definition.argument_defaults.merge(self.resolve @arguments)
   end
 
+  # :inherit:
   def has_argument?(name : String) : Bool
     @definition.has_argument? name
   end
 
+  # :inherit:
   def option(name : String) : String?
     if @definition.has_negation?(name)
       self.option(@definition.negation_to_name(name), Bool?).try do |v|
@@ -93,6 +103,7 @@ abstract class Athena::Console::Input
     end
   end
 
+  # :inherit:
   def option(name : String, type : T.class) : T forall T
     {% if T <= Bool? %}
       if @definition.has_negation?(name)
@@ -125,6 +136,7 @@ abstract class Athena::Console::Input
     @definition.option(name).default T
   end
 
+  # :inherit:
   def set_option(name : String, value : _) : Nil
     if @definition.has_negation?(name)
       return @options[@definition.negation_to_name(name)] = ACON::Input::Value.from_value !value
@@ -135,14 +147,17 @@ abstract class Athena::Console::Input
     @options[name] = ACON::Input::Value.from_value value
   end
 
+  # :inherit:
   def options : ::Hash
     @definition.option_defaults.merge(self.resolve @options)
   end
 
+  # :inherit:
   def has_option?(name : String) : Bool
     @definition.has_option?(name) || @definition.has_negation?(name)
   end
 
+  # :inherit:
   def bind(definition : ACON::Input::Definition) : Nil
     @arguments.clear
     @options.clear
@@ -153,6 +168,7 @@ abstract class Athena::Console::Input
 
   protected abstract def parse : Nil
 
+  # :inherit:
   def validate : Nil
     missing_args = @definition.arguments.keys.select do |arg|
       !@arguments.has_key?(arg) && @definition.argument(arg).required?
