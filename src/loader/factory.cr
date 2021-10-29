@@ -1,5 +1,19 @@
 require "./interface"
 
+# A default implementation of `ACON::Loader::Interface` that accepts a `Hash(String, Proc(ACON::Command))`.
+#
+# A factory could then be set on the `ACON::Application`:
+#
+# ```
+# application = MyCustomApplication.new "My CLI"
+#
+# application.command_loader = Athena::Console::Loader::Factory.new({
+#   "command1"        => Proc(ACON::Command).new { Command1.new },
+#   "app:create-user" => Proc(ACON::Command).new { CreateUserCommand.new },
+# })
+#
+# application.run
+# ```
 struct Athena::Console::Loader::Factory
   include Athena::Console::Loader::Interface
 

@@ -73,7 +73,7 @@
 # ```
 #
 # INFO: The name and description can also be set via `@@default_name` and `@@default_description` class variables,
-# which is the perfered way of setting them.
+# which is the preferred way of setting them.
 #
 # The `#configure` command is called automatically at the end of the constructor method.
 # If your command defines its own, be sure to call `super()` to also run the parent constructor.

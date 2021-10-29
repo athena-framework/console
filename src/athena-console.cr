@@ -75,4 +75,7 @@ module Athena::Console
 
   # Contains all custom exceptions defined within `Athena::Console`.
   module Exceptions; end
+
+  # Contains types realted to lazily loading commands.
+  module Loader; end
 end
