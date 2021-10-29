@@ -207,11 +207,11 @@ class Athena::Console::Input::Definition
     self.option self.shortcut_to_name shortcut.to_s
   end
 
-  # ameba:disable Metrics/CyclomaticComplexity
   # Returns an optionally *short* synopsis based on the `ACON::Input::Argument`s and `ACON::Input::Option`s defined within `self`.
   #
   # The synopsis being the [docopt](http://docopt.org) string representing the expected options/arguments.
   # E.g. `<name> move <x> <y> [--speed=<kn>]`.
+  # ameba:disable Metrics/CyclomaticComplexity
   def synopsis(short : Bool = false) : String
     elements = [] of String
 
