@@ -10,7 +10,7 @@ abstract class Athena::Console::Question::AbstractChoice(T, ChoiceType)
   # Returns the possible choices.
   getter choices : Hash(String | Int32, T)
 
-  # Returns the message to dispaly if the provided answer is not a valid choice.
+  # Returns the message to display if the provided answer is not a valid choice.
   getter error_message : String = "Value '%s' is invalid."
 
   # Returns/sets the prompt to use for the question.
@@ -47,7 +47,7 @@ abstract class Athena::Console::Question::AbstractChoice(T, ChoiceType)
     self
   end
 
-  # Sets the valdiator callback to this block.
+  # Sets the validator callback to the provided block.
   # See [Validating the Answer][Athena::Console::Question--validating-the-answer].
   def validator(&@validator : T? -> ChoiceType) : Nil
   end

@@ -24,7 +24,7 @@ class Athena::Console::Helper::HelperSet
     helper.helper_set = self
   end
 
-  # Returns `true` if `self` has a helper fo the provided *helper_class*, otherwise `false`.
+  # Returns `true` if `self` has a helper for the provided *helper_class*, otherwise `false`.
   def has?(helper_class : ACON::Helper.class) : Bool
     @helpers.has_key? helper_class
   end

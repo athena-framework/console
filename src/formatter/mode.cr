@@ -1,6 +1,4 @@
-# !!!todo
-#     Remove this type in favor in the stdlib's version
-#     when/if https://github.com/crystal-lang/crystal/pull/7690 is merged.
+# TODO: Remove this type in favor in the stdlib's version when/if https://github.com/crystal-lang/crystal/pull/7690 is merged.
 @[Flags]
 enum Athena::Console::Formatter::Mode
   # Makes the text bold.

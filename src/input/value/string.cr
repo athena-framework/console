@@ -4,13 +4,13 @@ struct Athena::Console::Input::Value::String < Athena::Console::Input::Value
 
   def initialize(@value : ::String); end
 
-  def get(as : ::Bool.class) : ::Bool
+  def get(type : ::Bool.class) : ::Bool
     raise ACON::Exceptions::Logic.new "'#{@value}' is not a valid 'Bool'." unless @value.in? "true", "false"
 
     @value == "true"
   end
 
-  def get(as : ::Bool?.class) : ::Bool?
+  def get(type : ::Bool?.class) : ::Bool?
     (@value == "true").try do |v|
       raise ACON::Exceptions::Logic.new "'#{@value}' is not a valid 'Bool?'." unless @value.in? "true", "false"
       return v
@@ -19,22 +19,22 @@ struct Athena::Console::Input::Value::String < Athena::Console::Input::Value
     nil
   end
 
-  def get(as : ::Array(T).class) : ::Array(T) forall T
+  def get(type : ::Array(T).class) : ::Array(T) forall T
     Array.from_array(@value.split(',')).get ::Array(T)
   end
 
-  def get(as : ::Array(T)?.class) : ::Array(T)? forall T
+  def get(type : ::Array(T)?.class) : ::Array(T)? forall T
     Array.from_array(@value.split(',')).get ::Array(T)?
   end
 
   {% for type in ::Number::Primitive.union_types %}
-    def get(as : {{type.id}}.class) : {{type.id}}
+    def get(type : {{type.id}}.class) : {{type.id}}
       {{type.id}}.new @value
     rescue ArgumentError
       raise ACON::Exceptions::Logic.new "'#{@value}' is not a valid '#{{{type.id}}}'."
     end
 
-    def get(as : {{type.id}}?.class) : {{type.id}}?
+    def get(type : {{type.id}}?.class) : {{type.id}}?
       {{type.id}}.new(@value) || nil
     rescue ArgumentError
       raise ACON::Exceptions::Logic.new "'#{@value}' is not a valid '#{{{type.id}}}'."

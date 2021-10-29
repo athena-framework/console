@@ -1,4 +1,4 @@
-# An `ACON::Input::Interface` based on `ARGV`.
+# An `ACON::Input::Interface` based on [ARGV](https://crystal-lang.org/api/toplevel.html#ARGV).
 class Athena::Console::Input::ARGV < Athena::Console::Input
   @tokens : Array(String)
   @parsed : Array(String) = [] of String

@@ -175,7 +175,7 @@ class Athena::Console::Helper::Question < Athena::Console::Helper
       return input_stream.gets 4096
     end
 
-    # Can't just do `.gets_to_end` becuse we need to be able
+    # Can't just do `.gets_to_end` because we need to be able
     # to return early if the only input provided is a newline.
     String.build do |io|
       input_stream.each_char do |char|

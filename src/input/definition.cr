@@ -1,3 +1,7 @@
+# Represents a collection of `ACON::Input::Argument`s and `ACON::Input::Option`s that are to be parsed from an `ACON::Input::Interface`.
+#
+# Can be used to set the inputs of an `ACON::Command` via the `ACON::Command#definition=` method if so desired,
+# instead of using the dedicated methods.
 class Athena::Console::Input::Definition
   getter options : ::Hash(String, ACON::Input::Option) = ::Hash(String, ACON::Input::Option).new
   getter arguments : ::Hash(String, ACON::Input::Argument) = ::Hash(String, ACON::Input::Argument).new
@@ -22,6 +26,7 @@ class Athena::Console::Input::Definition
     self.definition = definition
   end
 
+  # Adds the provided *argument* to `self`.
   def <<(argument : ACON::Input::Argument) : Nil
     raise ACON::Exceptions::Logic.new "An argument with the name '#{argument.name}' already exists." if @arguments.has_key?(argument.name)
 
@@ -46,6 +51,7 @@ class Athena::Console::Input::Definition
     @arguments[argument.name] = argument
   end
 
+  # Adds the provided *options* to `self`.
   def <<(option : ACON::Input::Option) : Nil
     if self.has_option?(option.name) && option != self.option(option.name)
       raise ACON::Exceptions::Logic.new "An option named '#{option.name}' already exists."
@@ -80,12 +86,14 @@ class Athena::Console::Input::Definition
     end
   end
 
+  # Adds the provided *arguments* to `self`.
   def <<(arguments : Array(ACON::Input::Argument | ACON::Input::Option)) : Nil
     arguments.each do |arg|
       self.<< arg
     end
   end
 
+  # Overrides the arguments and options of `self` to those in the provided *definition*.
   def definition=(definition : Array(ACON::Input::Argument | ACON::Input::Option)) : Nil
     arguments = Array(ACON::Input::Argument).new
     options = Array(ACON::Input::Option).new
@@ -101,6 +109,7 @@ class Athena::Console::Input::Definition
     self.options = options
   end
 
+  # Overrides the arguments of `self` to those in the provided *arguments* array.
   def arguments=(arguments : Array(ACON::Input::Argument)) : Nil
     @arguments.clear
     @required_argument_count = 0
@@ -110,32 +119,38 @@ class Athena::Console::Input::Definition
     self.<< arguments
   end
 
-  def argument(name : String | Int32) : ACON::Input::Argument
-    raise ACON::Exceptions::InvalidArgument.new "The argument '#{name}' does not exist." unless self.has_argument? name
+  # Returns the `ACON::Input::Argument` with the provided *name_or_index*,
+  # otherwise raises `ACON::Exceptions::InvalidArgument` if that argument is not defined.
+  def argument(name_or_index : String | Int32) : ACON::Input::Argument
+    raise ACON::Exceptions::InvalidArgument.new "The argument '#{name_or_index}' does not exist." unless self.has_argument? name_or_index
 
-    case name
-    in String then @arguments[name]
-    in Int32  then @arguments.values[name]
+    case name_or_index
+    in String then @arguments[name_or_index]
+    in Int32  then @arguments.values[name_or_index]
     end
   end
 
-  def has_argument?(name : String | Int32) : Bool
-    case name
-    in String then @arguments.has_key? name
-    in Int32  then !@arguments.values.[name]?.nil?
+  # Returns `true` if `self` has an argument with the provided *name_or_index*.
+  def has_argument?(name_or_index : String | Int32) : Bool
+    case name_or_index
+    in String then @arguments.has_key? name_or_index
+    in Int32  then !@arguments.values.[name_or_index]?.nil?
     end
   end
 
+  # Returns the number of `ACON::Input::Argument`s defined within `self`.
   def argument_count : Int32
     !@last_array_argument.nil? ? Int32::MAX : @arguments.size
   end
 
-  def argument_defaults
+  # Returns a `::Hash` whose keys/values represent the names and default values of the `ACON::Input::Argument`s defined within `self`.
+  def argument_defaults : ::Hash
     @arguments.to_h do |(name, arg)|
       {name, arg.default}
     end
   end
 
+  # Overrides the options of `self` to those in the provided *options* array.
   def options=(options : Array(ACON::Input::Option)) : Nil
     @options.clear
     @shortcuts.clear
@@ -144,47 +159,59 @@ class Athena::Console::Input::Definition
     self.<< options
   end
 
-  def option(name : String | Int32) : ACON::Input::Option
-    raise ACON::Exceptions::InvalidArgument.new "The '--#{name}' option does not exist." unless self.has_option? name
+  # Returns the `ACON::Input::Option` with the provided *name_or_index*,
+  # otherwise raises `ACON::Exceptions::InvalidArgument` if that option is not defined.
+  def option(name_or_index : String | Int32) : ACON::Input::Option
+    raise ACON::Exceptions::InvalidArgument.new "The '--#{name_or_index}' option does not exist." unless self.has_option? name_or_index
 
-    case name
-    in String then @options[name]
-    in Int32  then @options.values[name]
+    case name_or_index
+    in String then @options[name_or_index]
+    in Int32  then @options.values[name_or_index]
     end
   end
 
-  def option_defaults
+  # Returns a `::Hash` whose keys/values represent the names and default values of the `ACON::Input::Option`s defined within `self`.
+  def option_defaults : ::Hash
     @options.to_h do |(name, opt)|
       {name, opt.default}
     end
   end
 
-  def has_option?(name : String | Int32) : Bool
-    case name
-    in String then @options.has_key? name
-    in Int32  then !@options.values.[name]?.nil?
+  # Returns `true` if `self` has an option with the provided *name_or_index*.
+  def has_option?(name_or_index : String | Int32) : Bool
+    case name_or_index
+    in String then @options.has_key? name_or_index
+    in Int32  then !@options.values.[name_or_index]?.nil?
     end
   end
 
+  # Returns `true` if `self` has a shortcut with the provided *name*, otherwise `false`.
   def has_shortcut?(name : String | Char) : Bool
     @shortcuts.has_key? name.to_s
   end
 
+  # Returns `true` if `self` has a negation with the provided *name*, otherwise `false`.
   def has_negation?(name : String | Char) : Bool
     @negations.has_key? name.to_s
   end
 
-  def negation_to_name(name : String) : String
-    raise ACON::Exceptions::InvalidArgument.new "The '--#{name}' option does not exist." unless self.has_negation? name
+  # Returns the name of the `ACON::Input::Option` that maps to the provided *negation*.
+  def negation_to_name(negation : String) : String
+    raise ACON::Exceptions::InvalidArgument.new "The '--#{negation}' option does not exist." unless self.has_negation? negation
 
-    @negations[name]
+    @negations[negation]
   end
 
+  # Returns the name of the `ACON::Input::Option` with the provided *shortcut*.
   def option_for_shortcut(shortcut : String | Char) : ACON::Input::Option
     self.option self.shortcut_to_name shortcut.to_s
   end
 
   # ameba:disable Metrics/CyclomaticComplexity
+  # Returns an optionally *short* synopsis based on the `ACON::Input::Argument`s and `ACON::Input::Option`s defined within `self`.
+  #
+  # The synopsis being the [docopt](http://docopt.org) string representing the expected options/arguments.
+  # E.g. `<name> move <x> <y> [--speed=<kn>]`.
   def synopsis(short : Bool = false) : String
     elements = [] of String
 

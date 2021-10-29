@@ -4,11 +4,11 @@ struct Athena::Console::Input::Value::Bool < Athena::Console::Input::Value
 
   def initialize(@value : ::Bool); end
 
-  def get(as : ::Bool.class) : ::Bool
+  def get(type : ::Bool.class) : ::Bool
     @value
   end
 
-  def get(as : ::Bool?.class) : ::Bool?
+  def get(type : ::Bool?.class) : ::Bool?
     @value.try do |v|
       return v
     end

@@ -1,7 +1,7 @@
 # Provides additional ways to format output messages than `ACON::Formatter::OutputStyle` can do alone, such as:
 #
 # * Printing messages in a section
-# * Priting messages in a block
+# * Printing messages in a block
 # * Print truncated messages.
 #
 # The provided methods return a `String` which could then be passed to `ACON::Output::Interface#print` or `ACON::Output::Interface#puts`.
@@ -20,7 +20,7 @@ class Athena::Console::Helper::Formatter < Athena::Console::Helper
     "<#{style}>[#{section}]</#{style}> #{message}"
   end
 
-  # Prints the provided *messages* in a blockformatted according to the provided *style*, with a total width a bit more than the longest line.
+  # Prints the provided *messages* in a block formatted according to the provided *style*, with a total width a bit more than the longest line.
   #
   # The *large* options adds additional padding, one blank line above and below the messages, and 2 more spaces on the left and right.
   #

@@ -13,15 +13,15 @@ abstract struct Athena::Console::Input::Value
     end
   end
 
-  def get(as : ::String.class) : ::String
+  def get(type : ::String.class) : ::String
     self.to_s
   end
 
-  def get(as : ::String?.class) : ::String?
+  def get(type : ::String?.class) : ::String?
     self.to_s.presence
   end
 
-  def get(as : T.class) : NoReturn forall T
+  def get(type : T.class) : NoReturn forall T
     raise ACON::Exceptions::Logic.new "'#{self.value}' is not a valid '#{T}'."
   end
 

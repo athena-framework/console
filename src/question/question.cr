@@ -16,7 +16,7 @@ require "./base"
 #
 # ### Trimming the Answer
 #
-# By default the answer is [trimmed](https://crystal-lang.org/api/String.html#strip%3AString-instance-method) in order to remove leading and trailing whitespace.
+# By default the answer is [trimmed](https://crystal-lang.org/api/String.html#strip%3AString-instance-method) in order to remove leading and trailing white space.
 # The `ACON::Question::Base#trimmable=` method can be used to disable this if you need the input as is.
 #
 # ```
@@ -97,7 +97,7 @@ class Athena::Console::Question(T)
   # See [Validating the Answer][Athena::Console::Question--validating-the-answer].
   property validator : Proc(T, T)? = nil
 
-  # Sets the valdiator callback to this block.
+  # Sets the validator callback to this block.
   # See [Validating the Answer][Athena::Console::Question--validating-the-answer].
   def validator(&@validator : T -> T) : Nil
   end

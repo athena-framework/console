@@ -1,6 +1,6 @@
 # An `ACON::Input::Interface` based on a [Hash](https://crystal-lang.org/api/Hash.html).
 #
-# Primarily useful for manually invocking commands, or as part of tests.
+# Primarily useful for manually invoking commands, or as part of tests.
 #
 # ```
 # ACON::Input::Hash.new(name: "George", "--foo": "bar")

@@ -22,11 +22,11 @@ struct Athena::Console::Input::Value::Array < Athena::Console::Input::Value
     @value << ACON::Input::Value.from_value value
   end
 
-  def get(as : ::Array(T).class) : ::Array(T) forall T
+  def get(type : ::Array(T).class) : ::Array(T) forall T
     @value.map &.get(T)
   end
 
-  def get(as : ::Array(T)?.class) : ::Array(T)? forall T
+  def get(type : ::Array(T)?.class) : ::Array(T)? forall T
     @value.map(&.get(T)) || nil
   end
 

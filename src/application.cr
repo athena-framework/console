@@ -147,7 +147,7 @@ class Athena::Console::Application
     @terminal = ACON::Terminal.new
 
     # TODO: Emit events when certain signals are triggered.
-    # This'll require the ability to optional set an event dispatcher on this type.
+    # This will require the ability to optional set an event dispatcher on this type.
   end
 
   # Adds the provided *command* instance to `self`, allowing it be executed.

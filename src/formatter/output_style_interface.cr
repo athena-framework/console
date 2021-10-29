@@ -1,7 +1,7 @@
 require "colorize"
 require "./mode"
 
-# Output styles represent reuseable formatting information that can be used when formatting output messages.
+# Output styles represent reusable formatting information that can be used when formatting output messages.
 # `Athena::Console` comes bundled with a few common styles including:
 #
 # * error
