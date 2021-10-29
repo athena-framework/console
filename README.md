@@ -20,7 +20,8 @@ dependencies:
 
 ## Documentation
 
-Everything is documented in the [API Docs](https://athena-framework.github.io/console/Athena/Console.html).
+If using the component on its own, checkout the [API documentation](https://athenaframework.org/Console).
+If using the component as part of Athena, also checkout the [external documentation](https://athenaframework.org/components/console).
 
 ## Contributing
 
