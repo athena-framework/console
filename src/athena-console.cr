@@ -30,7 +30,7 @@ alias ACON = Athena::Console
 #
 # The console component best works in conjunction with a dedicated Crystal file that'll be used as the entry point.
 # Ideally this file is compiled into a dedicated binary for use in production, but is invoked directly while developing.
-# Otherwise any changes made to the files it requires would not be represented.
+# Otherwise, any changes made to the files it requires would not be represented.
 # The most basic example would be:
 #
 # ```
@@ -50,6 +50,9 @@ alias ACON = Athena::Console
 # # By default this uses STDIN and STDOUT for its input and output.
 # application.run
 # ```
+#
+# The [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) allows executing the file as a command without needing the `crystal` prefix.
+# For example `./console list` would list all commands.
 #
 # External commands can be registered via `ACON::Application#add`:
 #
