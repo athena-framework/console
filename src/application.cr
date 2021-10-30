@@ -53,7 +53,7 @@ require "levenshtein"
 # ## Default Command
 #
 # The default command represents which command should be executed when no command name is provided; by default this is `ACON::Commands::List`.
-# For example, running `crystal run ./console.cr` would result in all the available commands being listed.
+# For example, running `./console` would result in all the available commands being listed.
 # The default command can be customized via `#default_command`.
 #
 # ## Single Command Applications
@@ -228,7 +228,7 @@ class Athena::Console::Application
 
   # Sets the [default command][Athena::Console::Application--default-command] to the command with the provided *name*.
   #
-  # For example, executing the following console script via `crystal run ./console.cr`
+  # For example, executing the following console script via `./console`
   # would result in `Hello world!` being printed instead of the default list output.
   #
   # ```
@@ -246,7 +246,7 @@ class Athena::Console::Application
   # ./console # => Hello world!
   # ```
   #
-  # For example, executing the following console script via `crystal run ./console.cr George`
+  # For example, executing the following console script via `./console George`
   # would result in `Hello George!` being printed. If we tried this again without setting *single_command*
   # to `true`, it would error saying `Command 'George' is not defined.
   #
