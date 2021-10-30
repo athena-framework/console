@@ -3,7 +3,7 @@
 [![CI](https://github.com/athena-framework/console/workflows/CI/badge.svg)](https://github.com/athena-framework/console/actions?query=workflow%3ACI)
 [![Latest release](https://img.shields.io/github/release/athena-framework/console.svg)](https://github.com/athena-framework/console/releases)
 
-Allows the creation of CLI based commands.
+Allows for the creation of CLI based commands.
 
 ## Installation
 
