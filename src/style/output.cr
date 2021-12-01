@@ -1,7 +1,7 @@
 require "./interface"
 
 # Base implementation of `ACON::Style::Interface` and `ACON::Output::Interface` that provides logic common to all styles.
-abstract struct Athena::Console::Style::Output
+abstract class Athena::Console::Style::Output
   include Athena::Console::Style::Interface
   include Athena::Console::Output::Interface
 
