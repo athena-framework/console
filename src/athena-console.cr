@@ -71,7 +71,7 @@ alias ACON = Athena::Console
 # end
 # ```
 module Athena::Console
-  VERSION = "0.1.0"
+  VERSION = "0.1.1"
 
   # Includes the commands that come bundled with `Athena::Console`.
   module Commands; end
