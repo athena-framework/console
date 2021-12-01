@@ -327,11 +327,11 @@ abstract class Athena::Console::Command
 
   # Adds an `ACON::Input::Option` to `self` with the provided *name*.
   # Optionally supports setting its *shortcut*, *value_mode*, *description*, and *default* value.
-  def option(name : String, shotcut : String? = nil, value_mode : ACON::Input::Option::Value = :none, description : String = "", default = nil) : self
-    @definition << ACON::Input::Option.new name, shotcut, value_mode, description, default
+  def option(name : String, shortcut : String? = nil, value_mode : ACON::Input::Option::Value = :none, description : String = "", default = nil) : self
+    @definition << ACON::Input::Option.new name, shortcut, value_mode, description, default
 
     if full_definition = @full_definition
-      full_definition << ACON::Input::Option.new name, shotcut, value_mode, description, default
+      full_definition << ACON::Input::Option.new name, shortcut, value_mode, description, default
     end
 
     self
